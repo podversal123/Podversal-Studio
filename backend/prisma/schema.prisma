@@ -1,0 +1,412 @@
+// Podversal Studio - Database Schema
+// All models based on the approved SRS document
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  STUDIO_MANAGER
+  EMPLOYEE
+  REFERRAL_AGENT
+  CUSTOMER
+}
+
+enum ServiceType {
+  PODCAST
+  VFX_PODCAST
+  MONOLOGUE
+  NEWS_SHOOT
+  ONLINE_CLASS
+  PRODUCT_SHOOT
+}
+
+enum BookingStatus {
+  REQUEST      // Customer submitted a booking request
+  CHECKING     // Manager is checking availability
+  QUOTED       // Quote sent to customer
+  APPROVED     // Booking approved by manager
+  ADVANCE_PAID // Advance payment received - slot confirmed
+  IN_PROGRESS  // Shoot is currently happening
+  COMPLETED    // Shoot done
+  CANCELLED    // Booking cancelled
+}
+
+enum PaymentMode {
+  UPI
+  CREDIT_CARD
+  DEBIT_CARD
+  NET_BANKING
+  BANK_TRANSFER
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentType {
+  ADVANCE
+  BALANCE
+  FULL
+  REFUND
+}
+
+enum InvoiceType {
+  QUOTATION
+  PROFORMA
+  GST_INVOICE
+  PAYMENT_RECEIPT
+}
+
+enum CustomerCategory {
+  INDIVIDUAL
+  BUSINESS
+  AGENCY
+  EDUCATIONAL_INSTITUTE
+}
+
+enum CommissionStatus {
+  PENDING   // Commission earned but not paid
+  RELEASED  // Paid to the agent
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+// ─────────────────────────────────────────
+// USER — All 5 roles use this single table
+// ─────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  phone         String?  @unique
+  password      String?  // null for Google OAuth users
+  role          Role     @default(CUSTOMER)
+  isActive      Boolean  @default(true)
+  googleId      String?  @unique // for Google OAuth
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  customer        Customer?
+  agent           Agent?
+  employee        Employee?
+  createdBookings Booking[] @relation("BookingCreatedBy")
+  blogs           Blog[]
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────
+// CUSTOMER — extended profile for customers
+// ─────────────────────────────────────────
+
+model Customer {
+  id            String           @id @default(cuid())
+  userId        String           @unique
+  companyName   String?
+  gstNumber     String?
+  category      CustomerCategory @default(INDIVIDUAL)
+  internalNotes String?          // only visible to staff
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  // Relations
+  user          User      @relation(fields: [userId], references: [id])
+  bookings      Booking[]
+
+  @@map("customers")
+}
+
+// ─────────────────────────────────────────
+// AGENT — referral agent with commission
+// ─────────────────────────────────────────
+
+model Agent {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  agencyName      String
+  gstNumber       String?
+  bankAccountNo   String?
+  bankIfscCode    String?
+  commissionRate  Float    // percentage e.g. 10 means 10%
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User         @relation(fields: [userId], references: [id])
+  bookings        Booking[]
+  commissions     Commission[]
+
+  @@map("agents")
+}
+
+// ─────────────────────────────────────────
+// EMPLOYEE — studio staff member
+// ─────────────────────────────────────────
+
+model Employee {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  jobTitle    String
+  shiftStart  String   // e.g. "09:00"
+  shiftEnd    String   // e.g. "18:00"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id])
+  bookings    Booking[] // shoots assigned to this employee
+
+  @@map("employees")
+}
+
+// ─────────────────────────────────────────
+// SERVICE — the 6 studio services with pricing
+// ─────────────────────────────────────────
+
+model Service {
+  id            String      @id @default(cuid())
+  type          ServiceType @unique
+  name          String
+  description   String
+  pricePerHour  Float
+  minDuration   Int         // minimum hours required
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  bookings      Booking[]
+
+  @@map("services")
+}
+
+// ─────────────────────────────────────────
+// BOOKING — core booking record
+// ─────────────────────────────────────────
+
+model Booking {
+  id                String        @id @default(cuid())
+  bookingCode       String        @unique @default(cuid()) // auto-set by service: BK-YYYYMMDD-XXXX
+
+  // Customer details at time of booking
+  customerName      String
+  customerEmail     String
+  customerPhone     String
+  companyName       String?
+
+  // Booking details
+  serviceId         String
+  shootDate         DateTime
+  startTime         String        // e.g. "09:00"
+  endTime           String        // e.g. "12:00"
+  durationHours     Float
+
+  // Requirements
+  studioRequirements String?
+  equipmentRequired  String?
+  additionalNotes    String?
+
+  // Status and pricing
+  status            BookingStatus @default(REQUEST)
+  totalAmount       Float?        // set when quote is sent
+  advanceAmount     Float?        // advance to be collected
+  discountAmount    Float?        @default(0)
+  discountApproved  Boolean       @default(false)
+
+  // Who created this booking
+  createdById       String
+  customerId        String?       // if booked by a customer
+  agentId           String?       // if referred by an agent
+
+  // Employee assigned to this shoot
+  employeeId        String?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  service           Service       @relation(fields: [serviceId], references: [id])
+  createdBy         User          @relation("BookingCreatedBy", fields: [createdById], references: [id])
+  customer          Customer?     @relation(fields: [customerId], references: [id])
+  agent             Agent?        @relation(fields: [agentId], references: [id])
+  employee          Employee?     @relation(fields: [employeeId], references: [id])
+  payments          Payment[]
+  invoices          Invoice[]
+  commission        Commission?
+
+  @@map("bookings")
+}
+
+// ─────────────────────────────────────────
+// PAYMENT — all payment records per booking
+// ─────────────────────────────────────────
+
+model Payment {
+  id              String        @id @default(cuid())
+  bookingId       String
+  amount          Float
+  type            PaymentType
+  mode            PaymentMode
+  status          PaymentStatus @default(PENDING)
+
+  // For online payments (Razorpay)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+
+  // For offline payments (cash/bank)
+  referenceNumber   String?     // bank transfer ref or receipt no
+  collectedBy       String?     // staff who collected cash
+
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  booking         Booking       @relation(fields: [bookingId], references: [id])
+
+  @@map("payments")
+}
+
+// ─────────────────────────────────────────
+// INVOICE — 4 types of documents
+// ─────────────────────────────────────────
+
+model Invoice {
+  id            String      @id @default(cuid())
+  bookingId     String
+  type          InvoiceType
+  invoiceNumber String      @unique // e.g. INV-2026-0001
+  amount        Float
+  gstAmount     Float?
+  totalAmount   Float
+  cloudinaryUrl String?     // PDF stored on Cloudinary
+  emailSentAt   DateTime?   // when it was emailed to customer
+  createdAt     DateTime    @default(now())
+
+  // Relations
+  booking       Booking     @relation(fields: [bookingId], references: [id])
+
+  @@map("invoices")
+}
+
+// ─────────────────────────────────────────
+// COMMISSION — agent commission per booking
+// ─────────────────────────────────────────
+
+model Commission {
+  id              String           @id @default(cuid())
+  bookingId       String           @unique
+  agentId         String
+  commissionRate  Float            // rate at time of booking
+  bookingAmount   Float
+  commissionAmount Float           // auto-calculated
+  status          CommissionStatus @default(PENDING)
+  releasedAt      DateTime?        // when paid to agent
+  cloudinaryUrl   String?          // PDF statement
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // Relations
+  booking         Booking          @relation(fields: [bookingId], references: [id])
+  agent           Agent            @relation(fields: [agentId], references: [id])
+
+  @@map("commissions")
+}
+
+// ─────────────────────────────────────────
+// NOTIFICATION — all outgoing notifications
+// ─────────────────────────────────────────
+
+model Notification {
+  id          String              @id @default(cuid())
+  userId      String
+  channel     NotificationChannel
+  subject     String?
+  message     String
+  isSent      Boolean             @default(false)
+  sentAt      DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────
+// DOCUMENT — cloud stored files per customer
+// ─────────────────────────────────────────
+
+model Document {
+  id            String   @id @default(cuid())
+  customerId    String
+  name          String   // e.g. "KYC", "NDA", "Agreement"
+  cloudinaryUrl String
+  uploadedBy    String   // userId of uploader
+  createdAt     DateTime @default(now())
+
+  @@map("documents")
+}
+
+// ─────────────────────────────────────────
+// BLOG — articles and news managed by Super Admin
+// ─────────────────────────────────────────
+
+model Blog {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  excerpt     String
+  content     String
+  coverImage  String?   // Cloudinary URL
+  category    String    @default("General")
+  tags        String[]  // array of tag strings
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  authorId    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author      User      @relation(fields: [authorId], references: [id])
+
+  @@map("blogs")
+}
+
+// ─────────────────────────────────────────
+// STUDIO VIDEO — showcase videos on homepage
+// ─────────────────────────────────────────
+
+model StudioVideo {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  youtubeId    String?  // YouTube video ID (not full URL)
+  thumbnailUrl String?  // Cloudinary thumbnail
+  category     String   @default("General") // e.g. Podcast, VFX, Product Shoot
+  isPublished  Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("studio_videos")
+}

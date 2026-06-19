@@ -1,0 +1,52 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { BookingsModule } from './bookings/bookings.module';
+import { ServicesModule } from './services/services.module';
+import { PaymentsModule } from './payments/payments.module';
+import { InvoicesModule } from './invoices/invoices.module';
+import { AgentsModule } from './agents/agents.module';
+import { CustomersModule } from './customers/customers.module';
+import { EmployeesModule } from './employees/employees.module';
+import { CalendarModule } from './calendar/calendar.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { ReportsModule } from './reports/reports.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { BlogsModule } from './blogs/blogs.module';
+import { StudioVideosModule } from './studio-videos/studio-videos.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
+
+@Module({
+  imports: [
+    // Load .env file globally across all modules
+    ConfigModule.forRoot({ isGlobal: true }),
+
+    // Rate limiting — max 100 requests per minute per IP
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+
+    // Core infrastructure
+    PrismaModule,
+    RedisModule,
+
+    // Feature modules
+    AuthModule,
+    UsersModule,
+    BookingsModule,
+    ServicesModule,
+    PaymentsModule,
+    InvoicesModule,
+    AgentsModule,
+    CustomersModule,
+    EmployeesModule,
+    CalendarModule,
+    DashboardModule,
+    ReportsModule,
+    NotificationsModule,
+    BlogsModule,
+    StudioVideosModule,
+  ],
+})
+export class AppModule {}

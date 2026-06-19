@@ -1,0 +1,173 @@
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import * as crypto from 'crypto';
+import Razorpay from 'razorpay';
+import { BookingStatus, PaymentMode, PaymentStatus, PaymentType } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
+import { NotificationsService } from '../notifications/notifications.service';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { VerifyRazorpayDto } from './dto/verify-razorpay.dto';
+
+@Injectable()
+export class PaymentsService {
+  private razorpay: Razorpay;
+
+  constructor(
+    private prisma: PrismaService,
+    private config: ConfigService,
+    private notifications: NotificationsService,
+  ) {
+    this.razorpay = new Razorpay({
+      key_id:     this.config.get<string>('RAZORPAY_KEY_ID'),
+      key_secret: this.config.get<string>('RAZORPAY_KEY_SECRET'),
+    });
+  }
+
+  async createRazorpayOrder(dto: CreatePaymentDto) {
+    const booking = await this.prisma.booking.findUnique({ where: { id: dto.bookingId } });
+    if (!booking) throw new NotFoundException('Booking not found');
+
+    const order = await this.razorpay.orders.create({
+      amount:   Math.round(dto.amount * 100),
+      currency: 'INR',
+      receipt:  `booking_${dto.bookingId}`,
+    });
+
+    const payment = await this.prisma.payment.create({
+      data: {
+        bookingId:       dto.bookingId,
+        amount:          dto.amount,
+        type:            dto.type,
+        mode:            PaymentMode.UPI,
+        status:          PaymentStatus.PENDING,
+        razorpayOrderId: order.id as string,
+      },
+    });
+
+    return {
+      orderId:   order.id,
+      amount:    dto.amount,
+      currency:  'INR',
+      paymentId: payment.id,
+      keyId:     this.config.get<string>('RAZORPAY_KEY_ID'),
+    };
+  }
+
+  async verifyRazorpay(dto: VerifyRazorpayDto) {
+    const expectedSignature = crypto
+      .createHmac('sha256', this.config.get<string>('RAZORPAY_KEY_SECRET'))
+      .update(`${dto.razorpayOrderId}|${dto.razorpayPaymentId}`)
+      .digest('hex');
+
+    if (expectedSignature !== dto.razorpaySignature) {
+      throw new BadRequestException('Payment verification failed — invalid signature');
+    }
+
+    const payment = await this.prisma.payment.update({
+      where: { id: dto.paymentDbId },
+      data: {
+        status:            PaymentStatus.PAID,
+        razorpayPaymentId: dto.razorpayPaymentId,
+        paidAt:            new Date(),
+      },
+    });
+
+    await this.updateBookingStatusAfterPayment(dto.bookingId, payment.type);
+    this.notifications.sendBookingNotification(dto.bookingId, 'PAYMENT_RECEIVED').catch(() => {});
+
+    return { success: true, payment };
+  }
+
+  async recordOfflinePayment(dto: CreatePaymentDto) {
+    const booking = await this.prisma.booking.findUnique({ where: { id: dto.bookingId } });
+    if (!booking) throw new NotFoundException('Booking not found');
+
+    const payment = await this.prisma.payment.create({
+      data: {
+        bookingId:       dto.bookingId,
+        amount:          dto.amount,
+        type:            dto.type,
+        mode:            dto.mode,
+        status:          PaymentStatus.PAID,
+        referenceNumber: dto.referenceNumber,
+        collectedBy:     dto.collectedBy,
+        paidAt:          new Date(),
+      },
+    });
+
+    await this.updateBookingStatusAfterPayment(dto.bookingId, dto.type);
+    this.notifications.sendBookingNotification(dto.bookingId, 'PAYMENT_RECEIVED').catch(() => {});
+
+    return payment;
+  }
+
+  findByBooking(bookingId: string) {
+    return this.prisma.payment.findMany({
+      where:   { bookingId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async handleWebhook(body: any, signature: string) {
+    const webhookSecret = this.config.get<string>('RAZORPAY_WEBHOOK_SECRET');
+    const expectedSig = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(JSON.stringify(body))
+      .digest('hex');
+
+    if (expectedSig !== signature) throw new BadRequestException('Invalid webhook signature');
+
+    if (body.event === 'payment.captured') {
+      const { order_id, id: paymentId } = body.payload.payment.entity;
+      await this.prisma.payment.updateMany({
+        where: { razorpayOrderId: order_id, status: PaymentStatus.PENDING },
+        data:  { status: PaymentStatus.PAID, razorpayPaymentId: paymentId, paidAt: new Date() },
+      });
+    }
+
+    return { received: true };
+  }
+
+  private async updateBookingStatusAfterPayment(bookingId: string, paymentType: PaymentType) {
+    if (paymentType === PaymentType.ADVANCE || paymentType === PaymentType.FULL) {
+      await this.prisma.booking.update({
+        where: { id: bookingId },
+        data:  { status: BookingStatus.ADVANCE_PAID },
+      });
+
+      // Auto-create commission if this booking has a referral agent
+      await this.createCommissionIfNeeded(bookingId);
+    }
+  }
+
+  // Auto-create pending commission when agent-referred booking gets advance payment
+  private async createCommissionIfNeeded(bookingId: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where:   { id: bookingId },
+      include: { agent: true },
+    });
+
+    if (!booking?.agentId || !booking.agent) return;
+
+    // Skip if commission already exists for this booking
+    const existing = await this.prisma.commission.findFirst({ where: { bookingId } });
+    if (existing) return;
+
+    const commissionAmount = (Number(booking.totalAmount ?? 0) * Number(booking.agent.commissionRate)) / 100;
+
+    await this.prisma.commission.create({
+      data: {
+        bookingId,
+        agentId:          booking.agentId,
+        bookingAmount:    booking.totalAmount ?? 0,
+        commissionRate:   booking.agent.commissionRate,
+        commissionAmount: commissionAmount,
+        status:           'PENDING',
+      },
+    });
+  }
+}
