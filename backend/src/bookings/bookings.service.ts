@@ -35,6 +35,12 @@ export class BookingsService {
       );
     }
 
+    // Auto-price from service rate — no manual quote needed
+    const service = await this.prisma.service.findUnique({ where: { id: dto.serviceId } });
+    if (!service) throw new NotFoundException('Service not found');
+    const totalAmount   = Math.round(dto.durationHours * Number(service.pricePerHour));
+    const advanceAmount = Math.round(totalAmount * 0.5); // 50% advance to confirm slot
+
     let customerId: string | undefined;
     if (userRole === Role.CUSTOMER) {
       const customer = await this.prisma.customer.findFirst({ where: { user: { id: createdById } } });
@@ -51,18 +57,19 @@ export class BookingsService {
       data: {
         ...dto,
         bookingCode,
-        shootDate: new Date(dto.shootDate),
+        shootDate:     new Date(dto.shootDate),
         createdById,
         customerId,
-        agentId: dto.agentId ?? undefined,
-        status: BookingStatus.REQUEST,
+        agentId:       dto.agentId ?? undefined,
+        totalAmount,
+        advanceAmount,
+        discountAmount: 0,
+        status:         BookingStatus.APPROVED, // Slot is free — auto-approved, pay now
       },
       include: { service: true, createdBy: { select: { id: true, name: true, email: true } } },
     });
 
-    // Send confirmation email
     this.notifications.sendBookingNotification(booking.id, 'BOOKING_CREATED').catch(() => {});
-
     return booking;
   }
 

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Calendar, BookOpen, Users, UserCheck,
   Briefcase, CreditCard, FileText, BarChart2, Settings,
-  LogOut, ChevronRight, X, PenSquare, Video,
+  LogOut, ChevronRight, X, PenSquare, Video, LayoutGrid,
 } from 'lucide-react';
 import { AuthUser, Role } from '@/types';
 import { logout, ROLE_LABELS } from '@/lib/auth';
@@ -48,6 +48,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { label: 'Reports',    href: '/dashboard/reports',     icon: BarChart2       },
     { label: 'Blog Posts', href: '/dashboard/blogs',       icon: PenSquare       },
     { label: 'Videos',     href: '/dashboard/videos',      icon: Video           },
+    { label: 'Gallery',    href: '/dashboard/gallery',     icon: LayoutGrid      },
     { label: 'Settings',   href: '/dashboard/settings',    icon: Settings        },
   ],
   STUDIO_MANAGER: [
@@ -93,7 +94,7 @@ export default function Sidebar({ user, isOpen, onClose }: SidebarProps) {
 
       {/* Logo bar */}
       <div className="h-20 flex items-center px-5 border-b border-[#e5e5e5] dark:border-[#2a2a2a] flex-shrink-0 gap-3">
-        <Logo height={44} />
+        <Logo height={56} />
         <div className="flex-1" />
         {onClose && (
           <button

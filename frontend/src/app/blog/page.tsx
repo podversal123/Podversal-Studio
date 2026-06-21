@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
-import Logo from '@/components/Logo';
+import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
 import { Calendar, Tag, ArrowRight } from 'lucide-react';
 
@@ -33,12 +33,9 @@ export default function BlogPage() {
       <section className="pt-[60px] bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <p className="section-label mb-4">Studio Blog</p>
-          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">
-            Stories from the Studio
+          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
+            Studio Blog
           </h1>
-          <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-lg max-w-xl">
-            Tips, behind-the-scenes sessions, creator interviews, and production advice from the Podversal team.
-          </p>
         </div>
       </section>
 
@@ -147,15 +144,7 @@ export default function BlogPage() {
         </Link>
       </div>
 
-      {/* Mini footer */}
-      <footer className="bg-white dark:bg-[#111111] border-t border-[#e5e5e5] dark:border-[#2a2a2a] py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Link href="/">
-            <Logo height={48} />
-          </Link>
-          <p className="text-xs text-[#aaa] dark:text-[#555]">© {new Date().getFullYear()} Podversal Studio</p>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { ReportsModule } from './reports/reports.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { StudioVideosModule } from './studio-videos/studio-videos.module';
+import { GalleryModule } from './gallery/gallery.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 
@@ -47,6 +48,7 @@ import { RedisModule } from './redis/redis.module';
     NotificationsModule,
     BlogsModule,
     StudioVideosModule,
+    GalleryModule,
   ],
 })
 export class AppModule {}

@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ─────────────────────────────────────────
@@ -409,4 +410,23 @@ model StudioVideo {
   updatedAt    DateTime @updatedAt
 
   @@map("studio_videos")
+}
+
+// ─────────────────────────────────────────
+// GALLERY IMAGE — studio photo gallery
+// ─────────────────────────────────────────
+
+model GalleryImage {
+  id          String   @id @default(cuid())
+  title       String?
+  imageUrl    String
+  category    String   @default("General")
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  uploadedBy  String
+  source      String   @default("URL")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("gallery_images")
 }

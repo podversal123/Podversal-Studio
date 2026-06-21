@@ -122,7 +122,7 @@ function LoginForm() {
         <div className="absolute top-4 right-4"><ThemeToggle /></div>
         <div className="w-full max-w-md">
           <div className="flex justify-center mb-8">
-            <Logo height={60} />
+            <Logo height={76} />
           </div>
 
           <div className="card">
@@ -155,7 +155,7 @@ function LoginForm() {
                     <input
                       {...forgotForm.register('email')}
                       type="email"
-                      placeholder="rahul@example.com"
+                      placeholder="E-mail"
                       className="input-field"
                       autoComplete="email"
                     />
@@ -182,7 +182,7 @@ function LoginForm() {
 
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <Logo height={60} />
+          <Logo height={76} />
         </div>
 
         {hint && (
@@ -231,7 +231,7 @@ function LoginForm() {
                 <input
                   {...loginForm.register('email')}
                   type="email"
-                  placeholder="rahul@example.com"
+                  placeholder="E-mail"
                   className="input-field"
                   autoComplete="email"
                 />
@@ -255,7 +255,7 @@ function LoginForm() {
                   <input
                     {...loginForm.register('password')}
                     type={showPass ? 'text' : 'password'}
-                    placeholder="Your password"
+                    placeholder="Password"
                     className="input-field pr-11"
                     autoComplete="current-password"
                   />
@@ -288,7 +288,7 @@ function LoginForm() {
                   <input
                     {...otpForm.register('phone')}
                     type="tel"
-                    placeholder="98765 43210"
+                    placeholder="98xxxxxxxx"
                     className="input-field"
                     disabled={otpSent}
                   />

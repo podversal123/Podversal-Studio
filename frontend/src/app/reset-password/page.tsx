@@ -52,7 +52,7 @@ function ResetPasswordForm() {
 
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <Logo height={60} />
+          <Logo height={76} />
         </div>
 
         <div className="card">

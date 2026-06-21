@@ -89,9 +89,15 @@ export default function NewBookingPage() {
     api.get<Service[]>('/services').then(r => setServices(r.data)).catch(() => {});
   }, []);
 
-  const startTime = watch('startTime');
-  const endTime   = watch('endTime');
-  const shootDate = watch('shootDate');
+  const startTime   = watch('startTime');
+  const endTime     = watch('endTime');
+  const shootDate   = watch('shootDate');
+  const serviceId   = watch('serviceId');
+  const duration    = watch('durationHours');
+
+  const selectedService = services.find(s => s.id === serviceId);
+  const totalAmount     = selectedService && duration ? Math.round(duration * selectedService.pricePerHour) : null;
+  const advanceAmount   = totalAmount ? Math.round(totalAmount * 0.5) : null;
 
   useEffect(() => {
     setValue('endTime', '');
@@ -118,9 +124,9 @@ export default function NewBookingPage() {
     }
     setSubmitting(true);
     try {
-      await api.post('/bookings', data);
-      toast.success('Booking request submitted — we\'ll review and get back to you.');
-      router.push('/dashboard/bookings');
+      const res = await api.post('/bookings', data);
+      toast.success('Slot confirmed — proceed to pay your advance.');
+      router.push(`/dashboard/bookings/${res.data.id}`);
     } catch (err: unknown) {
       const message = err && typeof err === 'object' && 'response' in err
         ? (err as any).response?.data?.message
@@ -278,13 +284,31 @@ export default function NewBookingPage() {
           </div>
         </div>
 
+        {/* Price summary — shown when service + time are selected */}
+        {totalAmount && advanceAmount && (
+          <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818] px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+            <div>
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-1">Total Amount</p>
+              <p className="text-xl font-black text-gray-900 dark:text-white">₹{totalAmount.toLocaleString('en-IN')}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-1">Advance to Pay (50%)</p>
+              <p className="text-xl font-black text-[#E5312A]">₹{advanceAmount.toLocaleString('en-IN')}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-1">Balance Due on Day</p>
+              <p className="text-xl font-black text-gray-900 dark:text-white">₹{(totalAmount - advanceAmount).toLocaleString('en-IN')}</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-3">
           <button
             type="submit"
             disabled={submitting || (availability !== null && !availability.available)}
             className="btn-primary !w-auto px-8"
           >
-            {submitting ? 'Submitting…' : 'Submit Booking Request'}
+            {submitting ? 'Confirming…' : 'Confirm & Pay Advance'}
           </button>
           <button
             type="button"

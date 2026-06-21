@@ -1,17 +1,28 @@
+'use client';
+
+import { useTheme } from './ThemeProvider';
+
 interface Props {
   height?: number;
   className?: string;
-  onDark?: boolean; // kept for API compatibility, no longer changes behaviour
 }
 
 export default function Logo({ height = 44, className = '' }: Props) {
+  const { theme } = useTheme();
+  const imgH = height * 2;
+  const top  = -Math.round(height / 2);
+  const src  = theme === 'dark' ? '/logo-dark.png' : '/logo-light.png';
+
   return (
-    <div className={`flex-shrink-0 select-none ${className}`} style={{ height }}>
+    <div
+      className={`flex-shrink-0 select-none overflow-hidden ${className}`}
+      style={{ height }}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo.png"
+        src={src}
         alt="Podversal Studio"
-        style={{ height, width: 'auto' }}
+        style={{ height: imgH, width: 'auto', marginTop: top, display: 'block' }}
         draggable={false}
       />
     </div>

@@ -26,7 +26,7 @@ export default function BlogPostPage() {
   const [post,    setPost]    = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const slug = params.slug as string;
+  const slug = (params?.slug ?? '') as string;
 
   useEffect(() => {
     if (!slug) return;

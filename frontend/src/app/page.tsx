@@ -3,13 +3,23 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
-import Logo from '@/components/Logo';
+import MarketingFooter from '@/components/marketing/MarketingFooter';
+import VideoThumbnail from '@/components/VideoThumbnail';
 import {
   Mic, Video, MonitorPlay, Newspaper, Laptop, Camera,
-  ArrowRight, CheckCircle, Phone, Mail, MapPin, Play, Star, Plus, Minus,
+  ArrowRight, CheckCircle, Phone, Mail, MapPin, Play, Star, Plus, Minus, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+
+// Only background image changes per slide — content stays the same across all
+const SLIDES = [
+  { image: '/studio/slide1.jpg', pos: 'object-center'     },
+  { image: '/studio/slide2.jpg', pos: 'object-center'     },
+  { image: '/studio/slide3.jpg', pos: 'object-center'     },
+  { image: '/studio/slide4.jpg', pos: 'object-center'     },
+  { image: '/studio/slide5.jpg', pos: 'object-left-bottom'},
+];
 
 const SERVICES = [
   { icon: Mic,         title: 'Podcast Studio',  description: 'Multi-channel recording with acoustic treatment, high-end microphones, and professional mixing. Ideal for interview shows and solo episodes.' },
@@ -56,78 +66,196 @@ const FAQS = [
 
 interface StudioVideo {
   id: string; title: string; description: string | null;
-  youtubeId: string | null; thumbnailUrl: string | null; category: string;
+  youtubeId: string | null; thumbnailUrl: string | null;
+  videoUrl?: string | null; category: string;
 }
+
+interface BlogPost {
+  id: string; title: string; slug: string; excerpt: string;
+  coverImage: string | null; category: string;
+  publishedAt: string | null; author: { name: string };
+}
+
+interface GalleryImage {
+  id: string; imageUrl: string; title: string | null;
+}
+
+const FEATURED_IMAGES = [
+  '/studio/slide1.jpg', '/studio/slide2.jpg', '/studio/slide3.jpg',
+  '/studio/slide4.jpg', '/studio/slide5.jpg',
+];
+
+// Real studio recordings — always shown
+const FEATURED_VIDEOS: StudioVideo[] = [
+  { id: 'feat-mandala', title: 'Mandala', description: null, youtubeId: null, thumbnailUrl: null, videoUrl: '/videos/mandala.mp4', category: 'Podcast' },
+  { id: 'feat-du',      title: 'DU',      description: null, youtubeId: null, thumbnailUrl: null, videoUrl: '/videos/du.mp4',      category: 'Podcast' },
+];
 
 export default function HomePage() {
   const [videos,      setVideos]      = useState<StudioVideo[]>([]);
+  const [posts,       setPosts]       = useState<BlogPost[]>([]);
+  const [galleryImgs, setGalleryImgs] = useState<GalleryImage[]>([]);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [openFaq,     setOpenFaq]     = useState<number | null>(null);
+  const [slide,       setSlide]       = useState(0);
 
   useEffect(() => {
     api.get<StudioVideo[]>('/studio-videos/public').then(r => setVideos(r.data)).catch(() => {});
+    api.get<BlogPost[]>('/blogs/public').then(r => setPosts(r.data)).catch(() => {});
+    api.get<GalleryImage[]>('/gallery/public').then(r => setGalleryImgs(r.data)).catch(() => {});
   }, []);
 
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  // Handle hash navigation from other pages (e.g. /blog → /#process)
+  // Delay scroll so hero section is fully rendered before measuring positions
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    const timer = setTimeout(() => {
+      document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => setSlide(s => (s + 1) % SLIDES.length), 5000);
+    return () => clearInterval(t);
+  }, []);
+
+  const prevSlide = () => setSlide(s => (s - 1 + SLIDES.length) % SLIDES.length);
+  const nextSlide = () => setSlide(s => (s + 1) % SLIDES.length);
+
+  const scrollTo = (id: string) =>
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#111111]">
       <Navbar />
 
-      {/* ── HERO ─────────────────────────────────────── */}
-      <section className="pt-[60px] bg-white dark:bg-[#111111]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="w-1.5 h-1.5 bg-[#E5312A] rounded-full animate-pulse" />
-            <span className="section-label">Now Booking — Slots Available</span>
+      {/* ── HERO SLIDER ──────────────────────────────── */}
+      <section className="relative h-screen min-h-[600px] overflow-hidden bg-black">
+
+        {/* Background photos — crossfade only, no scale */}
+        {SLIDES.map((s, i) => (
+          <div
+            key={i}
+            aria-hidden
+            className={`absolute inset-0 transition-opacity ease-in-out ${i === slide ? 'opacity-100' : 'opacity-0'}`}
+            style={{ transitionDuration: '1000ms' }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={s.image}
+              alt=""
+              className={`w-full h-full object-cover ${s.pos}`}
+              loading={i === 0 ? 'eager' : 'lazy'}
+            />
           </div>
+        ))}
 
-          <h1 className="text-5xl sm:text-6xl lg:text-[76px] font-bold leading-[1.05] tracking-tight text-gray-900 dark:text-white mb-6">
-            Your Vision,<br />
-            <span className="text-[#E5312A]">Professionally</span><br />
-            Produced.
-          </h1>
+        {/* Dark overlays */}
+        <div className="absolute inset-0 bg-black/60 z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent z-[1]" />
+        <div className="absolute top-0 left-0 right-0 h-36 bg-gradient-to-b from-black/60 to-transparent z-[1]" />
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/70 to-transparent z-[1]" />
 
-          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-xl mb-10 leading-relaxed">
-            Six studio services under one roof — podcasts, VFX, news shoots, online classes, monologues, and product photography. Book online in minutes.
-          </p>
+        {/* ── Single content — same on every slide ── */}
+        <div className="absolute inset-0 z-10 flex flex-col justify-end pb-[90px] px-6 sm:px-10 lg:px-16 pt-[80px]">
+          <div className="max-w-2xl">
 
-          <div className="flex flex-wrap gap-3 mb-16">
-            <Link href="/register" className="inline-flex items-center gap-2 bg-[#E5312A] hover:bg-[#CC2A24] text-white font-semibold px-7 py-3.5 transition-colors text-sm">
-              Book a Studio <ArrowRight size={16} />
-            </Link>
-            <button
-              onClick={() => scrollTo('videos')}
-              className="inline-flex items-center gap-2 border border-gray-200 dark:border-[#333] text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-[#555] font-semibold px-7 py-3.5 transition-colors text-sm"
+            {/* Tag */}
+            <div className="flex items-center gap-2 mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E5312A] animate-pulse" />
+              <span className="text-[10px] font-black tracking-[0.3em] uppercase text-white/50">Now Booking — Slots Available</span>
+            </div>
+
+            {/* Headline */}
+            <h1
+              className="font-black leading-[0.97] tracking-tight mb-6 text-white drop-shadow-2xl"
+              style={{ fontSize: 'clamp(46px, 6.5vw, 90px)' }}
             >
-              <Play size={12} className="text-[#E5312A] fill-[#E5312A]" />
-              Watch Our Work
-            </button>
-          </div>
+              Your Vision,<br />
+              <span className="text-[#E5312A]">Professionally</span><br />
+              Produced.
+            </h1>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 pt-10 border-t border-gray-100 dark:border-[#2a2a2a]">
-            {[
-              { value: '6+',      label: 'Studio Services' },
-              { value: '6AM–2AM', label: 'Open Daily'      },
-              { value: 'GST',     label: 'Tax Compliant'   },
-              { value: '100%',    label: 'Online Booking'  },
-            ].map(stat => (
-              <div key={stat.label}>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">{stat.label}</p>
+            {/* Sub */}
+            <p className="text-sm sm:text-[15px] text-white/55 leading-relaxed mb-9 max-w-lg">
+              Six studio services under one roof — podcasts, VFX, news shoots, online classes, monologues, and product photography. Book online in minutes.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-8 py-3.5 text-sm tracking-wide transition-colors"
+              >
+                Book a Studio <ArrowRight size={14} />
+              </Link>
+              <button
+                onClick={() => scrollTo('videos')}
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/40 text-white/80 hover:text-white font-semibold px-8 py-3.5 text-sm transition-colors"
+              >
+                <Play size={11} className="fill-white" />
+                Watch Our Work
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Bottom bar — stats + slide controls ── */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10 backdrop-blur-sm bg-black/20">
+          <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 flex items-center justify-between py-4">
+
+            {/* Stats */}
+            <div className="hidden sm:flex items-center divide-x divide-white/15">
+              {[
+                { value: '6+',      label: 'Studio Services' },
+                { value: '6AM–2AM', label: 'Open Daily'      },
+                { value: 'GST',     label: 'Tax Compliant'   },
+                { value: '100%',    label: 'Online Booking'  },
+              ].map(stat => (
+                <div key={stat.label} className="px-5 first:pl-0">
+                  <p className="text-sm font-black text-white leading-none">{stat.value}</p>
+                  <p className="text-[9px] tracking-widest uppercase text-white/30 mt-1">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Slide controls */}
+            <div className="flex items-center gap-4 ml-auto">
+              <div className="flex items-center gap-1.5">
+                {SLIDES.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSlide(i)}
+                    className={`h-[2px] rounded-full transition-all duration-500 ${
+                      i === slide ? 'w-8 bg-[#E5312A]' : 'w-4 bg-white/25 hover:bg-white/50'
+                    }`}
+                  />
+                ))}
               </div>
-            ))}
+              <div className="flex gap-1">
+                <button onClick={prevSlide} className="w-8 h-8 flex items-center justify-center border border-white/15 hover:border-white/40 text-white/50 hover:text-white transition-colors">
+                  <ChevronLeft size={14} />
+                </button>
+                <button onClick={nextSlide} className="w-8 h-8 flex items-center justify-center border border-white/15 hover:border-white/40 text-white/50 hover:text-white transition-colors">
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+              <span className="text-[11px] font-bold text-white/25 tabular-nums hidden sm:block">
+                {String(slide + 1).padStart(2, '0')} / {String(SLIDES.length).padStart(2, '0')}
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── SERVICES ──────────────────────────────────── */}
-      <section id="services" className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+      <section id="services" className="pt-6 pb-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
             <p className="section-label mb-3">Services</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Six Studio Experiences</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-3 max-w-xl">Each service is fully set up and ready — just book a slot and walk in.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Our Studio Services</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {SERVICES.map(s => {
@@ -138,7 +266,7 @@ export default function HomePage() {
                     <Icon size={18} className="text-[#E5312A]" />
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{s.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">{s.description}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">{s.description}</p>
                   <Link href="/register" className="inline-flex items-center gap-1 text-xs font-semibold text-[#E5312A] hover:text-[#CC2A24] transition-colors">
                     Book this service <ArrowRight size={11} />
                   </Link>
@@ -150,90 +278,119 @@ export default function HomePage() {
       </section>
 
       {/* ── STUDIO VIDEOS ────────────────────────────── */}
-      <section id="videos" className="py-20 bg-white dark:bg-[#111111]">
+      <section id="videos" className="pt-6 pb-20 bg-white dark:bg-[#111111]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
             <p className="section-label mb-3">Studio Showcase</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">See Our Work</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-3">Real sessions recorded at Podversal.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {videos.length === 0
-              ? [1, 2, 3].map(i => (
-                  <div key={i} className="aspect-video bg-[#f8f8f8] dark:bg-[#181818] flex items-center justify-center">
-                    <div className="text-center">
-                      <Play size={20} className="text-gray-300 dark:text-[#333] mx-auto mb-2" />
-                      <p className="text-xs text-gray-300 dark:text-[#444] tracking-widest uppercase">Coming Soon</p>
-                    </div>
+            {[...FEATURED_VIDEOS, ...videos].map(video => (
+              <div key={video.id} className="overflow-hidden group">
+                {activeVideo === video.id ? (
+                  /* ── Active player ── */
+                  <div className="aspect-video bg-black">
+                    {video.videoUrl ? (
+                      // eslint-disable-next-line jsx-a11y/media-has-caption
+                      <video src={video.videoUrl} controls autoPlay className="w-full h-full" />
+                    ) : video.youtubeId ? (
+                      <iframe
+                        className="w-full h-full"
+                        src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`}
+                        title={video.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : null}
                   </div>
-                ))
-              : videos.map(video => (
-                  <div key={video.id} className="overflow-hidden group">
-                    {activeVideo === video.id && video.youtubeId ? (
-                      <div className="aspect-video">
-                        <iframe
-                          className="w-full h-full"
-                          src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`}
-                          title={video.title}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
+                ) : (
+                  /* ── Thumbnail / poster ── */
+                  <button
+                    className="relative block w-full aspect-video overflow-hidden bg-[#0a0a0a] dark:bg-[#0a0a0a]"
+                    onClick={() => setActiveVideo(video.id)}
+                  >
+                    {video.thumbnailUrl ? (
+                      <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : video.youtubeId ? (
+                      <img src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : video.videoUrl ? (
+                      <VideoThumbnail src={video.videoUrl} className="w-full h-full object-cover" />
+                    ) : null}
+                    {/* Play overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition-colors">
+                      <div className="w-12 h-12 bg-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                        <Play size={16} className="text-gray-900 ml-1" fill="currentColor" />
                       </div>
-                    ) : (
-                      <button
-                        className="relative block w-full aspect-video overflow-hidden bg-[#f8f8f8] dark:bg-[#181818]"
-                        onClick={() => video.youtubeId && setActiveVideo(video.id)}
-                      >
-                        {(video.thumbnailUrl || video.youtubeId) ? (
-                          <img
-                            src={video.thumbnailUrl ?? `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
-                            alt={video.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Play size={24} className="text-gray-300 dark:text-[#444]" />
-                          </div>
-                        )}
-                        {video.youtubeId && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/15 transition-colors">
-                            <div className="w-12 h-12 bg-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                              <Play size={16} className="text-gray-900 ml-1" fill="currentColor" />
-                            </div>
-                          </div>
-                        )}
-                        <span className="absolute top-3 left-3 bg-[#E5312A] text-white text-[10px] font-semibold px-2 py-1 uppercase tracking-wide">
-                          {video.category}
-                        </span>
-                      </button>
-                    )}
-                    <div className="p-4 bg-[#f8f8f8] dark:bg-[#161616]">
-                      <h3 className="text-gray-900 dark:text-white font-semibold text-sm">{video.title}</h3>
-                      {video.description && (
-                        <p className="text-gray-500 dark:text-gray-500 text-xs mt-1 line-clamp-2">{video.description}</p>
-                      )}
                     </div>
-                  </div>
-                ))
-            }
+                    <span className="absolute top-3 left-3 bg-[#E5312A] text-white text-[10px] font-semibold px-2 py-1 uppercase tracking-wide">
+                      {video.category}
+                    </span>
+                  </button>
+                )}
+                <div className="p-4 bg-[#f8f8f8] dark:bg-[#161616]">
+                  <h3 className="text-gray-900 dark:text-white font-semibold text-sm">{video.title}</h3>
+                  {video.description && (
+                    <p className="text-gray-600 dark:text-gray-300 text-xs mt-1 line-clamp-2">{video.description}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── GALLERY ──────────────────────────────────── */}
+      <section className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <p className="section-label mb-3">Studio Gallery</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Inside the Studio</h2>
+            </div>
+            <Link href="/gallery" className="hidden sm:flex items-center gap-2 text-sm font-bold text-[#E5312A] hover:underline">
+              View All <ArrowRight size={14} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
+            {[
+              ...FEATURED_IMAGES.map((url, i) => ({ id: `fs-${i}`, imageUrl: url, title: null })),
+              ...galleryImgs,
+            ].slice(0, 8).map(img => (
+              <Link
+                key={img.id}
+                href="/gallery"
+                className="relative aspect-square overflow-hidden bg-[#e5e5e5] dark:bg-[#181818] group block"
+              >
+                <img
+                  src={img.imageUrl}
+                  alt={img.title ?? 'Studio'}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+              </Link>
+            ))}
+          </div>
+          <div className="flex sm:hidden justify-center mt-6">
+            <Link href="/gallery" className="flex items-center gap-2 text-sm font-bold text-[#E5312A]">
+              View All Gallery <ArrowRight size={14} />
+            </Link>
           </div>
         </div>
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────── */}
-      <section id="process" className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+      <section id="process" className="pt-6 pb-20 bg-white dark:bg-[#111111]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
             <p className="section-label mb-3">How It Works</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">From Request to Invoice</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-3">Seven steps. Clear at every stage. No surprises.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {PROCESS_STEPS.map(item => (
               <div key={item.step} className="bg-white dark:bg-[#161616] p-5">
                 <p className="text-[#E5312A] font-bold text-sm mb-3">{item.step}</p>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">{item.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{item.desc}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -258,7 +415,7 @@ export default function HomePage() {
                 ].map(point => (
                   <div key={point} className="flex items-start gap-3">
                     <CheckCircle size={16} className="text-white/70 flex-shrink-0 mt-0.5" />
-                    <p className="text-white/90 text-sm leading-relaxed">{point}</p>
+                    <p className="text-white text-sm leading-relaxed">{point}</p>
                   </div>
                 ))}
               </div>
@@ -296,7 +453,7 @@ export default function HomePage() {
                 <div className="flex gap-0.5 mb-4">
                   {[1,2,3,4,5].map(i => <Star key={i} size={13} className="fill-[#E5312A] text-[#E5312A]" />)}
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5">&ldquo;{t.quote}&rdquo;</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-5">&ldquo;{t.quote}&rdquo;</p>
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-[#2a2a2a]">
                   <div className="w-8 h-8 bg-[#E5312A] flex items-center justify-center font-bold text-white text-xs flex-shrink-0">
                     {t.name.charAt(0)}
@@ -312,29 +469,83 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FAQ ──────────────────────────────────────── */}
-      <section id="faq" className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12">
-            <p className="section-label mb-3">FAQ</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Common questions</h2>
+      {/* ── BLOG ─────────────────────────────────────── */}
+      <section className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <p className="section-label mb-3">Blog</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">From the Studio</h2>
+            </div>
+            <Link href="/blog" className="hidden sm:flex items-center gap-2 text-sm font-bold text-[#E5312A] hover:underline">
+              All Posts <ArrowRight size={14} />
+            </Link>
           </div>
-          <div className="space-y-2">
+          {posts.length === 0 ? (
+            <div className="text-center py-16 border border-[#e5e5e5] dark:border-[#2a2a2a]">
+              <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm">Blog posts coming soon.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {posts.slice(0, 3).map(post => (
+                  <Link key={post.id} href={`/blog/${post.slug}`} className="group bg-white dark:bg-[#161616] block">
+                    {post.coverImage ? (
+                      <div className="aspect-video overflow-hidden">
+                        <img
+                          src={post.coverImage}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    ) : (
+                      <div className="aspect-video bg-[#e5e5e5] dark:bg-[#1a1a1a] flex items-center justify-center">
+                        <span className="text-4xl font-black text-gray-300 dark:text-[#2a2a2a]">{post.title.charAt(0)}</span>
+                      </div>
+                    )}
+                    <div className="p-5">
+                      <p className="section-label text-[10px] mb-2">{post.category}</p>
+                      <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-2 group-hover:text-[#E5312A] transition-colors line-clamp-2">{post.title}</h3>
+                      {post.excerpt && (
+                        <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{post.excerpt}</p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <div className="flex sm:hidden justify-center mt-6">
+                <Link href="/blog" className="flex items-center gap-2 text-sm font-bold text-[#E5312A]">
+                  All Posts <ArrowRight size={14} />
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* ── FAQ ──────────────────────────────────────── */}
+      <section id="faq" className="pt-6 pb-24 bg-white dark:bg-[#111111]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-14">
+            <p className="section-label mb-3">FAQ</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Common Questions</h2>
+          </div>
+          <div className="space-y-3">
             {FAQS.map((faq, i) => (
               <div key={i} className="bg-white dark:bg-[#161616]">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors"
+                  className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors"
                 >
-                  <span className="font-semibold text-gray-900 dark:text-white text-sm pr-4">{faq.q}</span>
+                  <span className="font-semibold text-gray-900 dark:text-white text-base pr-4">{faq.q}</span>
                   {openFaq === i
-                    ? <Minus size={15} className="text-[#E5312A] flex-shrink-0" />
-                    : <Plus  size={15} className="text-gray-400 dark:text-[#555] flex-shrink-0" />
+                    ? <Minus size={16} className="text-[#E5312A] flex-shrink-0" />
+                    : <Plus  size={16} className="text-gray-400 dark:text-[#555] flex-shrink-0" />
                   }
                 </button>
                 {openFaq === i && (
-                  <div className="px-5 pb-5">
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
+                  <div className="px-6 pb-6">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{faq.a}</p>
                   </div>
                 )}
               </div>
@@ -344,35 +555,65 @@ export default function HomePage() {
       </section>
 
       {/* ── CONTACT ──────────────────────────────────── */}
-      <section id="contact" className="py-20 bg-white dark:bg-[#111111]">
+      <section id="contact" className="pt-6 pb-20 bg-white dark:bg-[#111111]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12">
+          <div className="mb-10">
             <p className="section-label mb-3">Contact</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Get in Touch</h2>
           </div>
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid lg:grid-cols-2 gap-10">
+
+            {/* Left — info + map */}
             <div>
-              <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-                Got a question before booking? Need a custom quote for a multi-day shoot? Send us a message and we'll reply within a few hours.
-              </p>
-              <div className="space-y-5">
-                {[
-                  { Icon: Phone,  label: 'Phone',    value: '+91 XXXXX XXXXX'     },
-                  { Icon: Mail,   label: 'Email',    value: 'studio@podversal.com' },
-                  { Icon: MapPin, label: 'Location', value: 'Address coming soon'  },
-                ].map(({ Icon, label, value }) => (
-                  <div key={label} className="flex items-start gap-4">
-                    <div className="w-9 h-9 bg-[#E5312A]/10 flex items-center justify-center flex-shrink-0">
-                      <Icon size={15} className="text-[#E5312A]" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">{label}</p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white mt-0.5">{value}</p>
-                    </div>
+              <div className="space-y-5 mb-7">
+                <div className="flex items-start gap-4">
+                  <div className="w-9 h-9 bg-[#E5312A]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Phone size={15} className="text-[#E5312A]" />
                   </div>
-                ))}
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Phone</p>
+                    <a href="tel:+917827882058" className="text-sm font-medium text-gray-900 dark:text-white hover:text-[#E5312A] transition-colors">
+                      +91 78278 82058
+                    </a>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-9 h-9 bg-[#E5312A]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Mail size={15} className="text-[#E5312A]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Email</p>
+                    <a href="mailto:info@podversal.com" className="text-sm font-medium text-gray-900 dark:text-white hover:text-[#E5312A] transition-colors">
+                      info@podversal.com
+                    </a>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-9 h-9 bg-[#E5312A]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <MapPin size={15} className="text-[#E5312A]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Location</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white leading-relaxed">
+                      B 812, 814, Tower 4, NX One<br />Greater Noida West, UP
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="w-full h-60 overflow-hidden border border-gray-100 dark:border-[#2a2a2a]">
+                <iframe
+                  title="Podversal Studio Location"
+                  src="https://maps.google.com/maps?q=NX+One+Tower+4+Greater+Noida+West+Uttar+Pradesh&output=embed&z=15"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               </div>
             </div>
+
+            {/* Right — form */}
             <div>
               <form
                 className="space-y-4"
@@ -382,23 +623,23 @@ export default function HomePage() {
                   (e.target as HTMLFormElement).reset();
                 }}
               >
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Name</label>
-                    <input type="text" placeholder="Rahul Sharma" className="input-field" required />
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Name</label>
+                    <input type="text" placeholder="Full Name" className="input-field" required />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Phone</label>
-                    <input type="tel" placeholder="98765 43210" className="input-field" />
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Phone</label>
+                    <input type="tel" placeholder="98xxxxxxxx" className="input-field" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Email</label>
-                  <input type="email" placeholder="rahul@example.com" className="input-field" required />
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Email</label>
+                  <input type="email" placeholder="E-mail" className="input-field" required />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Message</label>
-                  <textarea rows={4} placeholder="Hi, I'd like to book a podcast session for next Saturday. Can you check availability?" className="input-field resize-none" required />
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Message</label>
+                  <textarea rows={5} placeholder="Your message" className="input-field resize-none" required />
                 </div>
                 <button type="submit" className="btn-primary">Send Message</button>
               </form>
@@ -407,44 +648,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FOOTER ───────────────────────────────────── */}
-      <footer className="bg-gray-50 dark:bg-[#111111] border-t border-gray-100 dark:border-[#2a2a2a]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 py-14 border-b border-gray-100 dark:border-white/10">
-            <div>
-              <div className="mb-4">
-                <Logo height={52} />
-              </div>
-              <p className="text-sm text-gray-500 dark:text-white/50 leading-relaxed">
-                Professional studio management platform. Podcasts, VFX, shoots — all bookable online.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-4">Services</h4>
-              <ul className="space-y-2">
-                {['Podcast Studio', 'VFX Podcast', 'Monologue Shoot', 'News Shoot', 'Online Classes', 'Product Shoots'].map(s => (
-                  <li key={s}><span className="text-sm text-gray-500 dark:text-white/60">{s}</span></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><button onClick={() => scrollTo('services')} className="text-sm text-gray-500 dark:text-white/60 hover:text-[#E5312A] transition-colors">Services</button></li>
-                <li><button onClick={() => scrollTo('videos')}   className="text-sm text-gray-500 dark:text-white/60 hover:text-[#E5312A] transition-colors">Videos</button></li>
-                <li><Link href="/blog"     className="text-sm text-gray-500 dark:text-white/60 hover:text-[#E5312A] transition-colors">Blog</Link></li>
-                <li><button onClick={() => scrollTo('faq')}      className="text-sm text-gray-500 dark:text-white/60 hover:text-[#E5312A] transition-colors">FAQ</button></li>
-                <li><Link href="/login"    className="text-sm text-gray-500 dark:text-white/60 hover:text-[#E5312A] transition-colors">Sign In</Link></li>
-                <li><Link href="/register" className="text-sm text-gray-500 dark:text-white/60 hover:text-[#E5312A] transition-colors">Book a Studio</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center justify-between py-5 gap-2">
-            <p className="text-xs text-gray-400 dark:text-white/30">© {new Date().getFullYear()} Podversal Studio. All rights reserved.</p>
-            <p className="text-xs text-gray-400 dark:text-white/30">Professional Studio Management Platform</p>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }

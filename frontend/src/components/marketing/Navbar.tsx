@@ -11,8 +11,9 @@ const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), { ssr: fal
 
 const NAV_LINKS = [
   { label: 'Services',  href: '/#services', section: 'services' },
-  { label: 'Videos',    href: '/#videos',   section: 'videos'   },
+  { label: 'Videos',    href: '/videos',    section: null       },
   { label: 'Blog',      href: '/blog',       section: null       },
+  { label: 'Gallery',   href: '/gallery',   section: null       },
   { label: 'Process',   href: '/#process',  section: 'process'  },
   { label: 'FAQ',       href: '/#faq',       section: 'faq'      },
   { label: 'Contact',   href: '/#contact',   section: 'contact'  },
@@ -30,10 +31,17 @@ export default function Navbar() {
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [loggedIn,   setLoggedIn]   = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
+  const [scrolled,   setScrolled]   = useState(false);
   const dropdownRef                 = useRef<HTMLDivElement>(null);
   const pathname                    = usePathname();
 
   useEffect(() => { setLoggedIn(isAuthenticated()); }, []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -47,19 +55,23 @@ export default function Navbar() {
     if (!section) return;
     if (pathname === '/') {
       e.preventDefault();
-      document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById(section)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setMenuOpen(false);
     }
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+    <nav className={`fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#111111] transition-all duration-300 ${
+      scrolled
+        ? 'border-b border-[#e5e5e5] dark:border-[#2a2a2a] shadow-[0_1px_16px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_16px_rgba(0,0,0,0.35)]'
+        : 'border-b border-transparent'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-[70px]">
+        <div className="flex items-center justify-between h-[80px]">
 
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            <Logo height={56} />
+            <Logo height={72} />
           </Link>
 
           {/* Desktop Nav */}
@@ -69,7 +81,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleAnchorClick(e, link.section)}
-                className="text-sm font-medium text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-[#E5312A] dark:hover:text-[#E5312A] transition-colors"
               >
                 {link.label}
               </Link>

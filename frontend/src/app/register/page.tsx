@@ -56,7 +56,7 @@ export default function RegisterPage() {
 
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <Logo height={60} />
+          <Logo height={76} />
         </div>
 
         <div className="card">
@@ -66,13 +66,13 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Full Name</label>
-              <input {...register('name')} type="text" placeholder="Rahul Sharma" className="input-field" autoComplete="name" />
+              <input {...register('name')} type="text" placeholder="Full Name" className="input-field" autoComplete="name" />
               {errors.name && <p className="text-[#E5312A] text-xs mt-1">{errors.name.message}</p>}
             </div>
 
             <div>
               <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Email</label>
-              <input {...register('email')} type="email" placeholder="rahul@example.com" className="input-field" autoComplete="email" />
+              <input {...register('email')} type="email" placeholder="E-mail" className="input-field" autoComplete="email" />
               {errors.email && <p className="text-[#E5312A] text-xs mt-1">{errors.email.message}</p>}
             </div>
 
@@ -82,7 +82,7 @@ export default function RegisterPage() {
                 <input
                   {...register('password')}
                   type={showPass ? 'text' : 'password'}
-                  placeholder="At least 8 characters"
+                  placeholder="Password"
                   className="input-field pr-11"
                   autoComplete="new-password"
                 />
@@ -102,7 +102,7 @@ export default function RegisterPage() {
               <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">
                 Mobile Number <span className="text-[#ccc] dark:text-[#444] font-normal normal-case tracking-normal">(optional)</span>
               </label>
-              <input {...register('phone')} type="tel" placeholder="98765 43210" className="input-field" />
+              <input {...register('phone')} type="tel" placeholder="98xxxxxxxx" className="input-field" />
               {errors.phone && <p className="text-[#E5312A] text-xs mt-1">{errors.phone.message}</p>}
             </div>
 

@@ -20,7 +20,7 @@ export default function MobileHeader({ onOpen }: Props) {
         <Menu size={20} className="text-gray-600 dark:text-[#a0a0a0]" />
       </button>
       <div className="flex-1">
-        <Logo height={44} />
+        <Logo height={52} />
       </div>
       <ThemeToggle />
     </header>
