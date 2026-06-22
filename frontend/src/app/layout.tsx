@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="bg-white dark:bg-[#111111] text-gray-900 dark:text-white transition-colors duration-200">
+      <body className="font-sans bg-white dark:bg-[#111111] text-gray-900 dark:text-white transition-colors duration-200">
         <ThemeProvider>
           {children}
           <Toaster

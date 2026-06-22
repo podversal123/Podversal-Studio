@@ -68,7 +68,7 @@ type FormData = z.infer<typeof schema>;
 
 function FormLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">
+    <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
       {children}{required && <span className="text-[#E5312A] ml-1">*</span>}
     </label>
   );
@@ -154,7 +154,7 @@ export default function NewBookingPage() {
         {/* Customer Details */}
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] p-6 space-y-4">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">Customer Details</p>
+            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888]">Customer Details</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -181,7 +181,7 @@ export default function NewBookingPage() {
 
         {/* Booking Details */}
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] p-6 space-y-4">
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-1">Booking Details</p>
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Booking Details</p>
 
           <div>
             <FormLabel required>Service</FormLabel>
@@ -247,14 +247,14 @@ export default function NewBookingPage() {
             </div>
           )}
 
-          <p className="text-xs text-[#aaa] dark:text-[#555]">
+          <p className="text-xs text-[#888] dark:text-[#666]">
             Studio hours: 6:00 AM to 2:00 AM. Minimum 2 hours per booking, in 2-hour increments.
           </p>
         </div>
 
         {/* Requirements */}
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] p-6 space-y-4">
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-1">Requirements</p>
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Requirements</p>
           <div>
             <FormLabel>Studio Setup</FormLabel>
             <textarea
@@ -288,15 +288,15 @@ export default function NewBookingPage() {
         {totalAmount && advanceAmount && (
           <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818] px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
             <div>
-              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-1">Total Amount</p>
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Total Amount</p>
               <p className="text-xl font-black text-gray-900 dark:text-white">₹{totalAmount.toLocaleString('en-IN')}</p>
             </div>
             <div>
-              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-1">Advance to Pay (50%)</p>
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Advance to Pay (50%)</p>
               <p className="text-xl font-black text-[#E5312A]">₹{advanceAmount.toLocaleString('en-IN')}</p>
             </div>
             <div>
-              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-1">Balance Due on Day</p>
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Balance Due on Day</p>
               <p className="text-xl font-black text-gray-900 dark:text-white">₹{(totalAmount - advanceAmount).toLocaleString('en-IN')}</p>
             </div>
           </div>

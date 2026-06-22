@@ -20,7 +20,7 @@ export class GalleryController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
   create(@Body() dto: CreateGalleryImageDto, @Request() req: any) {
-    return this.gallery.create(dto, req.user.sub);
+    return this.gallery.create(dto, req.user.id);
   }
 
   @Patch(':id')

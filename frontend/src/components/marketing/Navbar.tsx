@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, Shield, User, Briefcase, UserCheck, Users } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { isAuthenticated } from '@/lib/auth';
 import dynamic from 'next/dynamic';
 import Logo from '@/components/Logo';
@@ -19,21 +19,11 @@ const NAV_LINKS = [
   { label: 'Contact',   href: '/#contact',   section: 'contact'  },
 ];
 
-const ROLE_OPTIONS = [
-  { role: 'SUPER_ADMIN',    label: 'Super Admin',    desc: 'Studio owner',    icon: Shield,    color: 'text-[#E5312A]'              },
-  { role: 'STUDIO_MANAGER', label: 'Studio Manager', desc: 'Staff member',    icon: UserCheck, color: 'text-gray-500 dark:text-gray-400' },
-  { role: 'EMPLOYEE',       label: 'Employee',       desc: 'Crew / operator', icon: Users,     color: 'text-green-600'              },
-  { role: 'REFERRAL_AGENT', label: 'Referral Agent', desc: 'Partner / agent', icon: Briefcase, color: 'text-orange-500'             },
-  { role: 'CUSTOMER',       label: 'Customer',       desc: 'Book a session',  icon: User,      color: 'text-gray-500 dark:text-gray-400' },
-];
-
 export default function Navbar() {
-  const [menuOpen,   setMenuOpen]   = useState(false);
-  const [loggedIn,   setLoggedIn]   = useState(false);
-  const [signInOpen, setSignInOpen] = useState(false);
-  const [scrolled,   setScrolled]   = useState(false);
-  const dropdownRef                 = useRef<HTMLDivElement>(null);
-  const pathname                    = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const pathname                = usePathname();
 
   useEffect(() => { setLoggedIn(isAuthenticated()); }, []);
 
@@ -41,14 +31,6 @@ export default function Navbar() {
     const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setSignInOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const handleAnchorClick = (e: React.MouseEvent, section: string | null) => {
@@ -98,41 +80,12 @@ export default function Navbar() {
               </Link>
             ) : (
               <>
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setSignInOpen(!signInOpen)}
-                    className="flex items-center gap-1 text-sm font-medium text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white transition-colors"
-                  >
-                    Sign In
-                    <ChevronDown size={13} className={`transition-transform duration-200 ${signInOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {signInOpen && (
-                    <div className="absolute top-full right-0 mt-0 w-60 bg-white dark:bg-[#181818] border border-[#e5e5e5] dark:border-[#2a2a2a] shadow-xl z-50">
-                      <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] px-4 pt-3 pb-2">
-                        Sign In As
-                      </p>
-                      {ROLE_OPTIONS.map((opt) => {
-                        const Icon = opt.icon;
-                        return (
-                          <Link
-                            key={opt.role}
-                            href={`/login?role=${opt.role}`}
-                            onClick={() => setSignInOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f5f5f5] dark:hover:bg-[#222] transition-colors"
-                          >
-                            <Icon size={14} className={opt.color} />
-                            <div>
-                              <p className="text-sm font-medium text-gray-900 dark:text-white">{opt.label}</p>
-                              <p className="text-xs text-[#aaa] dark:text-[#555]">{opt.desc}</p>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                  Sign In
+                </Link>
                 <Link
                   href="/register"
                   className="text-sm font-bold px-5 py-2 bg-[#E5312A] text-white hover:bg-[#CC2A24] transition-colors"
@@ -176,28 +129,18 @@ export default function Navbar() {
                   Go to Dashboard
                 </Link>
               ) : (
-                <>
-                  <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] px-3 py-2">Sign In As</p>
-                  {ROLE_OPTIONS.map((opt) => {
-                    const Icon = opt.icon;
-                    return (
-                      <Link
-                        key={opt.role}
-                        href={`/login?role=${opt.role}`}
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2.5 hover:bg-[#f5f5f5] dark:hover:bg-[#181818] transition-colors"
-                      >
-                        <Icon size={14} className={opt.color} />
-                        <span className="text-sm font-medium text-gray-700 dark:text-[#a0a0a0]">{opt.label}</span>
-                      </Link>
-                    );
-                  })}
-                  <div className="mt-2">
-                    <Link href="/register" className="btn-primary !py-2.5 text-sm text-center block">
-                      Book a Studio
-                    </Link>
-                  </div>
-                </>
+                <div className="space-y-2 pt-1">
+                  <Link
+                    href="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-[#a0a0a0] hover:bg-[#f5f5f5] dark:hover:bg-[#181818] transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link href="/register" className="btn-primary !py-2.5 text-sm text-center block" onClick={() => setMenuOpen(false)}>
+                    Book a Studio
+                  </Link>
+                </div>
               )}
             </div>
           </div>

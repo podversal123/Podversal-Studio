@@ -67,6 +67,10 @@ export class PaymentsService {
       throw new BadRequestException('Payment verification failed — invalid signature');
     }
 
+    const existing = await this.prisma.payment.findUnique({ where: { id: dto.paymentDbId } });
+    if (!existing) throw new NotFoundException('Payment record not found');
+    if (existing.bookingId !== dto.bookingId) throw new BadRequestException('Payment does not belong to this booking');
+
     const payment = await this.prisma.payment.update({
       where: { id: dto.paymentDbId },
       data: {
@@ -133,13 +137,17 @@ export class PaymentsService {
   }
 
   private async updateBookingStatusAfterPayment(bookingId: string, paymentType: PaymentType) {
-    if (paymentType === PaymentType.ADVANCE || paymentType === PaymentType.FULL) {
+    if (paymentType === PaymentType.ADVANCE) {
       await this.prisma.booking.update({
         where: { id: bookingId },
         data:  { status: BookingStatus.ADVANCE_PAID },
       });
-
-      // Auto-create commission if this booking has a referral agent
+      await this.createCommissionIfNeeded(bookingId);
+    } else if (paymentType === PaymentType.FULL) {
+      await this.prisma.booking.update({
+        where: { id: bookingId },
+        data:  { status: BookingStatus.COMPLETED },
+      });
       await this.createCommissionIfNeeded(bookingId);
     }
   }

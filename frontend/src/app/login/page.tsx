@@ -284,12 +284,12 @@ function LoginForm() {
             <form onSubmit={otpForm.handleSubmit(handleVerifyOtp)} className="space-y-4">
               <div>
                 <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Mobile Number</label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 min-w-0">
                   <input
                     {...otpForm.register('phone')}
                     type="tel"
                     placeholder="98xxxxxxxx"
-                    className="input-field"
+                    className="input-field min-w-0"
                     disabled={otpSent}
                   />
                   {!otpSent && (

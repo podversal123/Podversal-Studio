@@ -89,7 +89,7 @@ export default function GalleryPage() {
       <Navbar />
 
       {/* Banner */}
-      <section className="pt-[60px] bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+      <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <p className="section-label mb-4">Studio Gallery</p>
           <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">

@@ -10,7 +10,10 @@ export interface AuthUser {
   name: string;
   email: string;
   role: Role;
-  profileId: string | null; // agent/customer/employee profile row ID
+  profileId: string | null;
+  phone?: string;
+  avatarUrl?: string;
+  createdAt?: string;
 }
 
 export interface AuthResponse {

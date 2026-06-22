@@ -93,11 +93,13 @@ export default function BlogPostPage() {
         )}
 
         {/* Content */}
-        <div
-          className="prose prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-[#c0c0c0] leading-relaxed"
-          style={{ lineHeight: 1.8 }}
-          dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }}
-        />
+        <div className="overflow-x-auto">
+          <div
+            className="prose prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-[#c0c0c0] leading-relaxed"
+            style={{ lineHeight: 1.8 }}
+            dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }}
+          />
+        </div>
 
         {/* Tags */}
         {post.tags?.length > 0 && (

@@ -38,7 +38,9 @@ export class BookingsService {
     // Auto-price from service rate — no manual quote needed
     const service = await this.prisma.service.findUnique({ where: { id: dto.serviceId } });
     if (!service) throw new NotFoundException('Service not found');
-    const totalAmount   = Math.round(dto.durationHours * Number(service.pricePerHour));
+    const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const durationHours = (toMin(dto.endTime) - toMin(dto.startTime)) / 60;
+    const totalAmount   = Math.round(durationHours * Number(service.pricePerHour));
     const advanceAmount = Math.round(totalAmount * 0.5); // 50% advance to confirm slot
 
     let customerId: string | undefined;
@@ -47,27 +49,32 @@ export class BookingsService {
       if (customer) customerId = customer.id;
     }
 
-    // Generate unique booking code: BK-YYYYMMDD-XXXX
-    const count = await this.prisma.booking.count();
     const today = new Date();
     const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-    const bookingCode = `BK-${dateStr}-${String(count + 1).padStart(4, '0')}`;
+    const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const bookingCode = `BK-${dateStr}-${suffix}`;
 
-    const booking = await this.prisma.booking.create({
-      data: {
-        ...dto,
-        bookingCode,
-        shootDate:     new Date(dto.shootDate),
-        createdById,
-        customerId,
-        agentId:       dto.agentId ?? undefined,
-        totalAmount,
-        advanceAmount,
-        discountAmount: 0,
-        status:         BookingStatus.APPROVED, // Slot is free — auto-approved, pay now
-      },
-      include: { service: true, createdBy: { select: { id: true, name: true, email: true } } },
-    });
+    let booking: any;
+    try {
+      booking = await this.prisma.booking.create({
+        data: {
+          ...dto,
+          bookingCode,
+          shootDate:     new Date(dto.shootDate),
+          createdById,
+          customerId,
+          agentId:       dto.agentId ?? undefined,
+          totalAmount,
+          advanceAmount,
+          discountAmount: 0,
+          status:         BookingStatus.APPROVED,
+        },
+        include: { service: true, createdBy: { select: { id: true, name: true, email: true } } },
+      });
+    } catch (err) {
+      await this.redis.releaseSlot(key);
+      throw err;
+    }
 
     this.notifications.sendBookingNotification(booking.id, 'BOOKING_CREATED').catch(() => {});
     return booking;
@@ -155,7 +162,9 @@ export class BookingsService {
     const booking = await this.findOne(id);
 
     if (userRole === Role.CUSTOMER) {
-      if (booking.createdById !== userId) throw new ForbiddenException();
+      const isCreator  = booking.createdById === userId;
+      const isCustomer = booking.customer?.userId === userId;
+      if (!isCreator && !isCustomer) throw new ForbiddenException();
       if (booking.status === BookingStatus.ADVANCE_PAID || booking.status === BookingStatus.IN_PROGRESS) {
         throw new BadRequestException('Cannot cancel a booking after advance payment');
       }
@@ -254,7 +263,7 @@ export class BookingsService {
     const existing = await this.prisma.booking.findFirst({
       where: {
         shootDate: { gte: shootDate, lt: nextDay },
-        status:    { notIn: [BookingStatus.CANCELLED] },
+        status:    { notIn: [BookingStatus.CANCELLED, BookingStatus.REQUEST, BookingStatus.CHECKING] },
         AND: [{ startTime: { lt: endTime } }, { endTime: { gt: startTime } }],
       },
     });

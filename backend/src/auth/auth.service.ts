@@ -63,7 +63,7 @@ export class AuthService {
   }
 
   async sendOtp(phone: string) {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
     await this.redis.saveOtp(phone, otp);
     await this.dispatchSms(phone, otp);
     return { message: 'OTP sent successfully' };

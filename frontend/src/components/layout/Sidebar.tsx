@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Calendar, BookOpen, Users, UserCheck,
   Briefcase, CreditCard, FileText, BarChart2, Settings,
-  LogOut, ChevronRight, X, PenSquare, Video, LayoutGrid,
+  LogOut, ChevronRight, X, PenSquare, Video, LayoutGrid, User,
 } from 'lucide-react';
 import { AuthUser, Role } from '@/types';
 import { logout, ROLE_LABELS } from '@/lib/auth';
@@ -72,9 +72,11 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { label: 'Commissions', href: '/dashboard/commissions',icon: CreditCard      },
   ],
   CUSTOMER: [
-    { label: 'Book Studio',  href: '/dashboard/bookings/new', icon: Calendar },
-    { label: 'My Bookings',  href: '/dashboard/bookings',     icon: BookOpen },
-    { label: 'Invoices',     href: '/dashboard/invoices',     icon: FileText },
+    { label: 'Dashboard',   href: '/dashboard',              icon: LayoutDashboard },
+    { label: 'Book Studio', href: '/dashboard/bookings/new', icon: Calendar        },
+    { label: 'My Bookings', href: '/dashboard/bookings',     icon: BookOpen        },
+    { label: 'Invoices',    href: '/dashboard/invoices',     icon: FileText        },
+    { label: 'Profile',     href: '/dashboard/profile',      icon: User            },
   ],
 };
 
@@ -93,7 +95,7 @@ export default function Sidebar({ user, isOpen, onClose }: SidebarProps) {
     <div className="flex flex-col h-full">
 
       {/* Logo bar */}
-      <div className="h-20 flex items-center px-5 border-b border-[#e5e5e5] dark:border-[#2a2a2a] flex-shrink-0 gap-3">
+      <div className="h-20 flex items-center px-5 flex-shrink-0 gap-3">
         <Logo height={56} />
         <div className="flex-1" />
         {onClose && (
@@ -109,10 +111,21 @@ export default function Sidebar({ user, isOpen, onClose }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {navItems.map(item => {
-          const Icon     = item.icon;
-          const isActive = item.href === '/dashboard'
-            ? pathname === '/dashboard'
-            : pathname.startsWith(item.href);
+          const Icon = item.icon;
+          const isActive = (() => {
+            if (item.href === '/dashboard') return pathname === '/dashboard';
+            if (pathname === item.href) return true;
+            if (pathname.startsWith(item.href + '/')) {
+              // Don't activate if a more-specific sibling nav item matches
+              const moreSpecific = navItems.some(
+                other => other.href !== item.href &&
+                         other.href.startsWith(item.href) &&
+                         pathname.startsWith(other.href),
+              );
+              return !moreSpecific;
+            }
+            return false;
+          })();
 
           return (
             <Link
@@ -145,9 +158,11 @@ export default function Sidebar({ user, isOpen, onClose }: SidebarProps) {
           </div>
           <div className="overflow-hidden flex-1 min-w-0">
             <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.name}</p>
-            <span className={`inline-block text-[10px] font-black tracking-[0.1em] uppercase px-1.5 py-0.5 ${ROLE_BADGE_CLASS[user.role]}`}>
-              {ROLE_LABELS[user.role]}
-            </span>
+            {user.role !== 'CUSTOMER' && (
+              <span className={`inline-block text-[10px] font-black tracking-[0.1em] uppercase px-1.5 py-0.5 ${ROLE_BADGE_CLASS[user.role]}`}>
+                {ROLE_LABELS[user.role]}
+              </span>
+            )}
           </div>
           <ThemeToggle />
         </div>

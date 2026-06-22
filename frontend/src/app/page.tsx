@@ -171,7 +171,7 @@ export default function HomePage() {
             {/* Headline */}
             <h1
               className="font-black leading-[0.97] tracking-tight mb-6 text-white drop-shadow-2xl"
-              style={{ fontSize: 'clamp(46px, 6.5vw, 90px)' }}
+              style={{ fontSize: 'clamp(32px, 8vw, 90px)' }}
             >
               Your Vision,<br />
               <span className="text-[#E5312A]">Professionally</span><br />
@@ -400,7 +400,7 @@ export default function HomePage() {
       {/* ── WHY US ───────────────────────────────────── */}
       <section className="py-20 bg-[#E5312A]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-start">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             <div>
               <p className="section-label text-white/60 mb-4">Why Podversal</p>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-8">Why teams choose us</h2>
