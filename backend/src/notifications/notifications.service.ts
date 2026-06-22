@@ -43,7 +43,21 @@ export class NotificationsService {
 
     const { subject, html } = this.buildEmail(event, { booking, name });
 
+    // Send to customer
     await this.send(email, subject, html);
+
+    // Notify admin on new booking or payment received
+    if (event === 'BOOKING_CREATED' || event === 'PAYMENT_RECEIVED') {
+      const adminEmail = process.env.SMTP_USER;
+      if (adminEmail && email !== adminEmail) {
+        const adminSubject = `[New] ${subject}`;
+        const adminHtml = html.replace(
+          `<p>Hi <strong>${name}</strong>,</p>`,
+          `<p>Hi <strong>Studio Team</strong>,</p><p style="color:#888;font-size:12px;">Customer: ${name} (${email})</p>`,
+        );
+        await this.send(adminEmail, adminSubject, adminHtml);
+      }
+    }
 
     // Persist notification record
     await this.prisma.notification.create({
@@ -52,7 +66,7 @@ export class NotificationsService {
         channel: 'EMAIL',
         subject,
         message: `Booking ${booking.bookingCode}: ${event.replace(/_/g, ' ')}`,
-        isSent:  process.env.NODE_ENV === 'production',
+        isSent:  true,
       },
     });
   }
@@ -126,10 +140,16 @@ export class NotificationsService {
   }
 
   private async send(to: string, subject: string, html: string) {
-    if (process.env.NODE_ENV !== 'production') {
+    const smtpConfigured = process.env.SMTP_USER && !process.env.SMTP_USER.includes('your_');
+    if (!smtpConfigured) {
       console.log(`[Email DEV] To: ${to} | Subject: ${subject}`);
       return;
     }
-    await this.transporter.sendMail({ from: `"Podversal Studio" <${process.env.SMTP_USER}>`, to, subject, html });
+    await this.transporter.sendMail({
+      from:    process.env.EMAIL_FROM ?? `"Podversal Studio" <${process.env.SMTP_USER}>`,
+      to,
+      subject,
+      html,
+    });
   }
 }

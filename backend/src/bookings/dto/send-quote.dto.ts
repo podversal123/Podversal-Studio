@@ -7,10 +7,6 @@ export class SendQuoteDto {
 
   @IsNumber()
   @Min(0)
-  advanceAmount: number;
-
-  @IsNumber()
-  @Min(0)
   @IsOptional()
   discountAmount?: number;
 }

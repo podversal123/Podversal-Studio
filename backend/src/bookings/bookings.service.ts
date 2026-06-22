@@ -41,7 +41,7 @@ export class BookingsService {
     const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
     const durationHours = (toMin(dto.endTime) - toMin(dto.startTime)) / 60;
     const totalAmount   = Math.round(durationHours * Number(service.pricePerHour));
-    const advanceAmount = Math.round(totalAmount * 0.5); // 50% advance to confirm slot
+    const advanceAmount = totalAmount; // full payment upfront
 
     let customerId: string | undefined;
     if (userRole === Role.CUSTOMER) {
@@ -136,7 +136,7 @@ export class BookingsService {
       where: { id },
       data: {
         totalAmount:    dto.totalAmount,
-        advanceAmount:  dto.advanceAmount,
+        advanceAmount:  dto.totalAmount - (dto.discountAmount ?? 0),
         discountAmount: dto.discountAmount ?? 0,
         status:         BookingStatus.QUOTED,
       },

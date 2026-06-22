@@ -70,7 +70,6 @@ const STATUS_META: Record<BookingStatus, { label: string; cls: string }> = {
 
 const quoteSchema = z.object({
   totalAmount:    z.coerce.number().positive('Enter a valid total amount'),
-  advanceAmount:  z.coerce.number().positive('Enter a valid advance amount'),
   discountAmount: z.coerce.number().min(0).optional(),
 });
 type QuoteForm = z.infer<typeof quoteSchema>;
@@ -161,8 +160,8 @@ export default function BookingDetailPage() {
 
       const orderRes = await api.post('/payments/razorpay/order', {
         bookingId: id,
-        amount:    booking.advanceAmount,
-        type:      'ADVANCE',
+        amount:    booking.totalAmount,
+        type:      'FULL',
       });
 
       const { orderId, amount, currency, paymentId, keyId } = orderRes.data;
@@ -172,7 +171,7 @@ export default function BookingDetailPage() {
         amount:      Math.round(Number(amount) * 100),
         currency,
         name:        'Podversal Studio',
-        description: `Advance — ${booking.bookingCode}`,
+        description: `Full Payment — ${booking.bookingCode}`,
         order_id:    orderId,
         theme:       { color: '#E5312A' },
         prefill: {
@@ -251,7 +250,7 @@ export default function BookingDetailPage() {
       </div>
 
       {/* Customer: payment banner when APPROVED */}
-      {!isAdmin && status === 'APPROVED' && booking.advanceAmount && (
+      {!isAdmin && status === 'APPROVED' && booking.totalAmount && (
         <div className="border border-[#E5312A] bg-[#E5312A]/5 p-5">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 bg-[#E5312A] flex items-center justify-center flex-shrink-0">
@@ -260,11 +259,11 @@ export default function BookingDetailPage() {
             <div className="flex-1">
               <h3 className="font-black text-gray-900 dark:text-white mb-1">Your booking is approved</h3>
               <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-4">
-                Pay the advance of{' '}
+                Complete full payment of{' '}
                 <span className="font-black text-gray-900 dark:text-white">
-                  ₹{Number(booking.advanceAmount).toLocaleString('en-IN')}
+                  ₹{Number(booking.totalAmount).toLocaleString('en-IN')}
                 </span>{' '}
-                to lock your studio slot. Payment via UPI, card, or net banking.
+                to confirm your studio slot. Payment via UPI, card, or net banking.
               </p>
               <button
                 onClick={handlePayOnline}
@@ -273,7 +272,7 @@ export default function BookingDetailPage() {
               >
                 {actionLoading
                   ? <><Loader2 size={14} className="animate-spin" /> Opening payment…</>
-                  : <><CreditCard size={14} /> Pay ₹{Number(booking.advanceAmount).toLocaleString('en-IN')} Now</>
+                  : <><CreditCard size={14} /> Pay ₹{Number(booking.totalAmount).toLocaleString('en-IN')} Now</>
                 }
               </button>
             </div>
@@ -352,12 +351,14 @@ export default function BookingDetailPage() {
           {booking.totalAmount != null && (
             <SectionCard title="Quote & Pricing">
               <dl>
-                <DetailRow label="Total Amount"    value={`₹${Number(booking.totalAmount).toLocaleString('en-IN')}`} />
-                <DetailRow label="Advance Required" value={`₹${Number(booking.advanceAmount).toLocaleString('en-IN')}`} />
+                <DetailRow label="Total Amount" value={`₹${Number(booking.totalAmount).toLocaleString('en-IN')}`} />
                 {booking.discountAmount > 0 && (
                   <DetailRow label="Discount" value={
                     <span className="text-green-600">− ₹{Number(booking.discountAmount).toLocaleString('en-IN')}</span>
                   } />
+                )}
+                {booking.discountAmount > 0 && booking.advanceAmount && (
+                  <DetailRow label="Net Payable" value={`₹${Number(booking.advanceAmount).toLocaleString('en-IN')}`} />
                 )}
               </dl>
             </SectionCard>
@@ -449,11 +450,6 @@ export default function BookingDetailPage() {
                       <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Total Amount (₹)</label>
                       <input {...register('totalAmount')} type="number" className="input-field" placeholder="50000" />
                       {errors.totalAmount && <p className="text-[#E5312A] text-xs mt-1">{errors.totalAmount.message}</p>}
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Advance Amount (₹)</label>
-                      <input {...register('advanceAmount')} type="number" className="input-field" placeholder="25000" />
-                      {errors.advanceAmount && <p className="text-[#E5312A] text-xs mt-1">{errors.advanceAmount.message}</p>}
                     </div>
                     <div>
                       <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Discount (₹)</label>

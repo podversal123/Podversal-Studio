@@ -14,6 +14,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
+  authenticate(req: any, options?: any) {
+    super.authenticate(req, { ...options, prompt: 'select_account' });
+  }
+
   async validate(
     _accessToken: string,
     _refreshToken: string,

@@ -159,22 +159,22 @@ export default function NewBookingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <FormLabel required>Full Name</FormLabel>
-              <input {...register('customerName')} className="input-field" placeholder="Rahul Sharma" autoComplete="name" />
+              <input {...register('customerName')} className="input-field" placeholder="Full Name" autoComplete="name" />
               {errors.customerName && <p className="text-[#E5312A] text-xs mt-1">{errors.customerName.message}</p>}
             </div>
             <div>
               <FormLabel required>Mobile Number</FormLabel>
-              <input {...register('customerPhone')} className="input-field" placeholder="98765 43210" type="tel" />
+              <input {...register('customerPhone')} className="input-field" placeholder="Mobile Number" type="tel" autoComplete="tel" />
               {errors.customerPhone && <p className="text-[#E5312A] text-xs mt-1">{errors.customerPhone.message}</p>}
             </div>
             <div>
               <FormLabel required>Email Address</FormLabel>
-              <input {...register('customerEmail')} type="email" className="input-field" placeholder="rahul@example.com" autoComplete="email" />
+              <input {...register('customerEmail')} type="email" className="input-field" placeholder="Email Address" autoComplete="email" />
               {errors.customerEmail && <p className="text-[#E5312A] text-xs mt-1">{errors.customerEmail.message}</p>}
             </div>
             <div>
               <FormLabel>Company / Brand Name</FormLabel>
-              <input {...register('companyName')} className="input-field" placeholder="e.g. Sharma Productions (optional)" />
+              <input {...register('companyName')} className="input-field" placeholder="Company / Brand Name (optional)" autoComplete="organization" />
             </div>
           </div>
         </div>
@@ -285,20 +285,13 @@ export default function NewBookingPage() {
         </div>
 
         {/* Price summary — shown when service + time are selected */}
-        {totalAmount && advanceAmount && (
+        {totalAmount && (
           <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818] px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
             <div>
-              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Total Amount</p>
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Estimated Total</p>
               <p className="text-xl font-black text-gray-900 dark:text-white">₹{totalAmount.toLocaleString('en-IN')}</p>
             </div>
-            <div>
-              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Advance to Pay (50%)</p>
-              <p className="text-xl font-black text-[#E5312A]">₹{advanceAmount.toLocaleString('en-IN')}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Balance Due on Day</p>
-              <p className="text-xl font-black text-gray-900 dark:text-white">₹{(totalAmount - advanceAmount).toLocaleString('en-IN')}</p>
-            </div>
+            <p className="text-xs text-[#888] dark:text-[#666]">Final amount will be confirmed in the quote from studio team.</p>
           </div>
         )}
 
@@ -308,7 +301,7 @@ export default function NewBookingPage() {
             disabled={submitting || (availability !== null && !availability.available)}
             className="btn-primary !w-auto px-8"
           >
-            {submitting ? 'Confirming…' : 'Confirm & Pay Advance'}
+            {submitting ? 'Confirming…' : 'Submit Booking Request'}
           </button>
           <button
             type="button"

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Users, CreditCard, TrendingUp, Clock, UserCheck, UserCircle, Trophy, Calendar, FileText } from 'lucide-react';
+import { BookOpen, Users, CreditCard, TrendingUp, Clock, UserCheck, UserCircle, Trophy, Calendar, FileText, Bell } from 'lucide-react';
 import { getStoredUser } from '@/lib/auth';
 import { AuthUser, Role } from '@/types';
 import api from '@/lib/api';
@@ -20,9 +20,10 @@ const STATUS_COLORS: Record<string, string> = {
 
 
 export default function DashboardPage() {
-  const [user,       setUser]       = useState<AuthUser | null>(null);
-  const [stats,      setStats]      = useState<any>(null);
-  const [myBookings, setMyBookings] = useState<any[] | null>(null);
+  const [user,          setUser]          = useState<AuthUser | null>(null);
+  const [stats,         setStats]         = useState<any>(null);
+  const [myBookings,    setMyBookings]    = useState<any[] | null>(null);
+  const [notifications, setNotifications] = useState<any[] | null>(null);
 
   useEffect(() => {
     const u = getStoredUser();
@@ -30,6 +31,7 @@ export default function DashboardPage() {
 
     if (u?.role === 'SUPER_ADMIN' || u?.role === 'STUDIO_MANAGER') {
       api.get('/dashboard/stats').then(r => setStats(r.data)).catch(() => {});
+      api.get('/notifications').then(r => setNotifications(r.data)).catch(() => setNotifications([]));
     } else {
       api.get('/bookings')
         .then(r => setMyBookings(r.data.slice(0, 5)))
@@ -405,7 +407,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ─── RECENT BOOKINGS ──────────────────────────────────────────── */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <div className="card p-0 overflow-hidden">
             <div className="p-4 border-b border-gray-100 dark:border-[#3a3a3a] flex items-center justify-between">
               <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -458,6 +460,32 @@ export default function DashboardPage() {
                 </div>
               );
             })()}
+          </div>
+
+
+          {/* ─── ACTIVITY FEED ──────────────────────────────────────────── */}
+          <div className="card p-0 overflow-hidden">
+            <div className="p-4 border-b border-gray-100 dark:border-[#3a3a3a] flex items-center gap-2">
+              <Bell size={14} className="text-[#E5312A]" />
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Recent Activity</h3>
+            </div>
+            {notifications === null ? (
+              <div className="p-6 text-center text-sm text-gray-400 dark:text-[#555]">Loading…</div>
+            ) : notifications.length === 0 ? (
+              <div className="p-6 text-center text-sm text-gray-400 dark:text-[#555]">No activity yet</div>
+            ) : (
+              <div className="divide-y divide-gray-50 dark:divide-[#1a1a1a] max-h-80 overflow-y-auto">
+                {notifications.slice(0, 20).map((n: any) => (
+                  <div key={n.id} className="px-4 py-3">
+                    <p className="text-xs font-semibold text-gray-800 dark:text-white">{n.subject}</p>
+                    <p className="text-xs text-gray-400 dark:text-[#666] mt-0.5">{n.message}</p>
+                    <p className="text-[10px] text-gray-300 dark:text-[#444] mt-1">
+                      {new Date(n.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>

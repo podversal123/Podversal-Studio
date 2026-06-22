@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
+import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -42,8 +43,15 @@ export class AuthController {
   // GET /api/auth/google/callback  — Google redirects here after login
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleCallback(@Req() req: any) {
-    return this.auth.googleLogin(req.user);
+  async googleCallback(@Req() req: any, @Res() res: Response) {
+    const result = await this.auth.googleLogin(req.user);
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3002';
+    const params = new URLSearchParams({
+      accessToken:  result.accessToken,
+      refreshToken: result.refreshToken,
+      user:         JSON.stringify(result.user),
+    });
+    return res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
   }
 
   // POST /api/auth/otp/send
