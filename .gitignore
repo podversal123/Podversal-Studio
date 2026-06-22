@@ -62,6 +62,9 @@ desktop.ini
 .project
 .classpath
 
+# ─── Project Files ────────────────────────────────────────────────────────────
+CONTENT_REQUIREMENTS.md
+
 # ─── Miscellaneous ────────────────────────────────────────────────────────────
 *.pem
 *.key
