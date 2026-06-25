@@ -50,6 +50,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { label: 'Videos',     href: '/dashboard/videos',      icon: Video           },
     { label: 'Gallery',    href: '/dashboard/gallery',     icon: LayoutGrid      },
     { label: 'Settings',   href: '/dashboard/settings',    icon: Settings        },
+    { label: 'Profile',    href: '/dashboard/profile',     icon: User            },
   ],
   STUDIO_MANAGER: [
     { label: 'Dashboard',  href: '/dashboard',             icon: LayoutDashboard },
@@ -60,17 +61,20 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { label: 'Payments',   href: '/dashboard/payments',    icon: CreditCard      },
     { label: 'Invoices',   href: '/dashboard/invoices',    icon: FileText        },
     { label: 'Reports',    href: '/dashboard/reports',     icon: BarChart2       },
+    { label: 'Profile',    href: '/dashboard/profile',     icon: User            },
   ],
   EMPLOYEE: [
     { label: 'Dashboard',  href: '/dashboard',             icon: LayoutDashboard },
     { label: 'Bookings',   href: '/dashboard/bookings',    icon: BookOpen        },
     { label: 'Calendar',   href: '/dashboard/calendar',    icon: Calendar        },
     { label: 'Customers',  href: '/dashboard/customers',   icon: Users           },
+    { label: 'Profile',    href: '/dashboard/profile',     icon: User            },
   ],
   REFERRAL_AGENT: [
     { label: 'Dashboard',   href: '/dashboard',            icon: LayoutDashboard },
     { label: 'My Bookings', href: '/dashboard/bookings',   icon: BookOpen        },
     { label: 'Commissions', href: '/dashboard/commissions',icon: CreditCard      },
+    { label: 'Profile',     href: '/dashboard/profile',    icon: User            },
   ],
   CUSTOMER: [
     { label: 'Dashboard',   href: '/dashboard',              icon: LayoutDashboard },
