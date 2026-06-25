@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Calendar, BookOpen, Users, UserCheck,
   Briefcase, CreditCard, FileText, BarChart2, Settings,
-  LogOut, ChevronRight, X, PenSquare, Video, LayoutGrid, User,
+  LogOut, ChevronRight, X, PenSquare, Video, LayoutGrid, User, ShieldCheck,
 } from 'lucide-react';
 import { AuthUser, Role } from '@/types';
 import { logout, ROLE_LABELS } from '@/lib/auth';
@@ -42,6 +42,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { label: 'Calendar',   href: '/dashboard/calendar',    icon: Calendar        },
     { label: 'Customers',  href: '/dashboard/customers',   icon: Users           },
     { label: 'Agents',     href: '/dashboard/agents',      icon: Briefcase       },
+    { label: 'Staff',      href: '/dashboard/staff',       icon: ShieldCheck     },
     { label: 'Employees',  href: '/dashboard/employees',   icon: UserCheck       },
     { label: 'Payments',   href: '/dashboard/payments',    icon: CreditCard      },
     { label: 'Invoices',   href: '/dashboard/invoices',    icon: FileText        },

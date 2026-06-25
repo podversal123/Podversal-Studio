@@ -8,6 +8,7 @@ import { UsersService } from '../users/users.service';
 export class CreateAgentDto {
   @IsString() name: string;
   @IsString() email: string;
+  @IsString() @IsOptional() password?: string;
   @IsString() agencyName: string;
   @IsNumber() @Min(0) @Max(100) commissionRate: number;
   @IsString() @IsOptional() phone?: string;
@@ -75,10 +76,11 @@ export class AgentsService {
     if (existing) throw new BadRequestException('Email already registered');
 
     const user = await this.users.create({
-      name:  dto.name,
-      email: dto.email,
-      phone: dto.phone,
-      role:  Role.REFERRAL_AGENT,
+      name:     dto.name,
+      email:    dto.email,
+      phone:    dto.phone,
+      password: dto.password,
+      role:     Role.REFERRAL_AGENT,
     });
 
     return this.prisma.agent.create({

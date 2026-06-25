@@ -76,6 +76,14 @@ export class AuthController {
     return this.auth.register(dto);
   }
 
+  // GET /api/auth/managers — SUPER_ADMIN only, lists all Studio Managers
+  @Get('managers')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
+  getManagers() {
+    return this.users.findManagers();
+  }
+
   // POST /api/auth/setup-admin — one-time only, creates first SUPER_ADMIN if none exists
   @Post('setup-admin')
   setupAdmin(@Body() dto: RegisterDto) {

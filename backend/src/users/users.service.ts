@@ -81,6 +81,14 @@ export class UsersService {
     return this.updateProfile(id, { avatarUrl: result.secure_url });
   }
 
+  findManagers() {
+    return this.prisma.user.findMany({
+      where: { role: Role.STUDIO_MANAGER },
+      select: { id: true, name: true, email: true, phone: true, isActive: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findOrCreateGoogleUser(profile: {
     googleId: string;
     email: string;
