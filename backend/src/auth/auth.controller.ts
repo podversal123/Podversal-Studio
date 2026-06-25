@@ -45,7 +45,7 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: any, @Res() res: Response) {
     const result = await this.auth.googleLogin(req.user);
-    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3002';
+    const frontendUrl = (process.env.FRONTEND_URL ?? 'http://localhost:3002').split(',')[0].trim();
     const params = new URLSearchParams({
       accessToken:  result.accessToken,
       refreshToken: result.refreshToken,
