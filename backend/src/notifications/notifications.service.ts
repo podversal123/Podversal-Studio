@@ -237,10 +237,6 @@ Booking reference: <strong>${code}</strong>`,
     return this.send(to, 'Your Podversal Studio account is ready', html);
   }
 
-  async sendRawEmail(to: string, subject: string, html: string): Promise<void> {
-    return this.send(to, subject, html);
-  }
-
   // Sends one sample email of every type to `to` so you can verify layout and content
   async sendTestEmails(to: string): Promise<{ sent: string[]; errors: string[] }> {
     const fakebooking = {
