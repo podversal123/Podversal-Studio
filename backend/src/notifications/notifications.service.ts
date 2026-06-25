@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
 
 export type NotificationEvent =
@@ -20,22 +19,7 @@ const logoHtml = () => {
 
 @Injectable()
 export class NotificationsService {
-  private transporter: nodemailer.Transporter;
-
-  constructor(private prisma: PrismaService) {
-    const port   = Number(process.env.SMTP_PORT ?? 587);
-    const secure = port === 465;
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST ?? 'smtp.gmail.com',
-      port,
-      secure,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      tls: { rejectUnauthorized: false },
-    });
-  }
+  constructor(private prisma: PrismaService) {}
 
   async sendBookingNotification(bookingId: string, event: NotificationEvent) {
     const booking = await this.prisma.booking.findUnique({
@@ -297,20 +281,40 @@ Booking reference: <strong>${code}</strong>`,
     return { sent, errors };
   }
 
-  private async send(to: string, subject: string, html: string) {
-    const smtpConfigured = process.env.SMTP_USER && !process.env.SMTP_USER.includes('your_');
-    if (!smtpConfigured) {
+  async sendRawEmail(to: string, subject: string, html: string): Promise<void> {
+    return this.send(to, subject, html);
+  }
+
+  private async send(to: string, subject: string, html: string): Promise<void> {
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) {
       console.log(`[Email DEV] To: ${to} | Subject: ${subject}`);
       return;
     }
+
+    const senderEmail = process.env.BREVO_SENDER_EMAIL ?? 'podversalstudio@gmail.com';
+
     try {
-      const info = await this.transporter.sendMail({
-        from:    process.env.EMAIL_FROM ?? `"Podversal Studio" <${process.env.SMTP_USER}>`,
-        to,
-        subject,
-        html,
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method:  'POST',
+        headers: {
+          'api-key':      apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender:      { name: 'Podversal Studio', email: senderEmail },
+          to:          [{ email: to }],
+          subject,
+          htmlContent: html,
+        }),
       });
-      console.log(`[Email OK] To: ${to} | Subject: ${subject} | MessageId: ${info.messageId}`);
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`Brevo ${res.status}: ${err}`);
+      }
+
+      console.log(`[Email OK] To: ${to} | Subject: ${subject}`);
     } catch (err: any) {
       console.error(`[Email FAILED] To: ${to} | Subject: ${subject}`);
       console.error(`[Email ERROR] ${err?.message ?? err}`);
