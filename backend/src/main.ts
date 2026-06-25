@@ -13,8 +13,15 @@ async function bootstrap() {
   // Enable CORS so the Next.js frontend can talk to this API
   const frontendUrl = process.env.FRONTEND_URL;
   if (!frontendUrl) throw new Error('FRONTEND_URL env var is required');
+  const allowedOrigins = frontendUrl.split(',').map(o => o.trim());
   app.enableCors({
-    origin: frontendUrl,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin ${origin} not allowed`));
+      }
+    },
     credentials: true,
   });
 
