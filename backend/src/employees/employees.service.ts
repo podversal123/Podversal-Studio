@@ -7,6 +7,7 @@ import { UsersService } from '../users/users.service';
 export class CreateEmployeeDto {
   @IsString() name: string;
   @IsString() email: string;
+  @IsString() @IsOptional() password?: string;
   @IsString() jobTitle: string;
   @IsString() shiftStart: string; // "09:00"
   @IsString() shiftEnd: string;   // "18:00"
@@ -58,10 +59,11 @@ export class EmployeesService {
     if (existing) throw new BadRequestException('Email already registered');
 
     const user = await this.users.create({
-      name:  dto.name,
-      email: dto.email,
-      phone: dto.phone,
-      role:  Role.EMPLOYEE,
+      name:     dto.name,
+      email:    dto.email,
+      phone:    dto.phone,
+      password: dto.password,
+      role:     Role.EMPLOYEE,
     });
 
     return this.prisma.employee.create({
