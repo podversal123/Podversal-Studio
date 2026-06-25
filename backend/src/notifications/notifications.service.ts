@@ -44,6 +44,8 @@ export class NotificationsService {
         service:  true,
         customer: { include: { user: { select: { email: true, name: true } } } },
         createdBy: true,
+        employee:  { include: { user: { select: { email: true, name: true } } } },
+        agent:     { include: { user: { select: { email: true, name: true } } } },
       },
     });
     if (!booking) return;
@@ -69,6 +71,66 @@ export class NotificationsService {
           .replace(`<p>Hi ${name},</p>`, `<p>Hi Studio Team,</p><p style="color:#888;font-size:12px;margin-top:0;">Customer: ${name} &lt;${email}&gt;</p>`);
         await this.send(adminEmail, adminSubject, adminHtml);
       }
+    }
+
+    // Send shoot reminder to assigned employee
+    if (event === 'SHOOT_REMINDER' && booking.employee?.user?.email) {
+      const empEmail = booking.employee.user.email;
+      const empName  = booking.employee.user.name;
+      const date     = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
+      const time     = `${booking.startTime} – ${booking.endTime}`;
+      const empHtml  = this.wrapEmail(`
+        <p>Hi ${empName},</p>
+        <p>Reminder: you have a <strong>${booking.service.name}</strong> shoot scheduled for tomorrow.</p>
+        <p><strong>Date:</strong> ${date}<br>
+        <strong>Time:</strong> ${time}<br>
+        <strong>Customer:</strong> ${name}<br>
+        <strong>Booking:</strong> ${booking.bookingCode}</p>
+        <p>Please be ready at the studio on time.</p>
+      `);
+      await this.send(empEmail, `[Tomorrow] Your shoot: ${booking.service.name} at ${booking.startTime}`, empHtml);
+    }
+
+    // Send shoot reminder to referred agent
+    if (event === 'SHOOT_REMINDER' && booking.agent?.user?.email) {
+      const agentEmail = booking.agent.user.email;
+      const agentName  = booking.agent.user.name;
+      const date       = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
+      const time       = `${booking.startTime} – ${booking.endTime}`;
+      const agentHtml  = this.wrapEmail(`
+        <p>Hi ${agentName},</p>
+        <p>A booking you referred is scheduled for tomorrow.</p>
+        <p><strong>Service:</strong> ${booking.service.name}<br>
+        <strong>Date:</strong> ${date}<br>
+        <strong>Time:</strong> ${time}<br>
+        <strong>Customer:</strong> ${name}<br>
+        <strong>Booking:</strong> ${booking.bookingCode}</p>
+      `);
+      await this.send(agentEmail, `[Tomorrow] Referred booking: ${booking.bookingCode}`, agentHtml);
+    }
+
+    // Send shoot reminder to all active Studio Managers
+    if (event === 'SHOOT_REMINDER') {
+      const managers = await this.prisma.user.findMany({
+        where: { role: 'STUDIO_MANAGER', isActive: true },
+        select: { email: true, name: true },
+      });
+      const date = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
+      const time = `${booking.startTime} – ${booking.endTime}`;
+      await Promise.all(
+        managers.map((manager) => {
+          const html = this.wrapEmail(`
+            <p>Hi ${manager.name},</p>
+            <p>Reminder: there is a shoot scheduled for tomorrow that needs your attention.</p>
+            <p><strong>Service:</strong> ${booking.service.name}<br>
+            <strong>Date:</strong> ${date}<br>
+            <strong>Time:</strong> ${time}<br>
+            <strong>Customer:</strong> ${name}<br>
+            <strong>Booking:</strong> ${booking.bookingCode}</p>
+          `);
+          return this.send(manager.email, `[Tomorrow] Shoot: ${booking.service.name} at ${booking.startTime} (${booking.bookingCode})`, html);
+        }),
+      );
     }
 
     // Persist notification record
@@ -172,6 +234,23 @@ Booking reference: <strong>${code}</strong>`,
       <p>Log in to your Podversal Studio account to book sessions, view invoices, and manage your shoots.</p>
     `);
     return this.send(to, 'Welcome to Podversal Studio', html);
+  }
+
+  async sendCredentialsEmail(to: string, name: string, password: string, loginUrl: string, role: string): Promise<void> {
+    const html = this.wrapEmail(`
+      <p>Hi ${name},</p>
+      <p>Your <strong>Podversal Studio</strong> account has been created. Here are your login credentials:</p>
+      <table style="border:1px solid #e5e5e5;border-collapse:collapse;width:100%;margin:16px 0;">
+        <tr><td style="padding:10px 14px;background:#f9f9f9;font-weight:700;width:40%;">Role</td><td style="padding:10px 14px;">${role}</td></tr>
+        <tr><td style="padding:10px 14px;background:#f9f9f9;font-weight:700;">Email</td><td style="padding:10px 14px;">${to}</td></tr>
+        <tr><td style="padding:10px 14px;background:#f9f9f9;font-weight:700;">Password</td><td style="padding:10px 14px;">${password}</td></tr>
+      </table>
+      <p style="margin:0 0 20px 0;">
+        <a href="${loginUrl}" style="display:inline-block;background:#E5312A;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;text-decoration:none;">Login Now</a>
+      </p>
+      <p style="color:#888;font-size:12px;">Please change your password after your first login from Profile → Change Password.</p>
+    `);
+    return this.send(to, 'Your Podversal Studio account is ready', html);
   }
 
   async sendRawEmail(to: string, subject: string, html: string): Promise<void> {

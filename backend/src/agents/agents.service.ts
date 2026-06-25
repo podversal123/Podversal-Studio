@@ -4,6 +4,7 @@ import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import * as puppeteer from 'puppeteer';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export class CreateAgentDto {
   @IsString() name: string;
@@ -30,6 +31,7 @@ export class AgentsService {
   constructor(
     private prisma: PrismaService,
     private users: UsersService,
+    private notifications: NotificationsService,
   ) {}
 
   findAll() {
@@ -75,15 +77,20 @@ export class AgentsService {
     const existing = await this.users.findByEmail(dto.email);
     if (existing) throw new BadRequestException('Email already registered');
 
+    if (dto.phone) {
+      const phoneInUse = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+      if (phoneInUse) throw new BadRequestException('Phone number already registered');
+    }
+
     const user = await this.users.create({
       name:     dto.name,
       email:    dto.email,
-      phone:    dto.phone,
+      phone:    dto.phone || undefined,
       password: dto.password,
       role:     Role.REFERRAL_AGENT,
     });
 
-    return this.prisma.agent.create({
+    const agent = await this.prisma.agent.create({
       data: {
         userId:         user.id,
         agencyName:     dto.agencyName,
@@ -93,6 +100,13 @@ export class AgentsService {
         bankIfscCode:   dto.bankIfscCode,
       },
     });
+
+    if (dto.password) {
+      const loginUrl = `${process.env.FRONTEND_URL?.split(',')[0]}/agent/login`;
+      this.notifications.sendCredentialsEmail(dto.email, dto.name, dto.password, loginUrl, 'Referral Agent').catch(() => {});
+    }
+
+    return agent;
   }
 
   async update(id: string, dto: UpdateAgentDto) {

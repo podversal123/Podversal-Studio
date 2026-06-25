@@ -39,8 +39,12 @@ export class AuthService {
       role: dto.role ?? Role.CUSTOMER,
     });
 
-    // Send welcome email — fire and forget, don't block the response
-    this.notifications.sendWelcomeEmail(user.email, user.name).catch(() => {});
+    if (dto.role === Role.STUDIO_MANAGER && dto.password) {
+      const loginUrl = `${this.config.get<string>('FRONTEND_URL')?.split(',')[0]}/staff/login`;
+      this.notifications.sendCredentialsEmail(user.email, user.name, dto.password, loginUrl, 'Studio Manager').catch(() => {});
+    } else {
+      this.notifications.sendWelcomeEmail(user.email, user.name).catch(() => {});
+    }
 
     return this.generateTokens(user);
   }
@@ -170,7 +174,7 @@ export class AuthService {
     const token = crypto.randomBytes(32).toString('hex');
     await this.redis.set(`reset:${token}`, user.id, 900); // 15-minute TTL
 
-    const frontendUrl = this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3002'; // fallback for local dev
+    const frontendUrl = (this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3002').split(',')[0].trim();
     const resetUrl    = `${frontendUrl}/reset-password?token=${token}`;
 
     const emailLogoUrl = this.config.get<string>('EMAIL_LOGO_URL');
