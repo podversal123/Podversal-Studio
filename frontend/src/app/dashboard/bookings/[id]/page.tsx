@@ -7,8 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import {
-  CreditCard, ArrowLeft, User, Calendar, Clock,
-  DollarSign, FileText, CheckCircle, AlertTriangle, Loader2
+  CreditCard, ArrowLeft, FileText, CheckCircle, AlertTriangle, Loader2
 } from 'lucide-react';
 import api from '@/lib/api';
 import { getStoredUser } from '@/lib/auth';
@@ -87,18 +86,18 @@ const loadRazorpay = (): Promise<boolean> =>
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111]">
-      <div className="px-5 py-3.5 border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818]">
+      <div className="px-4 py-2 border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818]">
         <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">{title}</p>
       </div>
-      <div className="p-5">{children}</div>
+      <div className="p-3">{children}</div>
     </div>
   );
 }
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4 py-2.5 border-b border-[#f5f5f5] dark:border-[#1a1a1a] last:border-0">
-      <dt className="text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] sm:w-36 flex-shrink-0 mt-0.5">{label}</dt>
+    <div className="flex flex-col sm:flex-row sm:items-start gap-0.5 sm:gap-4 py-1.5 border-b border-[#f5f5f5] dark:border-[#1a1a1a] last:border-0">
+      <dt className="text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] sm:w-32 flex-shrink-0">{label}</dt>
       <dd className="text-sm font-medium text-gray-900 dark:text-white">{value || <span className="text-[#aaa] dark:text-[#555]">—</span>}</dd>
     </div>
   );
@@ -123,7 +122,7 @@ export default function BookingDetailPage() {
     resolver: zodResolver(quoteSchema),
   });
 
-  useEffect(() => {
+  const loadBooking = () => {
     Promise.all([
       api.get<Booking>(`/bookings/${id}`),
       isAdmin ? api.get<Employee[]>('/employees') : Promise.resolve({ data: [] as Employee[] }),
@@ -131,7 +130,18 @@ export default function BookingDetailPage() {
       .then(([b, e]) => { setBooking(b.data); setEmployees(e.data); })
       .catch(() => toast.error('Failed to load booking details'))
       .finally(() => setLoading(false));
-  }, [id, isAdmin]);
+  };
+
+  useEffect(() => { loadBooking(); }, [id, isAdmin]);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { bookingId } = (e as CustomEvent).detail ?? {};
+      if (bookingId === id) loadBooking();
+    };
+    window.addEventListener('podversal:live', handler);
+    return () => window.removeEventListener('podversal:live', handler);
+  }, [id]);
 
   const refresh = () => api.get<Booking>(`/bookings/${id}`).then(r => setBooking(r.data));
 
@@ -160,8 +170,8 @@ export default function BookingDetailPage() {
 
       const orderRes = await api.post('/payments/razorpay/order', {
         bookingId: id,
-        amount:    booking.totalAmount,
-        type:      'FULL',
+        amount:    booking.advanceAmount ?? booking.totalAmount,
+        type:      'ADVANCE',
       });
 
       const { orderId, amount, currency, paymentId, keyId } = orderRes.data;
@@ -171,7 +181,7 @@ export default function BookingDetailPage() {
         amount:      Math.round(Number(amount) * 100),
         currency,
         name:        'Podversal Studio',
-        description: `Full Payment — ${booking.bookingCode}`,
+        description: `Slot Confirmation — ${booking.bookingCode}`,
         order_id:    orderId,
         theme:       { color: '#E5312A' },
         prefill: {
@@ -229,7 +239,7 @@ export default function BookingDetailPage() {
   const meta = STATUS_META[status] ?? STATUS_META.REQUEST;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5">
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-3">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -250,20 +260,20 @@ export default function BookingDetailPage() {
       </div>
 
       {/* Customer: payment banner when APPROVED */}
-      {!isAdmin && status === 'APPROVED' && booking.totalAmount && (
+      {user?.role === 'CUSTOMER' && status === 'APPROVED' && booking.totalAmount && (
         <div className="border border-[#E5312A] bg-[#E5312A]/5 p-5">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 bg-[#E5312A] flex items-center justify-center flex-shrink-0">
               <CreditCard size={18} className="text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-black text-gray-900 dark:text-white mb-1">Your booking is approved</h3>
+              <h3 className="font-black text-gray-900 dark:text-white mb-1">Complete payment to lock your slot</h3>
               <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-4">
-                Complete full payment of{' '}
+                Pay{' '}
                 <span className="font-black text-gray-900 dark:text-white">
-                  ₹{Number(booking.totalAmount).toLocaleString('en-IN')}
+                  ₹{Number(booking.advanceAmount ?? booking.totalAmount).toLocaleString('en-IN')}
                 </span>{' '}
-                to confirm your studio slot. Payment via UPI, card, or net banking.
+                via UPI, card, or net banking to instantly confirm your studio slot.
               </p>
               <button
                 onClick={handlePayOnline}
@@ -272,7 +282,7 @@ export default function BookingDetailPage() {
               >
                 {actionLoading
                   ? <><Loader2 size={14} className="animate-spin" /> Opening payment…</>
-                  : <><CreditCard size={14} /> Pay ₹{Number(booking.totalAmount).toLocaleString('en-IN')} Now</>
+                  : <><CreditCard size={14} /> Pay ₹{Number(booking.advanceAmount ?? booking.totalAmount).toLocaleString('en-IN')} Now</>
                 }
               </button>
             </div>
@@ -280,8 +290,8 @@ export default function BookingDetailPage() {
         </div>
       )}
 
-      {/* Customer: advance paid confirmation */}
-      {!isAdmin && status === 'ADVANCE_PAID' && (
+      {/* Customer: slot confirmed after payment */}
+      {user?.role === 'CUSTOMER' && status === 'ADVANCE_PAID' && (
         <div className="border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/10 p-4 flex items-center gap-3">
           <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
           <p className="text-sm font-medium text-green-800 dark:text-green-400">
@@ -291,7 +301,7 @@ export default function BookingDetailPage() {
       )}
 
       {/* Customer: cancel confirmation inline */}
-      {!isAdmin && confirmCancel && (
+      {user?.role === 'CUSTOMER' && confirmCancel && (
         <div className="border border-[#E5312A] bg-[#E5312A]/5 p-4 flex items-start gap-4">
           <AlertTriangle size={16} className="text-[#E5312A] flex-shrink-0 mt-0.5" />
           <div className="flex-1">
@@ -316,10 +326,10 @@ export default function BookingDetailPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
 
         {/* Left — details */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-3">
 
           {/* Shoot Details */}
           <SectionCard title="Shoot Details">
@@ -367,7 +377,7 @@ export default function BookingDetailPage() {
           {/* Payments */}
           {booking.payments?.length > 0 && (
             <SectionCard title="Payments">
-              <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] overflow-hidden">
+              <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818]">
                     <tr>
@@ -425,7 +435,7 @@ export default function BookingDetailPage() {
           )}
 
           {/* Customer cancel */}
-          {!isAdmin && !['ADVANCE_PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status) && !confirmCancel && (
+          {user?.role === 'CUSTOMER' && !['ADVANCE_PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status) && !confirmCancel && (
             <div className="flex justify-end">
               <button
                 onClick={() => setConfirmCancel(true)}
@@ -439,7 +449,7 @@ export default function BookingDetailPage() {
 
         {/* Right — admin actions */}
         {isAdmin && (
-          <div className="space-y-4">
+          <div className="space-y-3">
 
             {/* Send Quote */}
             {(status === 'REQUEST' || status === 'CHECKING') && (

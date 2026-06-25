@@ -6,6 +6,7 @@ import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
 import { Calendar, Tag, ArrowRight } from 'lucide-react';
+import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
 
 interface BlogPost {
   id: string; title: string; slug: string; excerpt: string;
@@ -18,9 +19,12 @@ export default function BlogPage() {
   const [loading,  setLoading]  = useState(true);
   const [category, setCategory] = useState<string>('All');
 
-  useEffect(() => {
+  const fetchPosts = () => {
     api.get<BlogPost[]>('/blogs/public').then(r => setPosts(r.data)).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { fetchPosts(); }, []);
+  useRefetchOnFocus(fetchPosts);
 
   const categories = ['All', ...Array.from(new Set(posts.map(p => p.category)))];
   const filtered   = category === 'All' ? posts : posts.filter(p => p.category === category);

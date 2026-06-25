@@ -5,29 +5,43 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 
 const INVOICE_TYPES = [
-  { value: 'GST_INVOICE',     label: 'Tax Invoice (GST)' },
-  { value: 'PROFORMA',        label: 'Proforma Invoice' },
-  { value: 'QUOTATION',       label: 'Quotation' },
-  { value: 'PAYMENT_RECEIPT', label: 'Payment Receipt' },
+  { value: 'QUOTATION',       label: 'Quotation'          },
+  { value: 'PROFORMA',        label: 'Proforma Invoice'   },
+  { value: 'GST_INVOICE',     label: 'Tax Invoice (GST)'  },
+  { value: 'PAYMENT_RECEIPT', label: 'Payment Receipt'    },
 ] as const;
+
+const STATUS_LABEL: Record<string, string> = {
+  REQUEST:      'Request',
+  CHECKING:     'Checking',
+  QUOTED:       'Quoted',
+  APPROVED:     'Approved',
+  ADVANCE_PAID: 'Advance Paid',
+  IN_PROGRESS:  'In Progress',
+  COMPLETED:    'Completed',
+};
 
 export default function InvoicesPage() {
   const [bookings,    setBookings]    = useState<any[]>([]);
   const [bookingId,   setBookingId]   = useState('');
-  const [invoiceType, setInvoiceType] = useState<string>('GST_INVOICE');
+  const [invoiceType, setInvoiceType] = useState<string>('QUOTATION');
   const [invoices,    setInvoices]    = useState<any[]>([]);
   const [loading,     setLoading]     = useState(false);
   const [genLoading,  setGenLoading]  = useState(false);
 
-  // Load bookings that can have invoices (ADVANCE_PAID or COMPLETED)
   useEffect(() => {
-    Promise.all([
-      api.get('/bookings', { params: { status: 'ADVANCE_PAID' } }),
-      api.get('/bookings', { params: { status: 'COMPLETED' } }),
-    ]).then(([a, c]) => setBookings([...a.data, ...c.data])).catch(() => {});
+    // Load all active bookings that may need an invoice
+    const statuses = ['QUOTED', 'APPROVED', 'ADVANCE_PAID', 'IN_PROGRESS', 'COMPLETED'];
+    Promise.all(statuses.map(s => api.get('/bookings', { params: { status: s } })))
+      .then(results => {
+        const all = results.flatMap(r => r.data);
+        // Deduplicate by id
+        const seen = new Set<string>();
+        setBookings(all.filter(b => { if (seen.has(b.id)) return false; seen.add(b.id); return true; }));
+      })
+      .catch(() => {});
   }, []);
 
-  // Auto-load invoices when booking selection changes
   useEffect(() => {
     if (!bookingId) { setInvoices([]); return; }
     setLoading(true);
@@ -42,8 +56,7 @@ export default function InvoicesPage() {
     setGenLoading(true);
     try {
       const r = await api.post('/invoices/generate', { bookingId, type: invoiceType });
-      toast.success(`Invoice ${r.data.invoiceNumber} generated`);
-      // Reload invoices for this booking
+      toast.success(`${r.data.invoiceNumber} generated`);
       const updated = await api.get(`/invoices/booking/${bookingId}`);
       setInvoices(updated.data);
     } catch (e: any) {
@@ -53,88 +66,123 @@ export default function InvoicesPage() {
     }
   };
 
+  const selected = bookings.find(b => b.id === bookingId);
+
   return (
-    <div className="p-4 sm:p-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Invoices</h1>
+    <div className="space-y-6">
 
-      <div className="max-w-2xl space-y-6">
-        {/* Controls */}
-        <div className="card space-y-4">
-          <h2 className="font-semibold text-gray-900 dark:text-white">Generate / Lookup Invoice</h2>
+      <div>
+        <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#E5312A] mb-1">Billing</p>
+        <h1 className="text-2xl font-black text-gray-900 dark:text-white">Invoices</h1>
+      </div>
 
-          <div>
-            <label className="block text-sm text-gray-600 dark:text-[#a0a0a0] mb-1">Booking</label>
-            <select
-              value={bookingId}
-              onChange={e => setBookingId(e.target.value)}
-              className="input-field"
-            >
-              <option value="">Select a booking</option>
-              {bookings.map(b => (
-                <option key={b.id} value={b.id}>
-                  {b.bookingCode} — {b.service?.name} ({new Date(b.shootDate).toLocaleDateString('en-IN')}) · {b.customerName}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-400 dark:text-[#555] mt-1">Shows ADVANCE PAID and COMPLETED bookings</p>
+      {/* Generate panel */}
+      <div className="border border-[#e5e5e5] dark:border-[#2a2a2a]">
+
+        <div className="px-5 py-4 border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f9f9f9] dark:bg-[#161616]">
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">Generate Invoice</p>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div>
+              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Booking</label>
+              <select
+                value={bookingId}
+                onChange={e => setBookingId(e.target.value)}
+                className="input-field"
+              >
+                <option value="">— Select a booking —</option>
+                {bookings.map(b => (
+                  <option key={b.id} value={b.id}>
+                    {b.bookingCode} · {b.service?.name ?? 'Studio'} · {new Date(b.shootDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} [{STATUS_LABEL[b.status] ?? b.status}]
+                  </option>
+                ))}
+              </select>
+              {bookings.length === 0 && (
+                <p className="text-xs text-[#aaa] dark:text-[#555] mt-1">No bookings found (Quoted and above)</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Invoice Type</label>
+              <select
+                value={invoiceType}
+                onChange={e => setInvoiceType(e.target.value)}
+                className="input-field"
+              >
+                {INVOICE_TYPES.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm text-gray-600 dark:text-[#a0a0a0] mb-1">Invoice Type</label>
-            <select
-              value={invoiceType}
-              onChange={e => setInvoiceType(e.target.value)}
-              className="input-field"
-            >
-              {INVOICE_TYPES.map(t => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </select>
-          </div>
+          {/* Selected booking info */}
+          {selected && (
+            <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] px-4 py-3 text-sm flex flex-wrap gap-4">
+              <span className="text-[#6b6b6b] dark:text-[#8a8a8a]">Customer: <span className="font-bold text-gray-900 dark:text-white">{selected.customerName ?? selected.customer?.user?.name ?? '—'}</span></span>
+              <span className="text-[#6b6b6b] dark:text-[#8a8a8a]">Amount: <span className="font-bold text-gray-900 dark:text-white">₹{Number(selected.totalAmount ?? 0).toLocaleString('en-IN')}</span></span>
+              <span className="text-[#6b6b6b] dark:text-[#8a8a8a]">Status: <span className="font-bold text-gray-900 dark:text-white">{STATUS_LABEL[selected.status] ?? selected.status}</span></span>
+            </div>
+          )}
 
           <button
             onClick={generateInvoice}
             disabled={genLoading || !bookingId}
-            className="btn-primary w-full"
+            className="btn-primary disabled:opacity-50"
           >
-            {genLoading ? 'Generating...' : 'Generate Invoice'}
+            {genLoading ? 'Generating…' : 'Generate Invoice'}
           </button>
         </div>
+      </div>
 
-        {/* Invoice list for selected booking */}
-        {bookingId && (
-          loading ? (
-            <div className="text-center text-gray-400 dark:text-[#555] py-8">Loading invoices...</div>
-          ) : invoices.length > 0 ? (
-            <div className="card p-0 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-[#3a3a3a] bg-gray-50 dark:bg-[#1a1a1a]">
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-[#a0a0a0]">Existing Invoices</h3>
-              </div>
+      {/* Existing invoices for selected booking */}
+      {bookingId && (
+        loading ? (
+          <div className="space-y-2">
+            {[1, 2].map(i => <div key={i} className="h-12 bg-[#f5f5f5] dark:bg-[#1a1a1a] animate-pulse" />)}
+          </div>
+        ) : invoices.length > 0 ? (
+          <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] overflow-hidden">
+            <div className="px-5 py-3 border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f9f9f9] dark:bg-[#161616]">
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+                Existing Invoices — {invoices.length} found
+              </p>
+            </div>
+            <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-[#1a1a1a] border-b border-gray-100 dark:border-[#3a3a3a]">
-                  <tr>
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-[#a0a0a0] font-medium">Invoice #</th>
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-[#a0a0a0] font-medium">Type</th>
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-[#a0a0a0] font-medium">Amount</th>
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-[#a0a0a0] font-medium hidden sm:table-cell">GST</th>
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-[#a0a0a0] font-medium">Date</th>
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-[#a0a0a0] font-medium">PDF</th>
+                <thead>
+                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+                    <th className="px-4 py-3">Invoice #</th>
+                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3 text-right">Amount</th>
+                    <th className="px-4 py-3 text-right hidden sm:table-cell">GST</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">PDF</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-[#f0f0f0] dark:divide-[#1e1e1e]">
                   {invoices.map((inv: any) => (
-                    <tr key={inv.id} className="border-b border-gray-50 dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors">
-                      <td className="py-3 px-4 font-mono text-xs font-medium text-gray-900 dark:text-white">{inv.invoiceNumber}</td>
-                      <td className="py-3 px-4 text-xs text-gray-600 dark:text-[#a0a0a0]">{INVOICE_TYPES.find(t => t.value === inv.type)?.label ?? inv.type}</td>
-                      <td className="py-3 px-4 font-semibold text-gray-900 dark:text-white">₹{Number(inv.totalAmount).toLocaleString('en-IN')}</td>
-                      <td className="py-3 px-4 hidden sm:table-cell text-gray-500 dark:text-[#666]">
+                    <tr key={inv.id} className="hover:bg-[#fafafa] dark:hover:bg-[#161616] transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs font-bold text-gray-900 dark:text-white">{inv.invoiceNumber}</td>
+                      <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        {INVOICE_TYPES.find(t => t.value === inv.type)?.label ?? inv.type}
+                      </td>
+                      <td className="px-4 py-3 text-right font-black text-gray-900 dark:text-white">
+                        ₹{Number(inv.totalAmount).toLocaleString('en-IN')}
+                      </td>
+                      <td className="px-4 py-3 text-right hidden sm:table-cell text-orange-600 dark:text-orange-400">
                         {inv.gstAmount ? `₹${Number(inv.gstAmount).toLocaleString('en-IN')}` : '—'}
                       </td>
-                      <td className="py-3 px-4 text-gray-500 dark:text-[#666]">{new Date(inv.createdAt).toLocaleDateString('en-IN')}</td>
-                      <td className="py-3 px-4">
+                      <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        {new Date(inv.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="px-4 py-3">
                         {inv.cloudinaryUrl ? (
                           <a href={inv.cloudinaryUrl} target="_blank" rel="noopener noreferrer"
-                            className="text-[#E5312A] hover:underline text-xs font-medium">
+                            className="text-[#E5312A] hover:underline text-xs font-bold">
                             Download
                           </a>
                         ) : '—'}
@@ -144,13 +192,11 @@ export default function InvoicesPage() {
                 </tbody>
               </table>
             </div>
-          ) : (
-            <div className="text-center text-gray-400 dark:text-[#555] py-8 card">
-              No invoices for this booking yet. Click Generate to create one.
-            </div>
-          )
-        )}
-      </div>
+          </div>
+        ) : (
+          <p className="text-sm text-[#aaa] dark:text-[#555]">No invoices for this booking yet.</p>
+        )
+      )}
     </div>
   );
 }

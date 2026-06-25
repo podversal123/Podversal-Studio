@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +10,7 @@ import { BookingStatus, PaymentMode, PaymentStatus, PaymentType } from '@prisma/
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SseService } from '../sse/sse.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { VerifyRazorpayDto } from './dto/verify-razorpay.dto';
 
@@ -20,6 +22,7 @@ export class PaymentsService {
     private prisma: PrismaService,
     private config: ConfigService,
     private notifications: NotificationsService,
+    private sse: SseService,
   ) {
     this.razorpay = new Razorpay({
       key_id:     this.config.get<string>('RAZORPAY_KEY_ID'),
@@ -82,6 +85,7 @@ export class PaymentsService {
 
     await this.updateBookingStatusAfterPayment(dto.bookingId, payment.type);
     this.notifications.sendBookingNotification(dto.bookingId, 'PAYMENT_RECEIVED').catch(() => {});
+    this.sse.emit({ type: 'payment.confirmed', bookingId: dto.bookingId });
 
     return { success: true, payment };
   }
@@ -105,11 +109,23 @@ export class PaymentsService {
 
     await this.updateBookingStatusAfterPayment(dto.bookingId, dto.type);
     this.notifications.sendBookingNotification(dto.bookingId, 'PAYMENT_RECEIVED').catch(() => {});
+    this.sse.emit({ type: 'payment.confirmed', bookingId: dto.bookingId });
 
     return payment;
   }
 
-  findByBooking(bookingId: string) {
+  async findByBooking(bookingId: string, requesterId: string, requesterRole: string) {
+    // CUSTOMER can only view payments for their own bookings
+    if (requesterRole === 'CUSTOMER') {
+      const booking = await this.prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: { customer: { select: { userId: true } } },
+      });
+      if (!booking) throw new NotFoundException('Booking not found');
+      const owns = booking.createdById === requesterId ||
+                   booking.customer?.userId === requesterId;
+      if (!owns) throw new ForbiddenException('Access denied');
+    }
     return this.prisma.payment.findMany({
       where:   { bookingId },
       orderBy: { createdAt: 'desc' },
@@ -118,6 +134,9 @@ export class PaymentsService {
 
   async handleWebhook(body: any, signature: string) {
     const webhookSecret = this.config.get<string>('RAZORPAY_WEBHOOK_SECRET');
+    if (!webhookSecret || webhookSecret.includes('your_')) {
+      throw new BadRequestException('Webhook not configured');
+    }
     const expectedSig = crypto
       .createHmac('sha256', webhookSecret)
       .update(JSON.stringify(body))

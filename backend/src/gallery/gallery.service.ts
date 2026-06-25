@@ -1,21 +1,22 @@
 import { Injectable } from '@nestjs/common';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service';
 
 export class CreateGalleryImageDto {
-  title?: string;
-  imageUrl: string;
-  category?: string;
-  isPublished?: boolean;
-  sortOrder?: number;
-  source?: string;
+  @IsString()  @IsOptional() title?:       string;
+  @IsString()                imageUrl:     string;
+  @IsString()  @IsOptional() category?:    string;
+  @IsBoolean() @IsOptional() isPublished?: boolean;
+  @IsNumber()  @IsOptional() sortOrder?:   number;
+  @IsString()  @IsOptional() source?:      string;
 }
 
 export class UpdateGalleryImageDto {
-  title?: string;
-  imageUrl?: string;
-  category?: string;
-  isPublished?: boolean;
-  sortOrder?: number;
+  @IsString()  @IsOptional() title?:       string;
+  @IsString()  @IsOptional() imageUrl?:    string;
+  @IsString()  @IsOptional() category?:    string;
+  @IsBoolean() @IsOptional() isPublished?: boolean;
+  @IsNumber()  @IsOptional() sortOrder?:   number;
 }
 
 @Injectable()

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { HealthController } from './health.controller';
 import { AuthModule } from './auth/auth.module';
@@ -20,6 +21,8 @@ import { StudioVideosModule } from './studio-videos/studio-videos.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
+import { SseModule } from './sse/sse.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
   controllers: [HealthController],
@@ -33,6 +36,9 @@ import { RedisModule } from './redis/redis.module';
     // Core infrastructure
     PrismaModule,
     RedisModule,
+    SseModule,
+    ScheduleModule.forRoot(),
+    SchedulerModule,
 
     // Feature modules
     AuthModule,

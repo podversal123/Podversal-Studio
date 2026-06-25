@@ -39,6 +39,9 @@ export class AuthService {
       role: dto.role ?? Role.CUSTOMER,
     });
 
+    // Send welcome email — fire and forget, don't block the response
+    this.notifications.sendWelcomeEmail(user.email, user.name).catch(() => {});
+
     return this.generateTokens(user);
   }
 
@@ -58,7 +61,10 @@ export class AuthService {
   }
 
   async googleLogin(googleUser: { googleId: string; email: string; name: string }) {
-    const user = await this.users.findOrCreateGoogleUser(googleUser);
+    const { user, isNew } = await this.users.findOrCreateGoogleUser(googleUser);
+    if (isNew) {
+      this.notifications.sendWelcomeEmail(user.email, user.name).catch(() => {});
+    }
     return this.generateTokens(user);
   }
 
@@ -83,7 +89,7 @@ export class AuthService {
       // New customer via OTP — placeholder email updated when they complete profile
       user = await this.users.create({
         name: phone,
-        email: `otp_${phone}@podversal.in`,
+        email: `otp_${phone}@otp.internal`,
         phone,
         role: Role.CUSTOMER,
       });
@@ -158,30 +164,40 @@ export class AuthService {
 
   async forgotPassword(email: string): Promise<void> {
     const user = await this.users.findByEmail(email);
-    if (!user || !user.password) return; // silently ignore — don't reveal if email exists
+    if (!user) return; // silently ignore — don't reveal if email exists
+    // Google-only users can also reset/set a password via this flow
 
     const token = crypto.randomBytes(32).toString('hex');
     await this.redis.set(`reset:${token}`, user.id, 900); // 15-minute TTL
 
-    const frontendUrl = this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3002';
+    const frontendUrl = this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3002'; // fallback for local dev
     const resetUrl    = `${frontendUrl}/reset-password?token=${token}`;
 
-    const html = `
-      <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;padding:32px;">
-        <p style="font-size:13px;color:#6b6b6b;margin-bottom:24px;">Podversal Studio</p>
-        <h1 style="font-size:24px;font-weight:900;color:#111;margin-bottom:12px;">Reset your password</h1>
-        <p style="font-size:14px;color:#6b6b6b;line-height:1.6;margin-bottom:24px;">
-          We received a request to reset the password for your account. Click the button below to set a new password.
-          This link expires in 15 minutes.
-        </p>
-        <a href="${resetUrl}" style="display:inline-block;background:#E5312A;color:#fff;font-weight:700;font-size:14px;padding:12px 28px;text-decoration:none;">
+    const emailLogoUrl = this.config.get<string>('EMAIL_LOGO_URL');
+    const logoHtml = emailLogoUrl
+      ? `<img src="${emailLogoUrl}" alt="Podversal Studio" height="150" style="display:block;margin:0 auto;border:0;" />`
+      : `<span style="color:#E5312A;font-size:20px;font-weight:900;letter-spacing:0.08em;">PODVERSAL STUDIO</span>`;
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;">
+  <div style="max-width:480px;margin:32px auto;background:#fff;border:1px solid #e5e5e5;">
+    <div style="background:#fff;padding:12px 32px;text-align:center;">
+      ${logoHtml}
+    </div>
+    <div style="display:none;max-height:0;overflow:hidden;">${Date.now()}</div>
+    <div style="padding:28px;font-size:14px;color:#222;line-height:1.7;">
+      <p style="margin:0 0 20px 0;">We received a password reset request for your Podversal Studio account. Use the button below to set a new password — this link is valid for 15 minutes only.</p>
+      <div style="margin:0 0 20px 0;">
+        <a href="${resetUrl}" style="display:inline-block;background:#E5312A;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;text-decoration:none;">
           Reset Password
         </a>
-        <p style="font-size:12px;color:#aaa;margin-top:24px;">
-          If you didn't request this, you can safely ignore this email. Your password won't change.
-        </p>
       </div>
-    `;
+      <p style="margin:0;color:#888;font-size:12px;">If you didn't request this, ignore this email. Your password won't change.</p>
+    </div>
+    <div style="padding:14px 28px;font-size:11px;color:#aaa;border-top:1px solid #eee;">Podversal Studio &nbsp;|&nbsp; Reply to this email or call us if you have any questions.</div>
+  </div>
+</body></html>`;
 
     this.notifications.sendRawEmail(email, 'Reset your Podversal Studio password', html).catch(() => {
       // Log but don't throw — token is already created and valid
@@ -201,18 +217,21 @@ export class AuthService {
   }
 
   private async dispatchSms(phone: string, otp: string) {
-    // In development, print OTP to console instead of sending real SMS
     if (this.config.get<string>('NODE_ENV') !== 'production') {
       console.log(`[DEV OTP] Phone: ${phone} → OTP: ${otp}`);
       return;
     }
 
-    const authKey = this.config.get<string>('MSG91_AUTH_KEY');
-    const templateId = this.config.get<string>('MSG91_TEMPLATE_ID');
-    const senderId = this.config.get<string>('MSG91_SENDER_ID');
+    const apiKey = this.config.get<string>('TWO_FACTOR_API_KEY');
 
-    await fetch(
-      `https://api.msg91.com/api/v5/otp?template_id=${templateId}&mobile=91${phone}&authkey=${authKey}&otp=${otp}&sender=${senderId}`,
-    );
+    try {
+      const res  = await fetch(`https://2factor.in/API/V1/${apiKey}/SMS/91${phone}/${otp}`);
+      const data = await res.json() as { Status: string; Details: string };
+      if (data.Status !== 'Success') {
+        console.error(`[SMS FAILED] Phone: ${phone} | ${data.Details}`);
+      }
+    } catch (err: any) {
+      console.error(`[SMS FAILED] Phone: ${phone} | ${err?.message ?? err}`);
+    }
   }
 }

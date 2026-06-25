@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
+import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
 import { Calendar, Tag, ArrowLeft, ArrowRight, User } from 'lucide-react';
 
@@ -121,6 +122,8 @@ export default function BlogPostPage() {
           </Link>
         </div>
       </div>
+
+      <MarketingFooter />
     </div>
   );
 }

@@ -67,12 +67,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.client.del(slotKey);
   }
 
-  // Check if a slot is currently locked by anyone
-  async isSlotLocked(slotKey: string): Promise<boolean> {
-    const value = await this.client.get(slotKey);
-    return value !== null;
-  }
-
   // ─────────────────────────────────────────
   // OTP STORAGE
   // Store OTP for 5 minutes, auto-expire

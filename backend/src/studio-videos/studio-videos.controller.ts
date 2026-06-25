@@ -31,21 +31,21 @@ export class StudioVideosController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles('SUPER_ADMIN')
   create(@Body() dto: CreateVideoDto) {
     return this.videos.create(dto);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles('SUPER_ADMIN')
   update(@Param('id') id: string, @Body() dto: UpdateVideoDto) {
     return this.videos.update(id, dto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles('SUPER_ADMIN')
   remove(@Param('id') id: string) {
     return this.videos.remove(id);
   }

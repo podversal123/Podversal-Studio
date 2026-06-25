@@ -34,10 +34,10 @@ export class BookingsController {
     return this.bookings.findAll(user.id, user.role, { date, status });
   }
 
-  // GET /api/bookings/:id
+  // GET /api/bookings/:id — ownership enforced per role
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.bookings.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.bookings.findOne(id, user.id, user.role);
   }
 
   // POST /api/bookings

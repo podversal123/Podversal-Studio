@@ -65,6 +65,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { label: 'Dashboard',  href: '/dashboard',             icon: LayoutDashboard },
     { label: 'Bookings',   href: '/dashboard/bookings',    icon: BookOpen        },
     { label: 'Calendar',   href: '/dashboard/calendar',    icon: Calendar        },
+    { label: 'Customers',  href: '/dashboard/customers',   icon: Users           },
   ],
   REFERRAL_AGENT: [
     { label: 'Dashboard',   href: '/dashboard',            icon: LayoutDashboard },

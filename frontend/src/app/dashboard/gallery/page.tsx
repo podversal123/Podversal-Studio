@@ -3,17 +3,13 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, Trash2, Upload, Link as LinkIcon } from 'lucide-react';
+import { Eye, EyeOff, Trash2, Upload, Link as LinkIcon, ImageIcon, Plus, X } from 'lucide-react';
+import { cldUpload } from '@/lib/cloudinary-widget';
 
 interface GalleryImage {
-  id: string;
-  title: string | null;
-  imageUrl: string;
-  category: string;
-  isPublished: boolean;
-  source: string;
-  uploadedBy: string;
-  createdAt: string;
+  id: string; title: string | null; imageUrl: string;
+  category: string; isPublished: boolean; source: string;
+  uploadedBy: string; createdAt: string;
 }
 
 const CATEGORIES = [
@@ -21,23 +17,17 @@ const CATEGORIES = [
   'Online Class', 'Product Shoot', 'Behind the Scenes',
 ];
 
-type TabMode = 'url' | 'cloudinary';
-
 export default function DashboardGalleryPage() {
-  const [images,  setImages]  = useState<GalleryImage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [tab,     setTab]     = useState<TabMode>('url');
-  const [saving,  setSaving]  = useState(false);
+  const [images,    setImages]    = useState<GalleryImage[]>([]);
+  const [loading,   setLoading]   = useState(true);
+  const [modal,     setModal]     = useState(false);
+  const [tab,       setTab]       = useState<'url' | 'cloudinary'>('cloudinary');
+  const [saving,    setSaving]    = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({
-    title: '',
-    imageUrl: '',
-    category: 'General',
-    isPublished: true,
-    source: 'URL',
+    title: '', imageUrl: '', category: 'General', isPublished: true,
   });
-
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
   const fetchImages = () => {
     setLoading(true);
@@ -47,304 +37,239 @@ export default function DashboardGalleryPage() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    fetchImages();
-  }, []);
+  useEffect(() => { fetchImages(); }, []);
 
-  // Load Cloudinary widget script
-  useEffect(() => {
-    if (!cloudName) return;
-    if (document.getElementById('cloudinary-widget-script')) return;
-    const script = document.createElement('script');
-    script.id  = 'cloudinary-widget-script';
-    script.src = 'https://upload-widget.cloudinary.com/global/all.js';
-    document.body.appendChild(script);
-  }, [cloudName]);
+  const openModal = () => {
+    setForm({ title: '', imageUrl: '', category: 'General', isPublished: true });
+    setTab('cloudinary');
+    setModal(true);
+  };
 
+  // --- URL submit ---
   const handleUrlSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.imageUrl.trim()) {
-      toast.error('Image URL is required');
-      return;
-    }
+    if (!form.imageUrl.trim()) { toast.error('Image URL is required'); return; }
     setSaving(true);
     try {
       await api.post('/gallery', { ...form, source: 'URL' });
       toast.success('Image added');
-      setForm({ title: '', imageUrl: '', category: 'General', isPublished: true, source: 'URL' });
+      setModal(false);
       fetchImages();
-    } catch {
-      toast.error('Failed to add image');
-    } finally {
-      setSaving(false);
-    }
+    } catch { toast.error('Failed to add image'); }
+    finally { setSaving(false); }
   };
 
-  const openCloudinaryWidget = () => {
-    if (!(window as any).cloudinary) {
-      toast.error('Cloudinary widget not loaded yet. Please try again.');
-      return;
-    }
-    (window as any).cloudinary.openUploadWidget(
-      {
-        cloud_name:    cloudName,
-        upload_preset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'podversal_gallery',
-        sources:       ['local', 'url', 'camera'],
-        multiple:      true,
-        folder:        'gallery',
-        cropping:      false,
-        styles: {
-          palette: {
-            action: '#E5312A',
-            link:   '#E5312A',
-          },
-        },
-      },
-      async (error: any, result: any) => {
-        if (error) {
-          toast.error('Upload failed');
-          return;
-        }
-        if (result.event === 'success') {
-          const info = result.info;
-          try {
-            await api.post('/gallery', {
-              title:       info.original_filename || null,
-              imageUrl:    info.secure_url,
-              category:    'General',
-              isPublished: true,
-              source:      'CLOUDINARY',
-            });
-            toast.success('Image uploaded and saved');
-            fetchImages();
-          } catch {
-            toast.error('Upload succeeded but failed to save');
-          }
+  // --- Cloudinary upload ---
+  const handleCloudinaryUpload = () => {
+    setUploading(true);
+    cldUpload(
+      { folder: 'gallery', resourceType: 'image', multiple: true, sources: ['local', 'url', 'camera'] },
+      async (info) => {
+        const optimistic: GalleryImage = {
+          id:          `optimistic-${Date.now()}`,
+          title:       info.original_filename || null,
+          imageUrl:    info.secure_url,
+          category:    form.category,
+          isPublished: true,
+          source:      'CLOUDINARY',
+          uploadedBy:  '',
+          createdAt:   new Date().toISOString(),
+        };
+        setImages(prev => [optimistic, ...prev]);
+        try {
+          await api.post('/gallery', {
+            title:       info.original_filename || null,
+            imageUrl:    info.secure_url,
+            category:    form.category,
+            isPublished: true,
+            source:      'CLOUDINARY',
+          });
+          fetchImages();
+        } catch (err: any) {
+          setImages(prev => prev.filter(i => i.id !== optimistic.id));
+          toast.error(err?.response?.data?.message || 'Save failed — please try again');
         }
       },
+      () => { setUploading(false); toast.error('Upload failed'); },
     );
+    setTimeout(() => setUploading(false), 400);
   };
 
+  // --- Toggle / Delete ---
   const togglePublish = async (img: GalleryImage) => {
+    setImages(prev => prev.map(i => i.id === img.id ? { ...i, isPublished: !i.isPublished } : i));
     try {
       await api.patch(`/gallery/${img.id}`, { isPublished: !img.isPublished });
-      toast.success(img.isPublished ? 'Hidden from gallery' : 'Published to gallery');
-      setImages(prev => prev.map(i => i.id === img.id ? { ...i, isPublished: !i.isPublished } : i));
-    } catch {
-      toast.error('Failed to update');
-    }
+      toast.success(img.isPublished ? 'Hidden' : 'Published');
+    } catch { toast.error('Failed to update'); fetchImages(); }
   };
 
   const deleteImage = async (id: string) => {
     if (!confirm('Delete this image? This cannot be undone.')) return;
+    setImages(prev => prev.filter(i => i.id !== id));
     try {
       await api.delete(`/gallery/${id}`);
       toast.success('Image deleted');
-      setImages(prev => prev.filter(i => i.id !== id));
-    } catch {
-      toast.error('Failed to delete');
-    }
+    } catch { toast.error('Failed to delete'); fetchImages(); }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
+          <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#E5312A] mb-1">Content</p>
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">Studio Gallery</h1>
           <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-1">
-            {images.length} image{images.length !== 1 ? 's' : ''} total
+            {images.length} photo{images.length !== 1 ? 's' : ''} total
           </p>
         </div>
-      </div>
-
-      {/* Add Image Section */}
-      <div className="bg-white dark:bg-[#0f0f0f] border border-[#e5e5e5] dark:border-[#2a2a2a]">
-        {/* Tabs */}
-        <div className="flex border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
-          <button
-            onClick={() => setTab('url')}
-            className={`flex items-center gap-2 px-5 py-3.5 text-sm font-bold transition-colors border-b-2 ${
-              tab === 'url'
-                ? 'border-[#E5312A] text-[#E5312A]'
-                : 'border-transparent text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <LinkIcon size={15} />
-            Add via URL
-          </button>
-          {cloudName && (
-            <button
-              onClick={() => setTab('cloudinary')}
-              className={`flex items-center gap-2 px-5 py-3.5 text-sm font-bold transition-colors border-b-2 ${
-                tab === 'cloudinary'
-                  ? 'border-[#E5312A] text-[#E5312A]'
-                  : 'border-transparent text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              <Upload size={15} />
-              Upload to Cloudinary
-            </button>
-          )}
-        </div>
-
-        <div className="p-6">
-          {tab === 'url' ? (
-            <form onSubmit={handleUrlSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-[#6b6b6b] dark:text-[#8a8a8a] uppercase tracking-wide mb-1.5">
-                    Title <span className="font-normal normal-case">(optional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.title}
-                    onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                    placeholder="e.g. Podcast setup — Studio A"
-                    className="input-field"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#6b6b6b] dark:text-[#8a8a8a] uppercase tracking-wide mb-1.5">
-                    Category
-                  </label>
-                  <select
-                    value={form.category}
-                    onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                    className="input-field"
-                  >
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#6b6b6b] dark:text-[#8a8a8a] uppercase tracking-wide mb-1.5">
-                  Image URL <span className="text-[#E5312A]">*</span>
-                </label>
-                <input
-                  type="url"
-                  value={form.imageUrl}
-                  onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))}
-                  placeholder="https://..."
-                  required
-                  className="input-field"
-                />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.isPublished}
-                    onChange={e => setForm(f => ({ ...f, isPublished: e.target.checked }))}
-                    className="sr-only peer"
-                  />
-                  <div className="w-9 h-5 bg-gray-200 dark:bg-[#2a2a2a] peer-focus:outline-none peer-checked:bg-[#E5312A] rounded-full peer transition-colors" />
-                  <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4" />
-                </label>
-                <span className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
-                  {form.isPublished ? 'Published' : 'Hidden'}
-                </span>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="btn-primary disabled:opacity-50"
-                >
-                  {saving ? 'Adding...' : 'Add Image'}
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="text-center py-10">
-              <div className="w-16 h-16 bg-[#f5f5f5] dark:bg-[#181818] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Upload size={28} className="text-[#6b6b6b] dark:text-[#8a8a8a]" />
-              </div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-2">Upload from your computer</h3>
-              <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-6 max-w-xs mx-auto">
-                Images will be stored on Cloudinary and automatically saved to the gallery.
-              </p>
-              <button
-                onClick={openCloudinaryWidget}
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                <Upload size={15} />
-                Upload from Computer
-              </button>
-            </div>
-          )}
-        </div>
+        <button onClick={openModal} className="btn-primary !w-auto flex items-center gap-2">
+          <Plus size={16} /> Add Photo
+        </button>
       </div>
 
       {/* Image Grid */}
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-            <div key={i} className="aspect-square bg-[#f5f5f5] dark:bg-[#181818] animate-pulse" />
-          ))}
+          {[...Array(8)].map((_, i) => <div key={i} className="aspect-square bg-[#f5f5f5] dark:bg-[#181818] animate-pulse" />)}
         </div>
       ) : images.length === 0 ? (
         <div className="text-center py-20 border border-[#e5e5e5] dark:border-[#2a2a2a]">
-          <p className="text-gray-900 dark:text-white font-bold mb-2">No images yet</p>
-          <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm">Add your first studio photo above.</p>
+          <ImageIcon size={32} className="mx-auto mb-3 text-[#e5e5e5] dark:text-[#3a3a3a]" />
+          <p className="font-bold text-gray-900 dark:text-white mb-1">No photos yet</p>
+          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">Click Add Photo to upload your first studio photo.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {images.map(img => (
-            <div
-              key={img.id}
-              className={`relative group border ${
-                img.isPublished
-                  ? 'border-[#e5e5e5] dark:border-[#2a2a2a]'
-                  : 'border-[#e5e5e5] dark:border-[#2a2a2a] opacity-50'
-              }`}
-            >
+            <div key={img.id} className={`border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] overflow-hidden ${!img.isPublished ? 'opacity-60' : ''}`}>
               <div className="aspect-square overflow-hidden bg-[#f5f5f5] dark:bg-[#181818]">
                 <img
                   src={img.imageUrl}
-                  alt={img.title ?? 'Gallery image'}
+                  alt={img.title ?? 'Gallery'}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect width="100" height="100" fill="%23f5f5f5"/%3E%3C/svg%3E';
-                  }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                 />
               </div>
-
-              {/* Overlay with actions */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+              <div className="px-2.5 pt-2 pb-1">
+                {img.title && <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{img.title}</p>}
+                <p className="text-[10px] text-[#aaa] dark:text-[#555] uppercase tracking-wide">{img.category}</p>
+              </div>
+              <div className="flex items-center gap-1 px-2 pb-2">
                 <button
                   onClick={() => togglePublish(img)}
-                  title={img.isPublished ? 'Hide' : 'Publish'}
-                  className="p-2 bg-white/90 hover:bg-white text-gray-900 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-bold uppercase tracking-wide border border-[#e5e5e5] dark:border-[#2a2a2a] text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#E5312A] hover:text-[#E5312A] transition-colors"
                 >
-                  {img.isPublished ? <EyeOff size={15} /> : <Eye size={15} />}
+                  {img.isPublished ? <><EyeOff size={11} /> Hide</> : <><Eye size={11} /> Show</>}
                 </button>
                 <button
                   onClick={() => deleteImage(img.id)}
-                  title="Delete"
-                  className="p-2 bg-[#E5312A] hover:bg-[#CC2A24] text-white transition-colors"
+                  className="p-1.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-[#E5312A] hover:bg-[#E5312A] hover:text-white hover:border-[#E5312A] transition-colors"
                 >
-                  <Trash2 size={15} />
+                  <Trash2 size={13} />
                 </button>
               </div>
-
-              {/* Info */}
-              {img.title && (
-                <div className="p-2 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
-                  <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{img.title}</p>
-                  <p className="text-[10px] text-[#aaa] dark:text-[#555] uppercase tracking-wide">{img.category}</p>
-                </div>
-              )}
-              {!img.title && (
-                <div className="p-2 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
-                  <p className="text-[10px] text-[#aaa] dark:text-[#555] uppercase tracking-wide">{img.category}</p>
-                </div>
-              )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal */}
+      {modal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="w-full max-w-lg bg-white dark:bg-[#111111] border border-[#e5e5e5] dark:border-[#2a2a2a]">
+
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+              <h2 className="font-black text-gray-900 dark:text-white">Add Photo</h2>
+              <button onClick={() => setModal(false)} className="text-[#aaa] hover:text-gray-900 dark:hover:text-white transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+              <button
+                onClick={() => setTab('cloudinary')}
+                className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 transition-colors ${
+                  tab === 'cloudinary' ? 'border-[#E5312A] text-[#E5312A]' : 'border-transparent text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Upload size={14} /> Upload
+              </button>
+              <button
+                onClick={() => setTab('url')}
+                className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 transition-colors ${
+                  tab === 'url' ? 'border-[#E5312A] text-[#E5312A]' : 'border-transparent text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <LinkIcon size={14} /> Add via URL
+              </button>
+            </div>
+
+            <div className="p-5">
+              {tab === 'cloudinary' ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Category</label>
+                    <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="input-field">
+                      {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <button
+                    onClick={handleCloudinaryUpload}
+                    disabled={uploading}
+                    className="w-full border-2 border-dashed border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#E5312A] hover:bg-[#E5312A]/5 transition-colors py-10 flex flex-col items-center gap-3 disabled:opacity-50"
+                  >
+                    <div className="w-12 h-12 bg-[#E5312A]/10 flex items-center justify-center">
+                      <Upload size={22} className="text-[#E5312A]" />
+                    </div>
+                    <div className="text-center">
+                      <p className="font-bold text-gray-900 dark:text-white text-sm">{uploading ? 'Opening…' : 'Click to Upload Photos'}</p>
+                      <p className="text-xs text-[#aaa] dark:text-[#555] mt-1">JPG, PNG, WebP · Multiple files supported</p>
+                    </div>
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleUrlSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Title <span className="font-normal normal-case">(optional)</span></label>
+                      <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Podcast setup" className="input-field" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Category</label>
+                      <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="input-field">
+                        {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Image URL *</label>
+                    <input type="url" value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." required className="input-field" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked={form.isPublished} onChange={e => setForm(f => ({ ...f, isPublished: e.target.checked }))} className="sr-only peer" />
+                      <div className="w-9 h-5 bg-gray-200 dark:bg-[#2a2a2a] peer-checked:bg-[#E5312A] rounded-full peer transition-colors" />
+                      <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4" />
+                    </label>
+                    <span className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">{form.isPublished ? 'Published' : 'Hidden'}</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
+                      {saving ? 'Adding…' : 'Add Image'}
+                    </button>
+                    <button type="button" onClick={() => setModal(false)} className="px-4 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-gray-400 transition-colors">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

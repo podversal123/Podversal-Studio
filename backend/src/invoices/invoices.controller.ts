@@ -4,6 +4,7 @@ import { InvoicesService } from './invoices.service';
 import { JwtAuthGuard } from '../common/guards/jwt.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { IsEnum, IsString } from 'class-validator';
 
 class GenerateInvoiceDto {
@@ -27,9 +28,9 @@ export class InvoicesController {
     return this.invoices.generate(dto.bookingId, dto.type);
   }
 
-  // GET /api/invoices/booking/:bookingId
+  // GET /api/invoices/booking/:bookingId — ownership enforced per role
   @Get('booking/:bookingId')
-  findByBooking(@Param('bookingId') bookingId: string) {
-    return this.invoices.findByBooking(bookingId);
+  findByBooking(@Param('bookingId') bookingId: string, @CurrentUser() user: any) {
+    return this.invoices.findByBooking(bookingId, user.id, user.role);
   }
 }

@@ -25,10 +25,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ) {
     const { id, name, emails } = profile;
+    const fullName = [name.givenName, name.familyName].filter(Boolean).join(' ')
+      || emails[0].value.split('@')[0];
     done(null, {
       googleId: id,
       email: emails[0].value,
-      name: `${name.givenName} ${name.familyName}`,
+      name: fullName,
     });
   }
 }

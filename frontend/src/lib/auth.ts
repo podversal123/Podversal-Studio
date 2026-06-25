@@ -1,10 +1,19 @@
 import { AuthUser, Role } from '@/types';
 
+function cleanName(name: string | undefined): string {
+  if (!name) return '';
+  // Strip stray "undefined" tokens left by missing Google familyName
+  return name.replace(/\bundefined\b/gi, '').replace(/\s+/g, ' ').trim();
+}
+
 export function getStoredUser(): AuthUser | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = localStorage.getItem('user');
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const user = JSON.parse(raw) as AuthUser;
+    if (user?.name) user.name = cleanName(user.name) || user.email?.split('@')[0] || 'User';
+    return user;
   } catch {
     return null;
   }
@@ -20,10 +29,18 @@ export function isAuthenticated(): boolean {
 }
 
 export function logout(): void {
+  const raw  = localStorage.getItem('user');
+  const role = raw ? (JSON.parse(raw)?.role ?? '') : '';
+
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
   localStorage.removeItem('user');
-  window.location.href = '/login';
+  window.history.replaceState(null, '', '/');
+
+  if (role === 'SUPER_ADMIN')                                    window.location.href = '/admin/login';
+  else if (role === 'REFERRAL_AGENT')                            window.location.href = '/agent/login';
+  else if (role === 'STUDIO_MANAGER' || role === 'EMPLOYEE')     window.location.href = '/staff/login';
+  else                                                           window.location.href = '/login';
 }
 
 // Role hierarchy — used to restrict page access

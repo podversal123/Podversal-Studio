@@ -7,20 +7,30 @@ import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
 import { ArrowRight, Play, X } from 'lucide-react';
 import VideoThumbnail from '@/components/VideoThumbnail';
+import CldVideoThumb from '@/components/CldVideoThumb';
+import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
 
 interface StudioVideo {
-  id: string;
-  title: string;
-  description: string | null;
-  youtubeId: string | null;
-  thumbnailUrl: string | null;
-  videoUrl?: string | null;
-  category: string;
+  id:            string;
+  title:         string;
+  description:   string | null;
+  youtubeId:     string | null;
+  cloudinaryUrl: string | null;
+  thumbnailUrl:  string | null;
+  videoUrl?:     string | null;
+  category:      string;
+}
+
+function cloudinaryThumb(url: string): string {
+  const transformed = url.replace('/video/upload/', '/video/upload/so_1,w_1280,h_720,c_fill,q_100/');
+  return /\.(mp4|mov|avi|webm|mkv|flv|wmv)$/i.test(transformed)
+    ? transformed.replace(/\.(mp4|mov|avi|webm|mkv|flv|wmv)$/i, '.jpg')
+    : transformed + '.jpg';
 }
 
 const FEATURED_VIDEOS: StudioVideo[] = [
-  { id: 'feat-mandala', title: 'Mandala', description: null, youtubeId: null, thumbnailUrl: null, videoUrl: '/videos/mandala.mp4', category: 'Podcast' },
-  { id: 'feat-du',      title: 'DU',      description: null, youtubeId: null, thumbnailUrl: null, videoUrl: '/videos/du.mp4',      category: 'Podcast' },
+  { id: 'feat-mandala', title: 'Mandala', description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/mandala.mp4', category: 'Podcast' },
+  { id: 'feat-du',      title: 'DU',      description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/du.mp4',      category: 'Podcast' },
 ];
 
 const PAGE_SIZE = 9;
@@ -31,12 +41,14 @@ export default function VideosPage() {
   const [visible,   setVisible]   = useState(PAGE_SIZE);
   const [playing,   setPlaying]   = useState<string | null>(null);
 
-  // Featured videos render immediately; API videos merge in when ready
-  useEffect(() => {
+  const fetchVideos = () => {
     api.get<StudioVideo[]>('/studio-videos/public')
       .then(r => setApiVideos(r.data))
       .catch(() => {});
-  }, []);
+  };
+
+  useEffect(() => { fetchVideos(); }, []);
+  useRefetchOnFocus(fetchVideos);
 
   const allVideos  = [...FEATURED_VIDEOS, ...apiVideos];
   const categories = ['All', ...Array.from(new Set(allVideos.map(v => v.category)))];
@@ -44,8 +56,9 @@ export default function VideosPage() {
   const shown      = filtered.slice(0, visible);
 
   const getThumbnail = (v: StudioVideo) => {
-    if (v.thumbnailUrl) return v.thumbnailUrl;
-    if (v.youtubeId)   return `https://img.youtube.com/vi/${v.youtubeId}/hqdefault.jpg`;
+    if (v.cloudinaryUrl)  return cloudinaryThumb(v.cloudinaryUrl);
+    if (v.thumbnailUrl)   return v.thumbnailUrl;
+    if (v.youtubeId)      return `https://img.youtube.com/vi/${v.youtubeId}/maxresdefault.jpg`;
     return null;
   };
 
@@ -99,7 +112,7 @@ export default function VideosPage() {
               {shown.map(video => {
                 const thumb = getThumbnail(video);
                 const isPlaying = playing === video.id;
-                const canPlay   = !!(video.videoUrl || video.youtubeId);
+                const canPlay   = !!(video.videoUrl || video.youtubeId || video.cloudinaryUrl);
 
                 return (
                   <div key={video.id} className="border-b border-r border-[#e5e5e5] dark:border-[#2a2a2a] overflow-hidden bg-white dark:bg-[#111111]">
@@ -108,6 +121,9 @@ export default function VideosPage() {
                         {video.videoUrl ? (
                           // eslint-disable-next-line jsx-a11y/media-has-caption
                           <video src={video.videoUrl} controls autoPlay className="w-full h-full" />
+                        ) : video.cloudinaryUrl ? (
+                          // eslint-disable-next-line jsx-a11y/media-has-caption
+                          <video src={video.cloudinaryUrl} controls autoPlay className="w-full h-full" />
                         ) : video.youtubeId ? (
                           <iframe
                             src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`}
@@ -128,8 +144,10 @@ export default function VideosPage() {
                         className={`relative aspect-[16/9] overflow-hidden bg-[#0a0a0a] dark:bg-[#0a0a0a] ${canPlay ? 'cursor-pointer' : ''} group`}
                         onClick={() => canPlay && setPlaying(video.id)}
                       >
-                        {thumb ? (
-                          <img src={thumb} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        {video.cloudinaryUrl ? (
+                          <CldVideoThumb src={video.cloudinaryUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : thumb ? (
+                          <img src={thumb} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                         ) : video.videoUrl ? (
                           <VideoThumbnail src={video.videoUrl} className="w-full h-full object-cover" />
                         ) : null}

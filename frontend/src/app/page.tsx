@@ -1,16 +1,69 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import VideoThumbnail from '@/components/VideoThumbnail';
+import CldVideoThumb from '@/components/CldVideoThumb';
 import {
   Mic, Video, MonitorPlay, Newspaper, Laptop, Camera,
   ArrowRight, CheckCircle, Phone, Mail, MapPin, Play, Star, Plus, Minus, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
+
+function ContactForm() {
+  const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    setSubmitting(true);
+    try {
+      await api.post('/notifications/contact', {
+        name:    fd.get('name'),
+        phone:   fd.get('phone'),
+        email:   fd.get('email'),
+        message: fd.get('message'),
+      });
+      toast.success("Message sent! We'll get back to you within a few hours.");
+      formRef.current?.reset();
+    } catch {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form ref={formRef} className="space-y-4" onSubmit={handleSubmit}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Name</label>
+          <input name="name" type="text" placeholder="Full Name" className="input-field" required />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Phone</label>
+          <input name="phone" type="tel" placeholder="98xxxxxxxx" className="input-field" />
+        </div>
+      </div>
+      <div>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Email</label>
+        <input name="email" type="email" placeholder="E-mail" className="input-field" required />
+      </div>
+      <div>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Message</label>
+        <textarea name="message" rows={5} placeholder="Your message" className="input-field resize-none" required />
+      </div>
+      <button type="submit" disabled={submitting} className="btn-primary">
+        {submitting ? 'Sending…' : 'Send Message'}
+      </button>
+    </form>
+  );
+}
 
 // Only background image changes per slide — content stays the same across all
 const SLIDES = [
@@ -31,13 +84,12 @@ const SERVICES = [
 ];
 
 const PROCESS_STEPS = [
-  { step: '01', title: 'Tell us what you need',   desc: 'Fill in your preferred date, service, and any equipment you need. Takes about 2 minutes.' },
-  { step: '02', title: 'We check the slot',       desc: 'Our team confirms availability for your chosen date and time.' },
-  { step: '03', title: 'We send you a quote',     desc: 'You receive a clear price breakdown — total, advance amount, and any discounts.' },
-  { step: '04', title: 'You approve it',          desc: 'Review the quote and confirm. Your booking is reserved.' },
-  { step: '05', title: 'Pay the advance',         desc: 'Pay via UPI, card, or bank transfer. The advance locks your slot permanently.' },
-  { step: '06', title: 'Walk in and create',      desc: 'Show up on shoot day. Our crew is set up and ready for you.' },
-  { step: '07', title: 'Get your GST invoice',    desc: 'After the shoot, a GST-compliant invoice arrives in your inbox automatically.' },
+  { step: '01', title: 'Pick your slot',          desc: 'Choose your preferred date, time, and service. The system shows live availability — no waiting.' },
+  { step: '02', title: 'See the price instantly', desc: 'Your total is calculated automatically from the service rate and duration. No hidden charges.' },
+  { step: '03', title: 'Pay online',              desc: 'Pay securely via UPI, card, or net banking through Razorpay. Takes under a minute.' },
+  { step: '04', title: 'Slot confirmed instantly',desc: 'The moment payment goes through, your slot is locked. You receive a confirmation email.' },
+  { step: '05', title: 'Walk in and create',      desc: 'Show up on shoot day. Our crew is set up and ready for you — just bring your content plan.' },
+  { step: '06', title: 'Get your GST invoice',    desc: 'After the shoot, a GST-compliant invoice is generated and sent to your inbox automatically.' },
 ];
 
 const TESTIMONIALS = [
@@ -66,8 +118,15 @@ const FAQS = [
 
 interface StudioVideo {
   id: string; title: string; description: string | null;
-  youtubeId: string | null; thumbnailUrl: string | null;
-  videoUrl?: string | null; category: string;
+  youtubeId: string | null; cloudinaryUrl: string | null;
+  thumbnailUrl: string | null; videoUrl?: string | null; category: string;
+}
+
+function cloudinaryThumb(url: string): string {
+  const transformed = url.replace('/video/upload/', '/video/upload/so_1,w_1280,h_720,c_fill,q_100/');
+  return /\.(mp4|mov|avi|webm|mkv|flv|wmv)$/i.test(transformed)
+    ? transformed.replace(/\.(mp4|mov|avi|webm|mkv|flv|wmv)$/i, '.jpg')
+    : transformed + '.jpg';
 }
 
 interface BlogPost {
@@ -87,8 +146,8 @@ const FEATURED_IMAGES = [
 
 // Real studio recordings — always shown
 const FEATURED_VIDEOS: StudioVideo[] = [
-  { id: 'feat-mandala', title: 'Mandala', description: null, youtubeId: null, thumbnailUrl: null, videoUrl: '/videos/mandala.mp4', category: 'Podcast' },
-  { id: 'feat-du',      title: 'DU',      description: null, youtubeId: null, thumbnailUrl: null, videoUrl: '/videos/du.mp4',      category: 'Podcast' },
+  { id: 'feat-mandala', title: 'Mandala', description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/mandala.mp4', category: 'Podcast' },
+  { id: 'feat-du',      title: 'DU',      description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/du.mp4',      category: 'Podcast' },
 ];
 
 export default function HomePage() {
@@ -99,11 +158,14 @@ export default function HomePage() {
   const [openFaq,     setOpenFaq]     = useState<number | null>(null);
   const [slide,       setSlide]       = useState(0);
 
-  useEffect(() => {
+  const fetchPublicData = () => {
     api.get<StudioVideo[]>('/studio-videos/public').then(r => setVideos(r.data)).catch(() => {});
     api.get<BlogPost[]>('/blogs/public').then(r => setPosts(r.data)).catch(() => {});
     api.get<GalleryImage[]>('/gallery/public').then(r => setGalleryImgs(r.data)).catch(() => {});
-  }, []);
+  };
+
+  useEffect(() => { fetchPublicData(); }, []);
+  useRefetchOnFocus(fetchPublicData);
 
   // Handle hash navigation from other pages (e.g. /blog → /#process)
   // Delay scroll so hero section is fully rendered before measuring positions
@@ -293,6 +355,9 @@ export default function HomePage() {
                     {video.videoUrl ? (
                       // eslint-disable-next-line jsx-a11y/media-has-caption
                       <video src={video.videoUrl} controls autoPlay className="w-full h-full" />
+                    ) : video.cloudinaryUrl ? (
+                      // eslint-disable-next-line jsx-a11y/media-has-caption
+                      <video src={video.cloudinaryUrl} controls autoPlay className="w-full h-full" />
                     ) : video.youtubeId ? (
                       <iframe
                         className="w-full h-full"
@@ -309,10 +374,12 @@ export default function HomePage() {
                     className="relative block w-full aspect-video overflow-hidden bg-[#0a0a0a] dark:bg-[#0a0a0a]"
                     onClick={() => setActiveVideo(video.id)}
                   >
-                    {video.thumbnailUrl ? (
+                    {video.cloudinaryUrl ? (
+                      <CldVideoThumb src={video.cloudinaryUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : video.thumbnailUrl ? (
                       <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : video.youtubeId ? (
-                      <img src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={e => { (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`; }} />
                     ) : video.videoUrl ? (
                       <VideoThumbnail src={video.videoUrl} className="w-full h-full object-cover" />
                     ) : null}
@@ -583,8 +650,8 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Email</p>
-                    <a href="mailto:info@podversal.com" className="text-sm font-medium text-gray-900 dark:text-white hover:text-[#E5312A] transition-colors">
-                      info@podversal.com
+                    <a href="mailto:Podversalstudio@gmail.com" className="text-sm font-medium text-gray-900 dark:text-white hover:text-[#E5312A] transition-colors">
+                      Podversalstudio@gmail.com
                     </a>
                   </div>
                 </div>
@@ -615,34 +682,7 @@ export default function HomePage() {
 
             {/* Right — form */}
             <div>
-              <form
-                className="space-y-4"
-                onSubmit={e => {
-                  e.preventDefault();
-                  toast.success("Got it — we'll be in touch within a few hours.");
-                  (e.target as HTMLFormElement).reset();
-                }}
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Name</label>
-                    <input type="text" placeholder="Full Name" className="input-field" required />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Phone</label>
-                    <input type="tel" placeholder="98xxxxxxxx" className="input-field" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Email</label>
-                  <input type="email" placeholder="E-mail" className="input-field" required />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Message</label>
-                  <textarea rows={5} placeholder="Your message" className="input-field resize-none" required />
-                </div>
-                <button type="submit" className="btn-primary">Send Message</button>
-              </form>
+              <ContactForm />
             </div>
           </div>
         </div>

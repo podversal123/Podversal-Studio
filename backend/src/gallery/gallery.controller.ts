@@ -18,20 +18,20 @@ export class GalleryController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles('SUPER_ADMIN')
   create(@Body() dto: CreateGalleryImageDto, @Request() req: any) {
     return this.gallery.create(dto, req.user.id);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles('SUPER_ADMIN')
   update(@Param('id') id: string, @Body() dto: UpdateGalleryImageDto) {
     return this.gallery.update(id, dto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles('SUPER_ADMIN')
   remove(@Param('id') id: string) { return this.gallery.remove(id); }
 }

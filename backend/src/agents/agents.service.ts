@@ -173,7 +173,7 @@ export class AgentsService {
   <div class="header">
     <div>
       <div class="logo">Podversal Studio</div>
-      <div style="font-size:12px;color:#666;margin-top:4px;">studio@podversal.com</div>
+      <div style="font-size:12px;color:#666;margin-top:4px;">${process.env.ADMIN_EMAIL ?? process.env.SMTP_USER ?? ''}</div>
     </div>
     <div style="text-align:right;">
       <div class="title">Commission Statement</div>
@@ -232,10 +232,13 @@ export class AgentsService {
 
   private async renderPdf(html: string): Promise<Buffer> {
     const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-    const page    = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' } });
-    await browser.close();
-    return Buffer.from(pdf);
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' } });
+      return Buffer.from(pdf);
+    } finally {
+      await browser.close();
+    }
   }
 }

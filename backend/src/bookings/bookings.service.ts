@@ -8,6 +8,7 @@ import { BookingStatus, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SseService } from '../sse/sse.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { SendQuoteDto } from './dto/send-quote.dto';
 import { AssignEmployeeDto } from './dto/assign-employee.dto';
@@ -21,6 +22,7 @@ export class BookingsService {
     private prisma: PrismaService,
     private redis: RedisService,
     private notifications: NotificationsService,
+    private sse: SseService,
   ) {}
 
   async create(dto: CreateBookingDto, createdById: string, userRole: Role) {
@@ -77,6 +79,7 @@ export class BookingsService {
     }
 
     this.notifications.sendBookingNotification(booking.id, 'BOOKING_CREATED').catch(() => {});
+    this.sse.emit({ type: 'booking.created', bookingId: booking.id, status: booking.status, userId: createdById });
     return booking;
   }
 
@@ -110,20 +113,43 @@ export class BookingsService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, requesterId?: string, requesterRole?: Role) {
     const booking = await this.prisma.booking.findUnique({
       where: { id },
       include: {
         service:   true,
         createdBy: { select: { id: true, name: true, email: true, role: true } },
-        customer:  { include: { user: { select: { name: true, email: true, phone: true } } } },
-        agent:     { include: { user: { select: { name: true, email: true } } } },
+        customer:  { include: { user: { select: { id: true, name: true, email: true, phone: true } } } },
+        agent:     { include: { user: { select: { id: true, name: true, email: true } } } },
         employee:  { include: { user: { select: { name: true, email: true } } } },
         payments:  true,
         invoices:  true,
       },
     });
     if (!booking) throw new NotFoundException('Booking not found');
+
+    if (requesterId && requesterRole) {
+      if (requesterRole === Role.CUSTOMER) {
+        const owns = booking.createdById === requesterId ||
+                     booking.customer?.user?.id === requesterId;
+        if (!owns) throw new ForbiddenException('Access denied');
+      }
+      if (requesterRole === Role.REFERRAL_AGENT) {
+        const agent = await this.prisma.agent.findFirst({
+          where: { userId: requesterId }, select: { id: true },
+        });
+        if (!agent || booking.agentId !== agent.id)
+          throw new ForbiddenException('Access denied');
+      }
+      if (requesterRole === Role.EMPLOYEE) {
+        const employee = await this.prisma.employee.findFirst({
+          where: { userId: requesterId }, select: { id: true },
+        });
+        if (!employee || booking.employeeId !== employee.id)
+          throw new ForbiddenException('Access denied');
+      }
+    }
+
     return booking;
   }
 
@@ -142,6 +168,7 @@ export class BookingsService {
       },
     });
     this.notifications.sendBookingNotification(id, 'QUOTE_SENT').catch(() => {});
+    this.sse.emit({ type: 'booking.updated', bookingId: id, status: 'QUOTED' });
     return updated;
   }
 
@@ -155,6 +182,7 @@ export class BookingsService {
       data: { status: BookingStatus.APPROVED },
     });
     this.notifications.sendBookingNotification(id, 'BOOKING_APPROVED').catch(() => {});
+    this.sse.emit({ type: 'booking.updated', bookingId: id, status: 'APPROVED' });
     return updated;
   }
 
@@ -169,6 +197,10 @@ export class BookingsService {
         throw new BadRequestException('Cannot cancel a booking after advance payment');
       }
     }
+    if (userRole === Role.REFERRAL_AGENT) {
+      const agent = await this.prisma.agent.findFirst({ where: { userId }, select: { id: true } });
+      if (!agent || booking.agentId !== agent.id) throw new ForbiddenException();
+    }
 
     const key = slotKey(
       booking.shootDate.toISOString().split('T')[0],
@@ -182,6 +214,7 @@ export class BookingsService {
       data: { status: BookingStatus.CANCELLED },
     });
     this.notifications.sendBookingNotification(id, 'BOOKING_CANCELLED').catch(() => {});
+    this.sse.emit({ type: 'booking.updated', bookingId: id, status: 'CANCELLED' });
     return updated;
   }
 
@@ -198,7 +231,9 @@ export class BookingsService {
     if (booking.status !== BookingStatus.ADVANCE_PAID) {
       throw new BadRequestException('Booking must have advance paid before starting');
     }
-    return this.prisma.booking.update({ where: { id }, data: { status: BookingStatus.IN_PROGRESS } });
+    const updated = await this.prisma.booking.update({ where: { id }, data: { status: BookingStatus.IN_PROGRESS } });
+    this.sse.emit({ type: 'booking.updated', bookingId: id, status: 'IN_PROGRESS' });
+    return updated;
   }
 
   async markCompleted(id: string) {
@@ -206,7 +241,9 @@ export class BookingsService {
     if (booking.status !== BookingStatus.IN_PROGRESS) {
       throw new BadRequestException('Booking must be IN_PROGRESS to mark as completed');
     }
-    return this.prisma.booking.update({ where: { id }, data: { status: BookingStatus.COMPLETED } });
+    const updated = await this.prisma.booking.update({ where: { id }, data: { status: BookingStatus.COMPLETED } });
+    this.sse.emit({ type: 'booking.updated', bookingId: id, status: 'COMPLETED' });
+    return updated;
   }
 
   async checkAvailability(date: string, startTime: string, endTime: string) {

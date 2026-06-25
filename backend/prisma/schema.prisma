@@ -259,6 +259,11 @@ model Booking {
   invoices          Invoice[]
   commission        Commission?
 
+  @@index([shootDate])
+  @@index([status])
+  @@index([createdById])
+  @@index([agentId])
+  @@index([employeeId])
   @@map("bookings")
 }
 
@@ -289,6 +294,7 @@ model Payment {
   // Relations
   booking         Booking       @relation(fields: [bookingId], references: [id])
 
+  @@index([bookingId])
   @@map("payments")
 }
 
@@ -335,6 +341,7 @@ model Commission {
   booking         Booking          @relation(fields: [bookingId], references: [id])
   agent           Agent            @relation(fields: [agentId], references: [id])
 
+  @@index([agentId])
   @@map("commissions")
 }
 
@@ -352,22 +359,8 @@ model Notification {
   sentAt      DateTime?
   createdAt   DateTime            @default(now())
 
+  @@index([userId])
   @@map("notifications")
-}
-
-// ─────────────────────────────────────────
-// DOCUMENT — cloud stored files per customer
-// ─────────────────────────────────────────
-
-model Document {
-  id            String   @id @default(cuid())
-  customerId    String
-  name          String   // e.g. "KYC", "NDA", "Agreement"
-  cloudinaryUrl String
-  uploadedBy    String   // userId of uploader
-  createdAt     DateTime @default(now())
-
-  @@map("documents")
 }
 
 // ─────────────────────────────────────────
@@ -399,16 +392,17 @@ model Blog {
 // ─────────────────────────────────────────
 
 model StudioVideo {
-  id           String   @id @default(cuid())
-  title        String
-  description  String?
-  youtubeId    String?  // YouTube video ID (not full URL)
-  thumbnailUrl String?  // Cloudinary thumbnail
-  category     String   @default("General") // e.g. Podcast, VFX, Product Shoot
-  isPublished  Boolean  @default(false)
-  sortOrder    Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  youtubeId      String?  // YouTube video ID (not full URL)
+  cloudinaryUrl  String?  // Cloudinary video URL (alternative to YouTube)
+  thumbnailUrl   String?  // Custom thumbnail (Cloudinary or other URL)
+  category       String   @default("General")
+  isPublished    Boolean  @default(false)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@map("studio_videos")
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InvoiceType } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import * as puppeteer from 'puppeteer';
@@ -41,9 +41,17 @@ export class InvoicesService {
     });
     if (!booking) throw new NotFoundException('Booking not found');
 
-    // Auto-increment invoice number: INV-2026-0001
-    const count = await this.prisma.invoice.count();
-    const invoiceNumber = `INV-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+    // Unique invoice number using max existing number (safe under concurrent load)
+    const year = new Date().getFullYear();
+    const latest = await this.prisma.invoice.findFirst({
+      where:   { invoiceNumber: { startsWith: `INV-${year}-` } },
+      orderBy: { invoiceNumber: 'desc' },
+      select:  { invoiceNumber: true },
+    });
+    const nextSeq = latest
+      ? parseInt(latest.invoiceNumber.split('-')[2], 10) + 1
+      : 1;
+    const invoiceNumber = `INV-${year}-${String(nextSeq).padStart(4, '0')}`;
 
     const gstRate  = 0.18;
     const amount   = booking.totalAmount ?? 0;
@@ -79,14 +87,25 @@ export class InvoicesService {
       },
     });
 
-    // Auto-email to customer
-    await this.sendInvoiceEmail(booking.customerEmail, booking.customerName, invoiceNumber, cloudinaryUrl, type);
+    // Auto-email to customer — fire-and-forget so email failure doesn't kill invoice creation
+    this.sendInvoiceEmail(booking.customerEmail, booking.customerName, invoiceNumber, cloudinaryUrl, type)
+      .catch(err => console.error(`[Invoice Email Failed] ${invoiceNumber}: ${err?.message ?? err}`));
 
     return invoice;
   }
 
   // ── LIST BY BOOKING ──────────────────────────────────────
-  findByBooking(bookingId: string) {
+  async findByBooking(bookingId: string, requesterId: string, requesterRole: string) {
+    if (requesterRole === 'CUSTOMER') {
+      const booking = await this.prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: { customer: { select: { userId: true } } },
+      });
+      if (!booking) throw new NotFoundException('Booking not found');
+      const owns = booking.createdById === requesterId ||
+                   booking.customer?.userId === requesterId;
+      if (!owns) throw new ForbiddenException('Access denied');
+    }
     return this.prisma.invoice.findMany({
       where: { bookingId },
       orderBy: { createdAt: 'desc' },
@@ -136,7 +155,7 @@ export class InvoicesService {
   <div class="header">
     <div>
       <div class="logo">Podversal Studio</div>
-      <div style="font-size:13px;color:#666;margin-top:4px;">studio@podversal.com</div>
+      <div style="font-size:13px;color:#666;margin-top:4px;">${process.env.ADMIN_EMAIL ?? process.env.SMTP_USER ?? ''}</div>
     </div>
     <div style="text-align:right;">
       <div class="invoice-type">${typeLabels[type]}</div>
@@ -207,11 +226,14 @@ export class InvoicesService {
   // ── PRIVATE: PDF GENERATION ──────────────────────────────
   private async generatePdf(html: string): Promise<Buffer> {
     const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20px', bottom: '20px' } });
-    await browser.close();
-    return Buffer.from(pdf);
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20px', bottom: '20px' } });
+      return Buffer.from(pdf);
+    } finally {
+      await browser.close();
+    }
   }
 
   // ── PRIVATE: CLOUDINARY UPLOAD ───────────────────────────

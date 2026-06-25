@@ -85,26 +85,38 @@ export class UsersService {
     googleId: string;
     email: string;
     name: string;
-  }) {
-    // Return existing user if already linked to this Google account
+  }): Promise<{ user: any; isNew: boolean }> {
     let user = await this.findByGoogleId(profile.googleId);
-    if (user) return user;
-
-    // If email exists, link the Google account to it
-    user = await this.findByEmail(profile.email);
     if (user) {
-      return this.prisma.user.update({
-        where: { id: user.id },
-        data: { googleId: profile.googleId },
-      });
+      // Fix any previously stored bad name (e.g. "officeinbox undefined")
+      if (user.name?.toLowerCase().includes('undefined')) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: { name: profile.name },
+        });
+      }
+      return { user, isNew: false };
     }
 
-    // Brand new user via Google
-    return this.create({
+    user = await this.findByEmail(profile.email);
+    if (user) {
+      const updated = await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          googleId: profile.googleId,
+          // Also fix name if it was stored incorrectly before
+          ...(user.name?.toLowerCase().includes('undefined') ? { name: profile.name } : {}),
+        },
+      });
+      return { user: updated, isNew: false };
+    }
+
+    const created = await this.create({
       googleId: profile.googleId,
       email: profile.email,
       name: profile.name,
       role: Role.CUSTOMER,
     });
+    return { user: created, isNew: true };
   }
 }

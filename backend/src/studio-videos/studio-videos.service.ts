@@ -4,22 +4,24 @@ import { PrismaService } from '../prisma/prisma.service';
 
 export class CreateVideoDto {
   @IsString()  title:         string;
-  @IsString()  @IsOptional() description?:  string;
-  @IsString()  @IsOptional() youtubeId?:    string; // YouTube video ID only (e.g. "dQw4w9WgXcQ")
-  @IsString()  @IsOptional() thumbnailUrl?: string;
-  @IsString()  @IsOptional() category?:     string;
-  @IsBoolean() @IsOptional() isPublished?:  boolean;
-  @IsNumber()  @IsOptional() sortOrder?:    number;
+  @IsString()  @IsOptional() description?:   string;
+  @IsString()  @IsOptional() youtubeId?:     string;
+  @IsString()  @IsOptional() cloudinaryUrl?: string;
+  @IsString()  @IsOptional() thumbnailUrl?:  string;
+  @IsString()  @IsOptional() category?:      string;
+  @IsBoolean() @IsOptional() isPublished?:   boolean;
+  @IsNumber()  @IsOptional() sortOrder?:     number;
 }
 
 export class UpdateVideoDto {
-  @IsString()  @IsOptional() title?:        string;
-  @IsString()  @IsOptional() description?:  string;
-  @IsString()  @IsOptional() youtubeId?:    string;
-  @IsString()  @IsOptional() thumbnailUrl?: string;
-  @IsString()  @IsOptional() category?:     string;
-  @IsBoolean() @IsOptional() isPublished?:  boolean;
-  @IsNumber()  @IsOptional() sortOrder?:    number;
+  @IsString()  @IsOptional() title?:         string;
+  @IsString()  @IsOptional() description?:   string;
+  @IsString()  @IsOptional() youtubeId?:     string;
+  @IsString()  @IsOptional() cloudinaryUrl?: string;
+  @IsString()  @IsOptional() thumbnailUrl?:  string;
+  @IsString()  @IsOptional() category?:      string;
+  @IsBoolean() @IsOptional() isPublished?:   boolean;
+  @IsNumber()  @IsOptional() sortOrder?:     number;
 }
 
 @Injectable()

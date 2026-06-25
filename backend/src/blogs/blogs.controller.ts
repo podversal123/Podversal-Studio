@@ -37,21 +37,21 @@ export class BlogsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles('SUPER_ADMIN')
   create(@Body() dto: CreateBlogDto, @CurrentUser() user: any) {
     return this.blogs.create(dto, user.id);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles('SUPER_ADMIN')
   update(@Param('id') id: string, @Body() dto: UpdateBlogDto) {
     return this.blogs.update(id, dto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles('SUPER_ADMIN')
   remove(@Param('id') id: string) {
     return this.blogs.remove(id);
   }

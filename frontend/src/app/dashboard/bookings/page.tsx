@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Filter, Calendar, Clock, CreditCard } from 'lucide-react';
 import api from '@/lib/api';
@@ -57,6 +57,9 @@ export default function BookingsPage() {
   const isAdmin      = user?.role === 'SUPER_ADMIN' || user?.role === 'STUDIO_MANAGER';
   const approvedPending = !isAdmin ? bookings.filter(b => b.status === 'APPROVED') : [];
 
+  const statusFilterRef = useRef(statusFilter);
+  statusFilterRef.current = statusFilter;
+
   const load = (status: BookingStatus | '') => {
     setLoading(true);
     setError(false);
@@ -67,6 +70,12 @@ export default function BookingsPage() {
   };
 
   useEffect(() => { load(statusFilter); }, [statusFilter]);
+
+  useEffect(() => {
+    const handler = () => load(statusFilterRef.current);
+    window.addEventListener('podversal:live', handler);
+    return () => window.removeEventListener('podversal:live', handler);
+  }, []);
 
   const filtered = bookings.filter(b => {
     const q = search.toLowerCase();

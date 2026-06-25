@@ -6,6 +6,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import MobileHeader from '@/components/layout/MobileHeader';
 import { getStoredUser, isAuthenticated } from '@/lib/auth';
 import { AuthUser } from '@/types';
+import { useLiveEvents } from '@/lib/use-live-events';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -19,6 +20,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
     setUser(getStoredUser());
   }, [router]);
+
+  useLiveEvents((event) => {
+    window.dispatchEvent(new CustomEvent('podversal:live', { detail: event }));
+  });
 
   if (!user) return null;
 

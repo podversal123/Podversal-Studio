@@ -6,6 +6,7 @@ import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
 import { ArrowRight, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
 
 interface GalleryImage {
   id: string;
@@ -32,12 +33,14 @@ export default function GalleryPage() {
   const [visible,   setVisible]   = useState(PAGE_SIZE);
   const [lightbox,  setLightbox]  = useState<number | null>(null);
 
-  // Featured images render immediately; API images merge in when ready
-  useEffect(() => {
+  const fetchImages = () => {
     api.get<GalleryImage[]>('/gallery/public')
       .then(r => setApiImages(r.data))
       .catch(() => {});
-  }, []);
+  };
+
+  useEffect(() => { fetchImages(); }, []);
+  useRefetchOnFocus(fetchImages);
 
   const allImages  = [...FEATURED_IMAGES, ...apiImages];
   const categories = ['All', ...Array.from(new Set(allImages.map(img => img.category)))];

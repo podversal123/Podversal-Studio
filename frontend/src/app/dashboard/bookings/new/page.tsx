@@ -1,13 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, IndianRupee } from 'lucide-react';
 import api from '@/lib/api';
+
+const loadRazorpay = (): Promise<boolean> =>
+  new Promise(resolve => {
+    if ((window as any).Razorpay) { resolve(true); return; }
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.onload  = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
 
 interface Service {
   id: string; name: string; type: string; pricePerHour: number; minDuration: number;
@@ -97,25 +107,47 @@ export default function NewBookingPage() {
 
   const selectedService = services.find(s => s.id === serviceId);
   const totalAmount     = selectedService && duration ? Math.round(duration * selectedService.pricePerHour) : null;
-  const advanceAmount   = totalAmount ? Math.round(totalAmount * 0.5) : null;
 
   useEffect(() => {
     setValue('endTime', '');
     setAvailability(null);
   }, [startTime, setValue]);
 
+  // Refs so SSE handler always sees latest values without stale closure
+  const startTimeRef = useRef(startTime);
+  const endTimeRef   = useRef(endTime);
+  const shootDateRef = useRef(shootDate);
+  startTimeRef.current = startTime;
+  endTimeRef.current   = endTime;
+  shootDateRef.current = shootDate;
+
+  const checkAvailability = (st: string, et: string, sd: string) => {
+    setChecking(true);
+    api.get<AvailabilityResult>('/bookings/availability', { params: { date: sd, startTime: st, endTime: et } })
+      .then(r => setAvailability(r.data))
+      .catch(() => setAvailability(null))
+      .finally(() => setChecking(false));
+  };
+
   useEffect(() => {
     if (!startTime || !endTime) { setAvailability(null); return; }
     const diff = toMin(endTime) - toMin(startTime);
     if (diff > 0) setValue('durationHours', diff / 60);
     if (!shootDate) return;
-
-    setChecking(true);
-    api.get<AvailabilityResult>('/bookings/availability', { params: { date: shootDate, startTime, endTime } })
-      .then(r => setAvailability(r.data))
-      .catch(() => setAvailability(null))
-      .finally(() => setChecking(false));
+    checkAvailability(startTime, endTime, shootDate);
   }, [startTime, endTime, shootDate, setValue]);
+
+  // Re-check in real time when another booking is created/cancelled
+  useEffect(() => {
+    const handler = () => {
+      const st = startTimeRef.current;
+      const et = endTimeRef.current;
+      const sd = shootDateRef.current;
+      if (st && et && sd) checkAvailability(st, et, sd);
+    };
+    window.addEventListener('podversal:live', handler);
+    return () => window.removeEventListener('podversal:live', handler);
+  }, []);
 
   const onSubmit = async (data: FormData) => {
     if (availability && !availability.available) {
@@ -123,16 +155,81 @@ export default function NewBookingPage() {
       return;
     }
     setSubmitting(true);
+    let bookingId: string | null = null;
     try {
-      const res = await api.post('/bookings', data);
-      toast.success('Slot confirmed — proceed to pay your advance.');
-      router.push(`/dashboard/bookings/${res.data.id}`);
-    } catch (err: unknown) {
-      const message = err && typeof err === 'object' && 'response' in err
-        ? (err as any).response?.data?.message
-        : null;
-      toast.error(message || 'Something went wrong. Please try again.');
-    } finally {
+      // Step 1: Create booking in DB (status = APPROVED, slot reserved)
+      const bookingRes = await api.post('/bookings', data);
+      bookingId = bookingRes.data.id;
+      const bookingCode = bookingRes.data.bookingCode;
+      const amount      = bookingRes.data.advanceAmount ?? bookingRes.data.totalAmount;
+
+      // Step 2: Load Razorpay script dynamically
+      const ok = await loadRazorpay();
+      if (!ok) {
+        toast.error('Payment gateway unavailable. Please try again.');
+        api.patch(`/bookings/${bookingId}/cancel`).catch(() => {});
+        setSubmitting(false);
+        return;
+      }
+
+      // Step 3: Create Razorpay order
+      const orderRes = await api.post('/payments/razorpay/order', {
+        bookingId, amount, type: 'ADVANCE',
+      });
+      const { orderId, currency, paymentId, keyId } = orderRes.data;
+
+      // Step 4: Open Razorpay modal
+      let slotReleased = false;
+      const releaseSlot = () => {
+        if (!slotReleased && bookingId) {
+          slotReleased = true;
+          api.patch(`/bookings/${bookingId}/cancel`).catch(() => {});
+        }
+      };
+
+      const rzp = new (window as any).Razorpay({
+        key:         keyId,
+        amount:      Math.round(Number(amount) * 100),
+        currency,
+        name:        'Podversal Studio',
+        description: `Slot Confirmation — ${bookingCode}`,
+        order_id:    orderId,
+        theme:       { color: '#E5312A' },
+        prefill:     { name: data.customerName, email: data.customerEmail, contact: data.customerPhone },
+        handler: async (resp: any) => {
+          try {
+            await api.post('/payments/razorpay/verify', {
+              razorpayOrderId:   resp.razorpay_order_id,
+              razorpayPaymentId: resp.razorpay_payment_id,
+              razorpaySignature: resp.razorpay_signature,
+              bookingId,
+              paymentDbId: paymentId,
+            });
+            toast.success('Payment successful — your studio slot is confirmed!');
+            router.push(`/dashboard/bookings/${bookingId}`);
+          } catch {
+            toast.error(`Payment received but verification failed. Share this ID with us: ${resp.razorpay_payment_id}`);
+            router.push(`/dashboard/bookings/${bookingId}`);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            toast.error('Payment cancelled. Slot has been released.');
+            releaseSlot();
+            setSubmitting(false);
+          },
+        },
+      });
+      rzp.on('payment.failed', () => {
+        toast.error('Payment failed. Please try again.');
+        releaseSlot();
+        setSubmitting(false);
+      });
+      rzp.open();
+    } catch (err: any) {
+      const message = err?.response?.data?.message ?? 'Something went wrong. Please try again.';
+      toast.error(message);
+      if (bookingId) api.patch(`/bookings/${bookingId}/cancel`).catch(() => {});
       setSubmitting(false);
     }
   };
@@ -143,9 +240,9 @@ export default function NewBookingPage() {
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
         <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#E5312A] mb-1">New Booking</p>
-        <h1 className="text-2xl font-black text-gray-900 dark:text-white">Request a Studio Slot</h1>
+        <h1 className="text-2xl font-black text-gray-900 dark:text-white">Book a Studio Slot</h1>
         <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm mt-1">
-          Fill in the details below. Our team will review and send you a quote.
+          Select your date, time, and service. Pay online to instantly confirm your slot.
         </p>
       </div>
 
@@ -288,10 +385,10 @@ export default function NewBookingPage() {
         {totalAmount && (
           <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818] px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
             <div>
-              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Estimated Total</p>
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">Total Payable</p>
               <p className="text-xl font-black text-gray-900 dark:text-white">₹{totalAmount.toLocaleString('en-IN')}</p>
             </div>
-            <p className="text-xs text-[#888] dark:text-[#666]">Final amount will be confirmed in the quote from studio team.</p>
+            <p className="text-xs text-[#888] dark:text-[#666]">Pay this amount to lock your slot.</p>
           </div>
         )}
 
@@ -299,9 +396,14 @@ export default function NewBookingPage() {
           <button
             type="submit"
             disabled={submitting || (availability !== null && !availability.available)}
-            className="btn-primary !w-auto px-8"
+            className="btn-primary !w-auto px-8 flex items-center gap-2"
           >
-            {submitting ? 'Confirming…' : 'Submit Booking Request'}
+            {submitting
+              ? <><Loader2 size={14} className="animate-spin" /> Processing…</>
+              : totalAmount
+                ? <><IndianRupee size={14} /> Book & Pay ₹{totalAmount.toLocaleString('en-IN')}</>
+                : 'Book & Pay'
+            }
           </button>
           <button
             type="button"

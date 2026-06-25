@@ -11,19 +11,29 @@ export type NotificationEvent =
   | 'BOOKING_CANCELLED'
   | 'INVOICE_GENERATED';
 
+const logoHtml = () => {
+  const url = process.env.EMAIL_LOGO_URL;
+  return url
+    ? `<img src="${url}" alt="Podversal Studio" height="150" style="display:block;margin:0 auto;border:0;" />`
+    : `<span style="color:#E5312A;font-size:20px;font-weight:900;letter-spacing:0.08em;">PODVERSAL STUDIO</span>`;
+};
+
 @Injectable()
 export class NotificationsService {
   private transporter: nodemailer.Transporter;
 
   constructor(private prisma: PrismaService) {
+    const port   = Number(process.env.SMTP_PORT ?? 587);
+    const secure = port === 465;
     this.transporter = nodemailer.createTransport({
-      host:   process.env.SMTP_HOST   ?? 'smtp.gmail.com',
-      port:   Number(process.env.SMTP_PORT ?? 587),
-      secure: false,
+      host: process.env.SMTP_HOST ?? 'smtp.gmail.com',
+      port,
+      secure,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      tls: { rejectUnauthorized: false },
     });
   }
 
@@ -38,23 +48,25 @@ export class NotificationsService {
     });
     if (!booking) return;
 
-    const email = booking.customer?.user?.email ?? booking.createdBy.email;
-    const name  = booking.customer?.user?.name  ?? booking.createdBy.name;
+    // Always use the email/name submitted on the booking form (avoids otp_PHONE@otp.internal for OTP users)
+    const email = booking.customerEmail || booking.customer?.user?.email || booking.createdBy.email;
+    const name  = booking.customerName  || booking.customer?.user?.name  || booking.createdBy.name;
 
     const { subject, html } = this.buildEmail(event, { booking, name });
 
     // Send to customer
     await this.send(email, subject, html);
 
-    // Notify admin on new booking or payment received
-    if (event === 'BOOKING_CREATED' || event === 'PAYMENT_RECEIVED') {
-      const adminEmail = process.env.SMTP_USER;
+    // Notify admin on new booking, payment received, and shoot reminder
+    const notifyAdmin = event === 'BOOKING_CREATED' || event === 'PAYMENT_RECEIVED' || event === 'SHOOT_REMINDER';
+    if (notifyAdmin) {
+      const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
       if (adminEmail && email !== adminEmail) {
-        const adminSubject = `[New] ${subject}`;
-        const adminHtml = html.replace(
-          `<p>Hi <strong>${name}</strong>,</p>`,
-          `<p>Hi <strong>Studio Team</strong>,</p><p style="color:#888;font-size:12px;">Customer: ${name} (${email})</p>`,
-        );
+        const adminSubject = event === 'SHOOT_REMINDER'
+          ? `[Tomorrow] ${subject}`
+          : `[New] ${subject}`;
+        const adminHtml = html
+          .replace(`<p>Hi ${name},</p>`, `<p>Hi Studio Team,</p><p style="color:#888;font-size:12px;margin-top:0;">Customer: ${name} &lt;${email}&gt;</p>`);
         await this.send(adminEmail, adminSubject, adminHtml);
       }
     }
@@ -76,67 +88,134 @@ export class NotificationsService {
     const code    = booking.bookingCode;
     const service = booking.service.name;
     const date    = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
+    const time    = `${booking.startTime} – ${booking.endTime}`;
+    const amount  = booking.totalAmount ? `₹${Number(booking.totalAmount).toLocaleString('en-IN')}` : '';
 
     const templates: Record<NotificationEvent, { subject: string; body: string }> = {
       BOOKING_CREATED: {
-        subject: `Booking Received — ${code}`,
-        body:    `Your booking request for <strong>${service}</strong> on <strong>${date}</strong> (${booking.startTime}–${booking.endTime}) has been received. Our team will review and get back to you shortly.`,
+        subject: `Slot reserved — complete payment to confirm (${code})`,
+        body: `We've received your booking request for <strong>${service}</strong> on <strong>${date}</strong> (${time}).<br><br>
+Your slot is reserved. Please complete the payment to lock it. If payment isn't received, the slot will be released automatically.`,
       },
       QUOTE_SENT: {
-        subject: `Quote Ready — ${code}`,
-        body:    `Your quote for <strong>${service}</strong> on <strong>${date}</strong> is ready.<br><br>Total: ₹${Number(booking.totalAmount).toLocaleString('en-IN')}<br>Advance: ₹${Number(booking.advanceAmount).toLocaleString('en-IN')}<br><br>Please approve to confirm your slot.`,
+        subject: `Your quote is ready — ${code}`,
+        body: `Here's the pricing for your ${service} booking on ${date}:<br><br>
+<strong>Total: ${amount}</strong><br>
+Advance: ₹${Number(booking.advanceAmount).toLocaleString('en-IN')}<br><br>
+Log in to your dashboard to approve and pay.`,
       },
       BOOKING_APPROVED: {
-        subject: `Booking Confirmed — ${code}`,
-        body:    `Great news! Your booking for <strong>${service}</strong> on <strong>${date}</strong> has been <strong>approved</strong>. Please complete the advance payment to lock your slot.`,
+        subject: `Booking approved — pay to lock your slot (${code})`,
+        body: `Your ${service} booking on ${date} (${time}) has been approved.<br><br>
+Pay the advance amount to confirm your slot.`,
       },
       PAYMENT_RECEIVED: {
-        subject: `Payment Received — ${code}`,
-        body:    `We've received your payment for booking <strong>${code}</strong>. Your slot is now confirmed for <strong>${date}</strong> (${booking.startTime}–${booking.endTime}).`,
+        subject: `Payment confirmed — see you on ${date} (${code})`,
+        body: `Your payment is confirmed. The slot is locked.<br><br>
+<strong>Booking:</strong> ${code}<br>
+<strong>Service:</strong> ${service}<br>
+<strong>Date:</strong> ${date}<br>
+<strong>Time:</strong> ${time}<br><br>
+See you on ${new Date(booking.shootDate).toLocaleDateString('en-IN', { weekday: 'long' })}!`,
       },
       SHOOT_REMINDER: {
-        subject: `Reminder: Shoot Tomorrow — ${code}`,
-        body:    `This is a reminder that your <strong>${service}</strong> shoot is scheduled for <strong>${date}</strong> from ${booking.startTime} to ${booking.endTime}.<br><br>Please arrive 10 minutes early.`,
+        subject: `Tomorrow: ${service} at ${booking.startTime} (${code})`,
+        body: `Your ${service} shoot is tomorrow — ${date}, from ${time}.<br><br>
+Please arrive 10 minutes before your slot. If something has come up, let us know right away.`,
       },
       BOOKING_CANCELLED: {
-        subject: `Booking Cancelled — ${code}`,
-        body:    `Your booking <strong>${code}</strong> for ${service} on ${date} has been cancelled. If you have any questions, please contact us.`,
+        subject: `Booking cancelled — ${code}`,
+        body: `Your booking ${code} for ${service} on ${date} has been cancelled.<br><br>
+If you paid an advance and haven't heard from us about the refund, please reach out directly.`,
       },
       INVOICE_GENERATED: {
-        subject: `Invoice Available — ${code}`,
-        body:    `Your invoice for booking <strong>${code}</strong> (${service}) has been generated. Please find it attached or in your dashboard.`,
+        subject: `Invoice ready — ${code}`,
+        body: `Your invoice for ${service} on ${date} is ready. You can download it from your dashboard.<br><br>
+Booking reference: <strong>${code}</strong>`,
       },
     };
 
     const tmpl = templates[event];
     return {
       subject: tmpl.subject,
-      html: `
-      <!DOCTYPE html><html><head><meta charset="utf-8"><style>
-        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
-        .wrapper { max-width: 560px; margin: 40px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-        .header  { background: #111; color: #fff; padding: 28px 32px; }
-        .header h2 { margin: 0; font-size: 20px; }
-        .header p  { margin: 4px 0 0; font-size: 12px; opacity: .6; }
-        .body    { padding: 28px 32px; color: #333; line-height: 1.6; font-size: 14px; }
-        .footer  { padding: 16px 32px; font-size: 11px; color: #999; border-top: 1px solid #eee; }
-      </style></head>
-      <body>
-        <div class="wrapper">
-          <div class="header"><h2>Podversal Studio</h2><p>Professional Studio Management</p></div>
-          <div class="body">
-            <p>Hi <strong>${name}</strong>,</p>
-            <p>${tmpl.body}</p>
-            <p>Thank you for choosing Podversal Studio.</p>
-          </div>
-          <div class="footer">Podversal Studio • This is an automated message, please do not reply directly.</div>
-        </div>
-      </body></html>`,
+      html: this.wrapEmail(`<p>Hi ${name},</p><p>${tmpl.body}</p>`),
     };
+  }
+
+  private wrapEmail(body: string): string {
+    return `<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+  .wrap { max-width: 540px; margin: 32px auto; background: #fff; border: 1px solid #e5e5e5; }
+  .top  { background: #fff; padding: 12px 32px; text-align: center; }
+  .body { padding: 28px 32px; color: #222; font-size: 14px; line-height: 1.7; }
+  .body p { margin: 0 0 16px 0; }
+  .body p:last-child { margin-bottom: 0; }
+  .foot { padding: 16px 32px; font-size: 11px; color: #aaa; border-top: 1px solid #eee; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">${logoHtml()}</div>
+    <div style="display:none;max-height:0;overflow:hidden;">${Date.now()}</div>
+    <div class="body">${body}</div>
+    <div class="foot">Podversal Studio &nbsp;|&nbsp; Reply to this email or call us if you have any questions.</div>
+  </div>
+</body></html>`;
+  }
+
+  async sendWelcomeEmail(to: string, name: string): Promise<void> {
+    const html = this.wrapEmail(`
+      <p>Hi ${name},</p>
+      <p>Your account has been created. You're all set to book studio sessions.</p>
+      <p>Log in to your Podversal Studio account to book sessions, view invoices, and manage your shoots.</p>
+    `);
+    return this.send(to, 'Welcome to Podversal Studio', html);
   }
 
   async sendRawEmail(to: string, subject: string, html: string): Promise<void> {
     return this.send(to, subject, html);
+  }
+
+  // Sends one sample email of every type to `to` so you can verify layout and content
+  async sendTestEmails(to: string): Promise<{ sent: string[]; errors: string[] }> {
+    const fakebooking = {
+      bookingCode:   'BK-20260630-TEST',
+      customerName:  'Rahul Mehta',
+      customerEmail: to,
+      startTime:     '10:00',
+      endTime:       '14:00',
+      shootDate:     new Date('2026-07-01'),
+      totalAmount:   8000,
+      advanceAmount: 8000,
+      service:       { name: 'Podcast Studio' },
+      customer:      null,
+      createdBy:     { email: to, name: 'Rahul Mehta' },
+    };
+
+    const events: NotificationEvent[] = [
+      'BOOKING_CREATED',
+      'PAYMENT_RECEIVED',
+      'SHOOT_REMINDER',
+      'BOOKING_CANCELLED',
+      'INVOICE_GENERATED',
+    ];
+
+    const sent: string[] = [];
+    const errors: string[] = [];
+
+    for (const event of events) {
+      try {
+        const { subject, html } = this.buildEmail(event, { booking: fakebooking, name: 'Rahul Mehta' });
+        await this.send(to, `[TEST] ${subject}`, html);
+        sent.push(event);
+      } catch (err: any) {
+        errors.push(`${event}: ${err?.message ?? 'failed'}`);
+      }
+    }
+
+    return { sent, errors };
   }
 
   private async send(to: string, subject: string, html: string) {
@@ -145,11 +224,18 @@ export class NotificationsService {
       console.log(`[Email DEV] To: ${to} | Subject: ${subject}`);
       return;
     }
-    await this.transporter.sendMail({
-      from:    process.env.EMAIL_FROM ?? `"Podversal Studio" <${process.env.SMTP_USER}>`,
-      to,
-      subject,
-      html,
-    });
+    try {
+      const info = await this.transporter.sendMail({
+        from:    process.env.EMAIL_FROM ?? `"Podversal Studio" <${process.env.SMTP_USER}>`,
+        to,
+        subject,
+        html,
+      });
+      console.log(`[Email OK] To: ${to} | Subject: ${subject} | MessageId: ${info.messageId}`);
+    } catch (err: any) {
+      console.error(`[Email FAILED] To: ${to} | Subject: ${subject}`);
+      console.error(`[Email ERROR] ${err?.message ?? err}`);
+      throw err;
+    }
   }
 }

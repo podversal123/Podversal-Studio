@@ -5,21 +5,24 @@ import { VerifyRazorpayDto } from './dto/verify-razorpay.dto';
 import { JwtAuthGuard } from '../common/guards/jwt.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private payments: PaymentsService) {}
 
-  // POST /api/payments/razorpay/order — creates Razorpay order for online payment
+  // POST /api/payments/razorpay/order — SUPER_ADMIN, STUDIO_MANAGER, CUSTOMER only
   @Post('razorpay/order')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER', 'CUSTOMER')
   createOrder(@Body() dto: CreatePaymentDto) {
     return this.payments.createRazorpayOrder(dto);
   }
 
-  // POST /api/payments/razorpay/verify — verifies Razorpay signature after payment
+  // POST /api/payments/razorpay/verify — same roles as order creation
   @Post('razorpay/verify')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER', 'CUSTOMER')
   verifyPayment(@Body() dto: VerifyRazorpayDto) {
     return this.payments.verifyRazorpay(dto);
   }
@@ -32,11 +35,11 @@ export class PaymentsController {
     return this.payments.recordOfflinePayment(dto);
   }
 
-  // GET /api/payments/booking/:bookingId — all payments for a booking
+  // GET /api/payments/booking/:bookingId — ownership enforced per role
   @Get('booking/:bookingId')
   @UseGuards(JwtAuthGuard)
-  getByBooking(@Param('bookingId') bookingId: string) {
-    return this.payments.findByBooking(bookingId);
+  getByBooking(@Param('bookingId') bookingId: string, @CurrentUser() user: any) {
+    return this.payments.findByBooking(bookingId, user.id, user.role);
   }
 
   // POST /api/payments/webhook — Razorpay webhook (no auth — Razorpay calls this)

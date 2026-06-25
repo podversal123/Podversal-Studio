@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import api from '@/lib/api';
-import { AuthResponse, Role } from '@/types';
-import { ROLE_LABELS } from '@/lib/auth';
+import { AuthResponse } from '@/types';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import Logo from '@/components/Logo';
 const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), { ssr: false });
@@ -33,18 +33,8 @@ type OtpForm    = z.infer<typeof otpSchema>;
 type ForgotForm = z.infer<typeof forgotSchema>;
 type Tab        = 'email' | 'otp';
 
-const ROLE_HINT: Record<Role, { label: string; color: string }> = {
-  SUPER_ADMIN:    { label: 'Super Admin',    color: 'text-[#E5312A]'  },
-  STUDIO_MANAGER: { label: 'Studio Manager', color: 'text-gray-600 dark:text-gray-300' },
-  EMPLOYEE:       { label: 'Employee',       color: 'text-green-600'  },
-  REFERRAL_AGENT: { label: 'Referral Agent', color: 'text-orange-500' },
-  CUSTOMER:       { label: 'Customer',       color: 'text-gray-600 dark:text-gray-300' },
-};
-
 function LoginForm() {
-  const router       = useRouter();
-  const searchParams = useSearchParams();
-  const roleHint     = searchParams.get('role') as Role | null;
+  const router = useRouter();
 
   const [tab,        setTab]        = useState<Tab>('email');
   const [otpSent,    setOtpSent]    = useState(false);
@@ -52,9 +42,6 @@ function LoginForm() {
   const [showPass,   setShowPass]   = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
-
-  const hint        = roleHint && ROLE_HINT[roleHint] ? ROLE_HINT[roleHint] : null;
-  const isAdminRole = roleHint === 'SUPER_ADMIN' || roleHint === 'STUDIO_MANAGER';
 
   const loginForm  = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
   const otpForm    = useForm<OtpForm>({ resolver: zodResolver(otpSchema) });
@@ -71,6 +58,18 @@ function LoginForm() {
     setLoading(true);
     try {
       const res = await api.post<AuthResponse>('/auth/login', values);
+      const role = res.data.user.role;
+      if (role !== 'CUSTOMER') {
+        const portals: Record<string, string> = {
+          SUPER_ADMIN:    '/admin/login',
+          STUDIO_MANAGER: '/staff/login',
+          EMPLOYEE:       '/staff/login',
+          REFERRAL_AGENT: '/agent/login',
+        };
+        toast.error(`Use the correct portal for your role.`);
+        router.push(portals[role] ?? '/login');
+        return;
+      }
       toast.success('Welcome back!');
       saveAndRedirect(res.data);
     } catch (err: any) {
@@ -122,7 +121,7 @@ function LoginForm() {
         <div className="absolute top-4 right-4"><ThemeToggle /></div>
         <div className="w-full max-w-md">
           <div className="flex justify-center mb-8">
-            <Logo height={76} />
+            <Link href="/"><Logo height={76} /></Link>
           </div>
 
           <div className="card">
@@ -130,7 +129,7 @@ function LoginForm() {
               onClick={() => { setShowForgot(false); setForgotSent(false); forgotForm.reset(); }}
               className="flex items-center gap-1.5 text-sm text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white transition-colors mb-6"
             >
-              <ArrowLeft size={14} /> Back to sign in
+              Back to sign in
             </button>
 
             {forgotSent ? (
@@ -140,14 +139,14 @@ function LoginForm() {
                 </div>
                 <h2 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Check your inbox</h2>
                 <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] leading-relaxed">
-                  If that email is registered with us, you'll receive a password reset link within a minute. Check your spam folder if it doesn't arrive.
+                  Reset link sent. Check your inbox — also check spam if you don't see it.
                 </p>
               </div>
             ) : (
               <>
                 <h2 className="font-black text-gray-900 dark:text-white text-xl mb-1">Reset your password</h2>
                 <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-6">
-                  Enter the email address on your account and we'll send you a reset link.
+                  Enter your registered email address.
                 </p>
                 <form onSubmit={forgotForm.handleSubmit(handleForgotPassword)} className="space-y-4">
                   <div>
@@ -178,33 +177,12 @@ function LoginForm() {
   // ─── Main Login View ───
   return (
     <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#111111] flex items-center justify-center p-4 relative">
-      <div className="absolute top-4 right-4"><ThemeToggle /></div>
+<div className="absolute top-4 right-4"><ThemeToggle /></div>
 
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <Logo height={76} />
         </div>
-
-        {hint && (
-          <div className="text-center mb-5">
-            <span className={`text-xs font-semibold tracking-wider uppercase ${hint.color}`}>
-              Signing in as {hint.label}
-            </span>
-          </div>
-        )}
-
-        {/* Setup admin notice — only shown for admin roles on first-time setup */}
-        {isAdminRole && (
-          <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 text-sm">
-            <p className="font-semibold text-amber-800 dark:text-amber-400 mb-1">First time setting up?</p>
-            <p className="text-amber-700 dark:text-amber-500 text-xs mb-2">
-              Admin accounts are not created via the public registration form. If no Super Admin exists yet, set one up first.
-            </p>
-            <a href="/setup" className="text-[#E5312A] font-semibold text-xs hover:underline">
-              Create first Super Admin →
-            </a>
-          </div>
-        )}
 
         <div className="card">
           {/* Tabs */}
@@ -363,6 +341,7 @@ function LoginForm() {
             New here?{' '}
             <a href="/register" className="text-[#E5312A] font-bold hover:underline">Create an account</a>
           </p>
+
         </div>
       </div>
     </div>
