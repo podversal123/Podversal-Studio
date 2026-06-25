@@ -73,11 +73,9 @@ export class NotificationsController {
   </div>
 </body></html>`;
 
-    try {
-      await this.notifications.sendRawEmail(adminEmail, `New Enquiry from ${name}`, html);
-    } catch (err: any) {
+    this.notifications.sendRawEmail(adminEmail, `New Enquiry from ${name}`, html).catch((err: any) => {
       console.error(`[Contact] FAILED: ${err?.message ?? err}`);
-    }
+    });
 
     return { success: true };
   }
