@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+// useRef kept for real-time slot availability recheck
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,15 +10,6 @@ import toast from 'react-hot-toast';
 import { CheckCircle, XCircle, Loader2, IndianRupee } from 'lucide-react';
 import api from '@/lib/api';
 
-const loadRazorpay = (): Promise<boolean> =>
-  new Promise(resolve => {
-    if ((window as any).Razorpay) { resolve(true); return; }
-    const s = document.createElement('script');
-    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    s.onload  = () => resolve(true);
-    s.onerror = () => resolve(false);
-    document.body.appendChild(s);
-  });
 
 interface Service {
   id: string; name: string; type: string; pricePerHour: number; minDuration: number;
@@ -155,81 +147,14 @@ export default function NewBookingPage() {
       return;
     }
     setSubmitting(true);
-    let bookingId: string | null = null;
     try {
-      // Step 1: Create booking in DB (status = APPROVED, slot reserved)
       const bookingRes = await api.post('/bookings', data);
-      bookingId = bookingRes.data.id;
-      const bookingCode = bookingRes.data.bookingCode;
-      const amount      = bookingRes.data.advanceAmount ?? bookingRes.data.totalAmount;
-
-      // Step 2: Load Razorpay script dynamically
-      const ok = await loadRazorpay();
-      if (!ok) {
-        toast.error('Payment gateway unavailable. Please try again.');
-        api.patch(`/bookings/${bookingId}/cancel`).catch(() => {});
-        setSubmitting(false);
-        return;
-      }
-
-      // Step 3: Create Razorpay order
-      const orderRes = await api.post('/payments/razorpay/order', {
-        bookingId, amount, type: 'ADVANCE',
-      });
-      const { orderId, currency, paymentId, keyId } = orderRes.data;
-
-      // Step 4: Open Razorpay modal
-      let slotReleased = false;
-      const releaseSlot = () => {
-        if (!slotReleased && bookingId) {
-          slotReleased = true;
-          api.patch(`/bookings/${bookingId}/cancel`).catch(() => {});
-        }
-      };
-
-      const rzp = new (window as any).Razorpay({
-        key:         keyId,
-        amount:      Math.round(Number(amount) * 100),
-        currency,
-        name:        'Podversal Studio',
-        description: `Slot Confirmation — ${bookingCode}`,
-        order_id:    orderId,
-        theme:       { color: '#E5312A' },
-        prefill:     { name: data.customerName, email: data.customerEmail, contact: data.customerPhone },
-        handler: async (resp: any) => {
-          try {
-            await api.post('/payments/razorpay/verify', {
-              razorpayOrderId:   resp.razorpay_order_id,
-              razorpayPaymentId: resp.razorpay_payment_id,
-              razorpaySignature: resp.razorpay_signature,
-              bookingId,
-              paymentDbId: paymentId,
-            });
-            toast.success('Payment successful — your studio slot is confirmed!');
-            router.push(`/dashboard/bookings/${bookingId}`);
-          } catch {
-            toast.error(`Payment received but verification failed. Share this ID with us: ${resp.razorpay_payment_id}`);
-            router.push(`/dashboard/bookings/${bookingId}`);
-          }
-        },
-        modal: {
-          ondismiss: () => {
-            toast.error('Payment cancelled. Slot has been released.');
-            releaseSlot();
-            setSubmitting(false);
-          },
-        },
-      });
-      rzp.on('payment.failed', () => {
-        toast.error('Payment failed. Please try again.');
-        releaseSlot();
-        setSubmitting(false);
-      });
-      rzp.open();
+      const bookingId  = bookingRes.data.id;
+      toast.success('Booking confirmed! You can pay online or offline from the booking page.');
+      router.push(`/dashboard/bookings/${bookingId}`);
     } catch (err: any) {
       const message = err?.response?.data?.message ?? 'Something went wrong. Please try again.';
       toast.error(message);
-      if (bookingId) api.patch(`/bookings/${bookingId}/cancel`).catch(() => {});
       setSubmitting(false);
     }
   };
