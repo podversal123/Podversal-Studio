@@ -13,75 +13,25 @@ export default function TermsPage() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Terms &amp; Conditions</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-10">Last updated: June 2026</p>
+      <main className="bg-[#0a0a0a] min-h-screen">
+        <div className="max-w-3xl mx-auto px-6 py-20">
+          <h1 className="text-4xl sm:text-5xl font-black text-white mb-12">Terms and Conditions</h1>
 
-        <div className="prose prose-gray dark:prose-invert max-w-none space-y-8 text-sm leading-7 text-gray-700 dark:text-gray-300">
+          <div className="space-y-6 text-[15px] leading-relaxed text-gray-300">
+            <p><strong className="text-white">Studio Access and Bookings</strong> Podversal Studio offers bookable studio sessions including Podcast, VFX, Monologue, News Shoot, Online Classes, and Product Shoots. A booking is confirmed only after advance payment is received. Slots are held temporarily and released if payment is not completed.</p>
 
-          <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using Podversal Studio's website and services, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services.</p>
-          </section>
+            <p><strong className="text-white">Payments</strong> All payments are processed securely through Razorpay in Indian Rupees (INR). An advance is required to confirm your session. The remaining balance is due on or before the day of the session.</p>
 
-          <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">2. Services</h2>
-            <p>Podversal Studio provides studio booking services including Podcast Studio, VFX Podcast, Monologue Shoot, News Shoot, Online Classes, and Product Shoots. All services are subject to availability.</p>
-          </section>
+            <p><strong className="text-white">Client Responsibilities</strong> Clients must arrive on time — late arrivals will not result in session extensions. You are responsible for any damage caused to studio equipment during your session. The studio must be kept clean and respectful at all times. Outside food or drink, except water, is permitted.</p>
 
-          <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">3. Bookings</h2>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>A booking is confirmed only upon receipt of the advance payment</li>
-              <li>The slot is reserved temporarily after booking creation but confirmed only after payment</li>
-              <li>Podversal Studio reserves the right to refuse any booking at its discretion</li>
-              <li>Clients must arrive on time; late arrivals will not result in session extensions</li>
-            </ul>
-          </section>
+            <p><strong className="text-white">Cancellation and Rescheduling</strong> Cancellations made more than 72 hours before the session are eligible for a full refund. Cancellations within 24–72 hours incur a 50% charge. No refund is issued for cancellations within 24 hours or no-shows. Rescheduling requests must be made at least 48 hours in advance and are subject to availability.</p>
 
-          <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">4. Payments</h2>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>All payments are processed securely through Razorpay</li>
-              <li>Prices are listed in Indian Rupees (INR) and include applicable taxes</li>
-              <li>An advance payment is required to confirm the booking</li>
-              <li>Balance payments are due on or before the day of the session</li>
-            </ul>
-          </section>
+            <p><strong className="text-white">Content and Intellectual Property</strong> Content produced during sessions belongs to the client. Podversal Studio may request permission to share session footage for promotional use, which the client may decline at any time.</p>
 
-          <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">5. User Responsibilities</h2>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>You must provide accurate information during registration and booking</li>
-              <li>You are responsible for keeping your account credentials secure</li>
-              <li>You agree not to use the studio for any illegal, offensive, or harmful activities</li>
-              <li>Any damage to studio equipment caused by the client will be charged accordingly</li>
-            </ul>
-          </section>
+            <p><strong className="text-white">Governing Law</strong> These terms are governed by the laws of India. Any disputes are subject to the exclusive jurisdiction of courts in Noida, Uttar Pradesh.</p>
 
-          <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">6. Intellectual Property</h2>
-            <p>Content produced during studio sessions belongs to the client unless otherwise agreed in writing. Podversal Studio may request permission to share session footage for promotional purposes, which the client may decline.</p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">7. Limitation of Liability</h2>
-            <p>Podversal Studio is not liable for any indirect, incidental, or consequential damages arising from the use of our services. Our maximum liability is limited to the amount paid for the specific booking.</p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">8. Governing Law</h2>
-            <p>These terms are governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in Noida, Uttar Pradesh.</p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">9. Contact</h2>
-            <p>For any questions about these terms, contact us at:<br />
-            <strong>Podversal Studio</strong><br />
-            Email: <a href="mailto:podversalstudio@gmail.com" className="text-[#E5312A] hover:underline">podversalstudio@gmail.com</a><br />
-            Phone: +91 78278 82058</p>
-          </section>
-
+            <p><strong className="text-white">Contact</strong> For questions, reach us at <a href="mailto:podversalstudio@gmail.com" className="text-[#E5312A] hover:underline">podversalstudio@gmail.com</a> or WhatsApp <a href="https://wa.me/917827882058" className="text-[#E5312A] hover:underline">+91 78278 82058</a>.</p>
+          </div>
         </div>
       </main>
 
