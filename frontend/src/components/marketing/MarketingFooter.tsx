@@ -94,6 +94,11 @@ export default function MarketingFooter() {
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between py-5 gap-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">© {new Date().getFullYear()} Podversal Studio. All rights reserved.</p>
+            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+              <Link href="/privacy-policy" className="hover:text-[#E5312A] transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-[#E5312A] transition-colors">Terms &amp; Conditions</Link>
+              <Link href="/refund-policy" className="hover:text-[#E5312A] transition-colors">Refund Policy</Link>
+            </div>
             {/* Social links */}
             <div className="flex items-center gap-3">
               {/* YouTube */}
