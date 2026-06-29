@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BookingStatus, PaymentStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import * as puppeteer from 'puppeteer';
+import PDFDocument from 'pdfkit';
 
 @Injectable()
 export class ReportsService {
@@ -89,176 +89,164 @@ export class ReportsService {
 
   async exportBookingReportPdf(from: string, to: string): Promise<Buffer> {
     const { summary, bookings } = await this.getBookingReport(from, to);
-
-    const rows = bookings.map(b => `
-      <tr>
-        <td>${b.bookingCode}</td>
-        <td>${b.service.name}</td>
-        <td>${b.customer?.user?.name ?? b.customerName}</td>
-        <td>${new Date(b.shootDate).toLocaleDateString('en-IN')}</td>
-        <td>${b.startTime} - ${b.endTime}</td>
-        <td><span class="status ${b.status.toLowerCase()}">${b.status}</span></td>
-        <td>₹${Number(b.totalAmount ?? 0).toLocaleString('en-IN')}</td>
-      </tr>`).join('');
-
-    const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-        h1 { color: #1a1a1a; font-size: 22px; }
-        .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
-        .summary { display: flex; gap: 20px; margin-bottom: 24px; }
-        .stat { background: #f4f4f4; padding: 12px 20px; border-radius: 6px; }
-        .stat .val { font-size: 22px; font-weight: bold; color: #111; }
-        .stat .lbl { font-size: 11px; color: #888; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { background: #111; color: #fff; padding: 8px; text-align: left; }
-        td { padding: 7px 8px; border-bottom: 1px solid #eee; }
-        tr:nth-child(even) { background: #fafafa; }
-        .status { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; }
-        .completed { background: #d1fae5; color: #065f46; }
-        .cancelled  { background: #fee2e2; color: #991b1b; }
-        .in_progress { background: #dbeafe; color: #1e40af; }
-      </style>
-    </head>
-    <body>
-      <h1>Podversal Studio — Booking Report</h1>
-      <div class="meta">Period: ${from} to ${to} | Generated: ${new Date().toLocaleString('en-IN')}</div>
-      <div class="summary">
-        <div class="stat"><div class="val">${summary.total}</div><div class="lbl">Total</div></div>
-        <div class="stat"><div class="val">${summary.completed}</div><div class="lbl">Completed</div></div>
-        <div class="stat"><div class="val">${summary.inProgress}</div><div class="lbl">In Progress</div></div>
-        <div class="stat"><div class="val">${summary.cancelled}</div><div class="lbl">Cancelled</div></div>
-      </div>
-      <table>
-        <thead><tr><th>Code</th><th>Service</th><th>Customer</th><th>Date</th><th>Slot</th><th>Status</th><th>Amount</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </body>
-    </html>`;
-
-    return this.generatePdf(html);
+    const fmt = (n: number) => `Rs.${Number(n).toLocaleString('en-IN')}`;
+    return this.buildReportPdf({
+      title: 'Booking Report',
+      period: `${from} to ${to}`,
+      stats: [
+        { label: 'Total',       value: String(summary.total)      },
+        { label: 'Completed',   value: String(summary.completed)  },
+        { label: 'In Progress', value: String(summary.inProgress) },
+        { label: 'Cancelled',   value: String(summary.cancelled)  },
+      ],
+      sections: [{
+        columns: ['Code', 'Service', 'Customer', 'Date', 'Slot', 'Status', 'Amount'],
+        rows: bookings.map((b: any) => [
+          b.bookingCode,
+          b.service.name,
+          b.customer?.user?.name ?? b.customerName,
+          new Date(b.shootDate).toLocaleDateString('en-IN'),
+          `${b.startTime} - ${b.endTime}`,
+          b.status,
+          fmt(b.totalAmount ?? 0),
+        ]),
+      }],
+    });
   }
 
   async exportRevenueReportPdf(from: string, to: string): Promise<Buffer> {
     const { totalRevenue, byMode, payments } = await this.getRevenueReport(from, to);
-
-    const modeRows = Object.entries(byMode).map(([mode, amt]) =>
-      `<tr><td>${mode}</td><td>₹${Number(amt).toLocaleString('en-IN')}</td></tr>`).join('');
-
-    const payRows = payments.map(p => `
-      <tr>
-        <td>${p.booking.bookingCode}</td>
-        <td>${p.booking.customer?.user?.name ?? '—'}</td>
-        <td>${p.booking.service.name}</td>
-        <td>${p.type}</td>
-        <td>${p.mode}</td>
-        <td>₹${Number(p.amount).toLocaleString('en-IN')}</td>
-        <td>${p.paidAt ? new Date(p.paidAt).toLocaleDateString('en-IN') : '-'}</td>
-      </tr>`).join('');
-
-    const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-        h1 { color: #1a1a1a; font-size: 22px; }
-        .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
-        .total-box { background: #111; color: #fff; display: inline-block; padding: 16px 32px; border-radius: 8px; margin-bottom: 20px; }
-        .total-box .val { font-size: 28px; font-weight: bold; }
-        .total-box .lbl { font-size: 12px; opacity: 0.7; }
-        h3 { font-size: 15px; margin-top: 24px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { background: #111; color: #fff; padding: 8px; text-align: left; }
-        td { padding: 7px 8px; border-bottom: 1px solid #eee; }
-      </style>
-    </head>
-    <body>
-      <h1>Podversal Studio — Revenue Report</h1>
-      <div class="meta">Period: ${from} to ${to} | Generated: ${new Date().toLocaleString('en-IN')}</div>
-      <div class="total-box">
-        <div class="val">₹${totalRevenue.toLocaleString('en-IN')}</div>
-        <div class="lbl">Total Revenue Collected</div>
-      </div>
-      <h3>Revenue by Payment Mode</h3>
-      <table><thead><tr><th>Mode</th><th>Amount</th></tr></thead><tbody>${modeRows}</tbody></table>
-      <h3>All Payments</h3>
-      <table>
-        <thead><tr><th>Booking</th><th>Customer</th><th>Service</th><th>Type</th><th>Mode</th><th>Amount</th><th>Date</th></tr></thead>
-        <tbody>${payRows}</tbody>
-      </table>
-    </body>
-    </html>`;
-
-    return this.generatePdf(html);
+    const fmt = (n: number) => `Rs.${Number(n).toLocaleString('en-IN')}`;
+    return this.buildReportPdf({
+      title: 'Revenue Report',
+      period: `${from} to ${to}`,
+      stats: [{ label: 'Total Revenue', value: fmt(totalRevenue) }],
+      sections: [
+        {
+          heading: 'Revenue by Payment Mode',
+          columns: ['Mode', 'Amount'],
+          rows: Object.entries(byMode).map(([mode, amt]) => [mode, fmt(amt as number)]),
+        },
+        {
+          heading: 'All Payments',
+          columns: ['Booking', 'Customer', 'Service', 'Type', 'Mode', 'Amount', 'Date'],
+          rows: payments.map((p: any) => [
+            p.booking.bookingCode,
+            p.booking.customer?.user?.name ?? '—',
+            p.booking.service.name,
+            p.type,
+            p.mode,
+            fmt(p.amount),
+            p.paidAt ? new Date(p.paidAt).toLocaleDateString('en-IN') : '—',
+          ]),
+        },
+      ],
+    });
   }
 
   async exportGstReportPdf(from: string, to: string): Promise<Buffer> {
     const { totalTaxable, totalGst, totalAmount, invoices } = await this.getGstReport(from, to);
-
-    const rows = invoices.map(inv => `
-      <tr>
-        <td>${inv.invoiceNumber}</td>
-        <td>${inv.booking.bookingCode}</td>
-        <td>${inv.booking.customer?.user?.name ?? '—'}</td>
-        <td>${inv.booking.service.name}</td>
-        <td>₹${Number(inv.amount).toLocaleString('en-IN')}</td>
-        <td>18%</td>
-        <td>₹${Number(inv.gstAmount ?? 0).toLocaleString('en-IN')}</td>
-        <td>₹${Number(inv.totalAmount).toLocaleString('en-IN')}</td>
-        <td>${new Date(inv.createdAt).toLocaleDateString('en-IN')}</td>
-      </tr>`).join('');
-
-    const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-        h1 { font-size: 22px; }
-        .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
-        .summary { display: flex; gap: 20px; margin-bottom: 24px; }
-        .stat { background: #f4f4f4; padding: 12px 20px; border-radius: 6px; }
-        .stat .val { font-size: 20px; font-weight: bold; }
-        .stat .lbl { font-size: 11px; color: #888; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { background: #111; color: #fff; padding: 8px; text-align: left; }
-        td { padding: 7px 8px; border-bottom: 1px solid #eee; }
-      </style>
-    </head>
-    <body>
-      <h1>Podversal Studio — GST Report</h1>
-      <div class="meta">Period: ${from} to ${to} | Generated: ${new Date().toLocaleString('en-IN')}</div>
-      <div class="summary">
-        <div class="stat"><div class="val">₹${totalTaxable.toLocaleString('en-IN')}</div><div class="lbl">Taxable Amount</div></div>
-        <div class="stat"><div class="val">₹${totalGst.toLocaleString('en-IN')}</div><div class="lbl">GST Collected (18%)</div></div>
-        <div class="stat"><div class="val">₹${totalAmount.toLocaleString('en-IN')}</div><div class="lbl">Total with GST</div></div>
-      </div>
-      <table>
-        <thead><tr><th>Invoice#</th><th>Booking</th><th>Customer</th><th>Service</th><th>Subtotal</th><th>GST%</th><th>GST Amt</th><th>Total</th><th>Date</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </body>
-    </html>`;
-
-    return this.generatePdf(html);
+    const fmt = (n: number) => `Rs.${Number(n).toLocaleString('en-IN')}`;
+    return this.buildReportPdf({
+      title: 'GST Report',
+      period: `${from} to ${to}`,
+      stats: [
+        { label: 'Taxable Amount', value: fmt(totalTaxable) },
+        { label: 'GST Collected',  value: fmt(totalGst)     },
+        { label: 'Total with GST', value: fmt(totalAmount)  },
+      ],
+      sections: [{
+        columns: ['Invoice#', 'Booking', 'Customer', 'Service', 'Subtotal', 'GST%', 'GST Amt', 'Total', 'Date'],
+        rows: invoices.map((inv: any) => [
+          inv.invoiceNumber,
+          inv.booking.bookingCode,
+          inv.booking.customer?.user?.name ?? '—',
+          inv.booking.service.name,
+          fmt(inv.amount),
+          '18%',
+          fmt(inv.gstAmount ?? 0),
+          fmt(inv.totalAmount),
+          new Date(inv.createdAt).toLocaleDateString('en-IN'),
+        ]),
+      }],
+    });
   }
 
-  private async generatePdf(html: string): Promise<Buffer> {
-    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-    try {
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
-      const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '10mm', bottom: '10mm', left: '10mm', right: '10mm' } });
-      return Buffer.from(pdf);
-    } finally {
-      await browser.close();
-    }
+  private buildReportPdf(opts: {
+    title: string;
+    period: string;
+    stats?: { label: string; value: string }[];
+    sections: { heading?: string; columns: string[]; rows: string[][] }[];
+  }): Promise<Buffer> {
+    const LM = 40;
+    const W  = 515; // A4 595 - 80 margins
+    const RM = LM + W;
+
+    return new Promise((resolve, reject) => {
+      const doc    = new PDFDocument({ margin: 40, size: 'A4' });
+      const chunks: Buffer[] = [];
+      doc.on('data', (c: Buffer) => chunks.push(c));
+      doc.on('end',  () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+
+      // ── Header ────────────────────────────────────────────
+      doc.fontSize(18).font('Helvetica-Bold').fillColor('#1a1a1a')
+         .text(`Podversal Studio — ${opts.title}`, LM, 40);
+      doc.fontSize(10).font('Helvetica').fillColor('#666666')
+         .text(`Period: ${opts.period}  |  Generated: ${new Date().toLocaleString('en-IN')}`, LM, 63);
+
+      doc.moveTo(LM, 80).lineTo(RM, 80).strokeColor('#e5e7eb').lineWidth(1).stroke();
+
+      let y = 92;
+
+      // ── Stats ────────────────────────────────────────────
+      if (opts.stats?.length) {
+        const cardW  = Math.min(120, (W - (opts.stats.length - 1) * 10) / opts.stats.length);
+        opts.stats.forEach((s, i) => {
+          const cx = LM + i * (cardW + 10);
+          doc.rect(cx, y, cardW, 44).fill('#f4f4f4');
+          doc.fontSize(14).font('Helvetica-Bold').fillColor('#111111')
+             .text(s.value, cx + 4, y + 6, { width: cardW - 8, align: 'center' });
+          doc.fontSize(8).font('Helvetica').fillColor('#888888')
+             .text(s.label, cx + 4, y + 26, { width: cardW - 8, align: 'center' });
+        });
+        y += 60;
+      }
+
+      // ── Sections with tables ──────────────────────────────
+      for (const section of opts.sections) {
+        if (section.heading) {
+          doc.fontSize(12).font('Helvetica-Bold').fillColor('#1a1a1a')
+             .text(section.heading, LM, y);
+          y += 18;
+        }
+
+        const cols    = section.columns;
+        const colW    = W / cols.length;
+
+        // Table header
+        doc.rect(LM, y, W, 22).fill('#111111');
+        doc.fontSize(8).font('Helvetica-Bold').fillColor('#ffffff');
+        cols.forEach((col, i) => doc.text(col, LM + i * colW + 4, y + 7, { width: colW - 8 }));
+
+        // Table rows
+        for (const [ri, row] of section.rows.entries()) {
+          y += 22;
+          if (y > 780) {
+            doc.addPage();
+            y = 40;
+          }
+          if (ri % 2 === 1) doc.rect(LM, y, W, 20).fill('#fafafa');
+          doc.fontSize(8).font('Helvetica').fillColor('#333333');
+          row.forEach((cell, i) =>
+            doc.text(String(cell ?? '—'), LM + i * colW + 4, y + 6, { width: colW - 8 }),
+          );
+        }
+
+        y += 30;
+      }
+
+      doc.end();
+    });
   }
 }
