@@ -183,7 +183,7 @@ export default function InvoicesPage() {
                         <button
                           className="text-[#E5312A] hover:underline text-xs font-bold"
                           onClick={() => {
-                            const token = localStorage.getItem('accessToken');
+                            const token = localStorage.getItem('access_token');
                             fetch(`${process.env.NEXT_PUBLIC_API_URL}/invoices/${inv.id}/pdf`, {
                               headers: { Authorization: `Bearer ${token}` },
                             })
