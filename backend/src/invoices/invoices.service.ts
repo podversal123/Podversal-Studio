@@ -97,6 +97,38 @@ export class InvoicesService {
     return invoice;
   }
 
+  // ── STREAM PDF (bypass Cloudinary auth) ─────────────────
+  async streamPdf(invoiceId: string, requesterId: string, requesterRole: string): Promise<{ buffer: Buffer; invoiceNumber: string }> {
+    const invoice = await this.prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      include: {
+        booking: {
+          include: {
+            service: true,
+            customer: { select: { userId: true } },
+          },
+        },
+      },
+    });
+    if (!invoice) throw new NotFoundException('Invoice not found');
+
+    if (requesterRole === 'CUSTOMER') {
+      const owns = invoice.booking.createdById === requesterId || invoice.booking.customer?.userId === requesterId;
+      if (!owns) throw new ForbiddenException('Access denied');
+    }
+
+    const buffer = await this.buildInvoicePdf({
+      invoiceNumber: invoice.invoiceNumber,
+      type:          invoice.type,
+      booking:       invoice.booking,
+      amount:        Number(invoice.amount),
+      gstAmount:     Number(invoice.gstAmount ?? 0),
+      total:         Number(invoice.totalAmount),
+    });
+
+    return { buffer, invoiceNumber: invoice.invoiceNumber };
+  }
+
   // ── LIST BY BOOKING ──────────────────────────────────────
   async findByBooking(bookingId: string, requesterId: string, requesterRole: string) {
     if (requesterRole === 'CUSTOMER') {

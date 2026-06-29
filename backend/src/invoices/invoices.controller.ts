@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res, UseGuards } from '@nestjs/common';
+import { Response } from 'express';
 import { InvoiceType } from '@prisma/client';
 import { InvoicesService } from './invoices.service';
 import { JwtAuthGuard } from '../common/guards/jwt.guard';
@@ -32,5 +33,14 @@ export class InvoicesController {
   @Get('booking/:bookingId')
   findByBooking(@Param('bookingId') bookingId: string, @CurrentUser() user: any) {
     return this.invoices.findByBooking(bookingId, user.id, user.role);
+  }
+
+  // GET /api/invoices/:id/pdf — streams PDF directly, no Cloudinary auth issues
+  @Get(':id/pdf')
+  async downloadPdf(@Param('id') id: string, @CurrentUser() user: any, @Res() res: Response) {
+    const { buffer, invoiceNumber } = await this.invoices.streamPdf(id, user.id, user.role);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${invoiceNumber}.pdf"`);
+    res.end(buffer);
   }
 }

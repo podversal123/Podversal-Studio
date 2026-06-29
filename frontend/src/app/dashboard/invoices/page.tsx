@@ -174,18 +174,32 @@ export default function InvoicesPage() {
                         ₹{Number(inv.totalAmount).toLocaleString('en-IN')}
                       </td>
                       <td className="px-4 py-3 text-right hidden sm:table-cell text-orange-600 dark:text-orange-400">
-                        {inv.gstAmount ? `₹${Number(inv.gstAmount).toLocaleString('en-IN')}` : '—'}
+                        {inv.gstAmount ? `₹${Number(inv.gstAmount).toLocaleString('en-IN')}` : <span className="text-[#aaa] dark:text-[#555]">N/A</span>}
                       </td>
                       <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
                         {new Date(inv.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
                       <td className="px-4 py-3">
-                        {inv.cloudinaryUrl ? (
-                          <a href={inv.cloudinaryUrl} target="_blank" rel="noopener noreferrer"
-                            className="text-[#E5312A] hover:underline text-xs font-bold">
-                            Download
-                          </a>
-                        ) : '—'}
+                        <button
+                          className="text-[#E5312A] hover:underline text-xs font-bold"
+                          onClick={() => {
+                            const token = localStorage.getItem('accessToken');
+                            fetch(`${process.env.NEXT_PUBLIC_API_URL}/invoices/${inv.id}/pdf`, {
+                              headers: { Authorization: `Bearer ${token}` },
+                            })
+                              .then(r => r.blob())
+                              .then(blob => {
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `${inv.invoiceNumber}.pdf`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                              });
+                          }}
+                        >
+                          Download
+                        </button>
                       </td>
                     </tr>
                   ))}
