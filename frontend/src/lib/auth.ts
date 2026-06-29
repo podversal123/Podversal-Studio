@@ -36,16 +36,7 @@ export function logout(): void {
   localStorage.removeItem('refresh_token');
   localStorage.removeItem('user');
 
-  // Signal login pages to block back-navigation so the user can't step through
-  // stale dashboard history after signing out.
-  sessionStorage.setItem('podversal_just_logged_out', '1');
-
-  // Use replace() so the logout action itself doesn't add a history entry —
-  // pressing back from the login page won't return to the page where logout was clicked.
-  if (role === 'SUPER_ADMIN')                                    window.location.replace('/admin/login');
-  else if (role === 'REFERRAL_AGENT')                            window.location.replace('/agent/login');
-  else if (role === 'STUDIO_MANAGER' || role === 'EMPLOYEE')     window.location.replace('/staff/login');
-  else                                                           window.location.replace('/login');
+  window.location.replace('/');
 }
 
 // Role hierarchy — used to restrict page access
