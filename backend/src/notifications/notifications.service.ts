@@ -167,12 +167,12 @@ We look forward to your session. If you need to make any changes, please contact
       SHOOT_REMINDER: {
         subject: `Tomorrow: ${service} at ${booking.startTime} (${code})`,
         body: `Your ${service} shoot is tomorrow on ${date}, from ${time}.<br><br>
-Please be at the studio on time and well prepared. Reach out to us immediately if you need to reschedule.`,
+We request you to be on time. In case you need to reschedule, please inform us immediately.`,
       },
       BOOKING_CANCELLED: {
         subject: `Booking cancelled (${code})`,
         body: `Your booking ${code} for ${service} on ${date} has been cancelled.<br><br>
-If you paid an advance and haven't heard from us about the refund, please reach out directly.`,
+For any queries regarding your advance payment or refund, feel free to contact us.`,
       },
       INVOICE_GENERATED: {
         subject: `Invoice ready (${code})`,
@@ -220,7 +220,7 @@ Booking reference: <strong>${code}</strong>`,
     const html = this.wrapEmail(`
       <p>Hi ${name},</p>
       <p>Your account has been created. You're all set to book studio sessions.</p>
-      <p>Log in to your Podversal Studio account to book sessions, view invoices, and manage your shoots.</p>
+      <p>Head to podversal.com to book your first session.</p>
     `);
     return this.send(to, 'Welcome to Podversal Studio', html);
   }

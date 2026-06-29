@@ -210,7 +210,7 @@ export class AuthService {
     </div>
     <div style="display:none;max-height:0;overflow:hidden;">${Date.now()}</div>
     <div style="padding:28px;font-size:14px;color:#222;line-height:1.7;">
-      <p style="margin:0 0 20px 0;">We received a password reset request for your Podversal Studio account. Use the button below to set a new password — this link is valid for 15 minutes only.</p>
+      <p style="margin:0 0 20px 0;">We received a password reset request for your Podversal Studio account. Use the button below to set a new password. This link is valid for 15 minutes only.</p>
       <div style="margin:0 0 20px 0;">
         <a href="${resetUrl}" style="display:inline-block;background:#E5312A;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;text-decoration:none;">
           Reset Password
