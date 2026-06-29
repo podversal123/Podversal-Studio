@@ -139,43 +139,43 @@ export class NotificationsService {
 
     const templates: Record<NotificationEvent, { subject: string; body: string }> = {
       BOOKING_CREATED: {
-        subject: `Slot reserved — complete payment to confirm (${code})`,
+        subject: `Slot reserved: Complete payment to confirm (${code})`,
         body: `We've received your booking request for <strong>${service}</strong> on <strong>${date}</strong> (${time}).<br><br>
 Your slot is reserved. Please complete the payment to lock it. If payment isn't received, the slot will be released automatically.`,
       },
       QUOTE_SENT: {
-        subject: `Your quote is ready — ${code}`,
+        subject: `Your quote is ready (${code})`,
         body: `Here's the pricing for your ${service} booking on ${date}:<br><br>
 <strong>Total: ${amount}</strong><br>
 Advance: ₹${Number(booking.advanceAmount).toLocaleString('en-IN')}<br><br>
 Log in to your dashboard to approve and pay.`,
       },
       BOOKING_APPROVED: {
-        subject: `Booking approved — pay to lock your slot (${code})`,
+        subject: `Booking approved: Pay to lock your slot (${code})`,
         body: `Your ${service} booking on ${date} (${time}) has been approved.<br><br>
 Pay the advance amount to confirm your slot.`,
       },
       PAYMENT_RECEIVED: {
-        subject: `Payment confirmed — see you on ${date} (${code})`,
-        body: `Your payment is confirmed. The slot is locked.<br><br>
+        subject: `Payment confirmed. See you on ${date} (${code})`,
+        body: `Thank you, your payment has been received and your studio slot is confirmed.<br><br>
 <strong>Booking:</strong> ${code}<br>
 <strong>Service:</strong> ${service}<br>
 <strong>Date:</strong> ${date}<br>
 <strong>Time:</strong> ${time}<br><br>
-See you on ${new Date(booking.shootDate).toLocaleDateString('en-IN', { weekday: 'long' })}!`,
+We look forward to your session. If you need to make any changes, please contact us at least 48 hours in advance.`,
       },
       SHOOT_REMINDER: {
         subject: `Tomorrow: ${service} at ${booking.startTime} (${code})`,
-        body: `Your ${service} shoot is tomorrow — ${date}, from ${time}.<br><br>
-Please arrive 10 minutes before your slot. If something has come up, let us know right away.`,
+        body: `Your ${service} shoot is tomorrow on ${date}, from ${time}.<br><br>
+Please be at the studio on time and well prepared. Reach out to us immediately if you need to reschedule.`,
       },
       BOOKING_CANCELLED: {
-        subject: `Booking cancelled — ${code}`,
+        subject: `Booking cancelled (${code})`,
         body: `Your booking ${code} for ${service} on ${date} has been cancelled.<br><br>
 If you paid an advance and haven't heard from us about the refund, please reach out directly.`,
       },
       INVOICE_GENERATED: {
-        subject: `Invoice ready — ${code}`,
+        subject: `Invoice ready (${code})`,
         body: `Your invoice for ${service} on ${date} is ready. You can download it from your dashboard.<br><br>
 Booking reference: <strong>${code}</strong>`,
       },
