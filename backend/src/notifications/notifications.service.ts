@@ -11,10 +11,15 @@ export type NotificationEvent =
   | 'INVOICE_GENERATED';
 
 const logoHtml = () => {
-  const url = process.env.EMAIL_LOGO_URL;
-  return url
-    ? `<img src="${url}" alt="Podversal Studio" height="150" style="display:block;margin:0 auto;border:0;" />`
-    : `<span style="color:#E5312A;font-size:20px;font-weight:900;letter-spacing:0.08em;">PODVERSAL STUDIO</span>`;
+  const light = process.env.EMAIL_LOGO_URL;
+  const dark  = process.env.EMAIL_LOGO_DARK_URL;
+  if (!light) return '';
+  if (dark) {
+    // Two images: CSS @media switches them for dark mode
+    return `<img class="logo-light" src="${light}" alt="Podversal Studio" height="60" style="display:block;margin:0 auto;border:0;" />
+<img class="logo-dark"  src="${dark}"  alt="Podversal Studio" height="60" style="display:none;margin:0 auto;border:0;" />`;
+  }
+  return `<img src="${light}" alt="Podversal Studio" height="60" style="display:block;margin:0 auto;border:0;" />`;
 };
 
 @Injectable()
@@ -193,10 +198,9 @@ Booking reference: <strong>${code}</strong>`,
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8">
-<meta name="color-scheme" content="light">
-<meta name="supported-color-schemes" content="light">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
 <style>
-  :root { color-scheme: light; supported-color-schemes: light; }
   body { font-family: Arial, sans-serif; background: #f5f5f5 !important; margin: 0; padding: 0; }
   .wrap { max-width: 540px; margin: 32px auto; background: #ffffff !important; border: 1px solid #e5e5e5; }
   .top  { background: #ffffff !important; padding: 20px 32px; text-align: center; }
@@ -204,6 +208,15 @@ Booking reference: <strong>${code}</strong>`,
   .body p { margin: 0 0 16px 0; color: #222222 !important; }
   .body p:last-child { margin-bottom: 0; }
   .foot { padding: 16px 32px; font-size: 11px; color: #aaaaaa !important; border-top: 1px solid #eeeeee; background: #ffffff !important; }
+  @media (prefers-color-scheme: dark) {
+    .logo-light { display: none   !important; }
+    .logo-dark  { display: block  !important; }
+    .top  { background: #111111 !important; }
+    .wrap { background: #1a1a1a !important; border-color: #2a2a2a !important; }
+    .body { background: #1a1a1a !important; color: #d4d4d4 !important; }
+    .body p { color: #d4d4d4 !important; }
+    .foot { background: #1a1a1a !important; color: #666 !important; border-top-color: #2a2a2a !important; }
+  }
 </style>
 </head>
 <body bgcolor="#f5f5f5">
