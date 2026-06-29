@@ -132,6 +132,63 @@ export class InvoicesService {
     });
   }
 
+  // ── PRIVATE: INVOICE EMAIL HTML ──────────────────────────
+  private buildInvoiceEmailHtml(name: string, typeLabel: string, invoiceNumber: string, portalUrl: string): string {
+    const logoUrl = process.env.EMAIL_LOGO_URL ?? '';
+    const logo    = logoUrl
+      ? `<img src="${logoUrl}" alt="Podversal Studio" height="60" style="display:block;margin:0 auto 8px;" />`
+      : `<div style="font-size:20px;font-weight:bold;color:#111111;text-align:center;">Podversal Studio</div>`;
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f4f4">
+    <tr><td align="center" style="padding:32px 16px;">
+      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+        <!-- Header -->
+        <tr><td bgcolor="#ffffff" align="center" style="padding:28px 32px 20px;border-bottom:1px solid #eeeeee;">
+          ${logo}
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td bgcolor="#ffffff" style="padding:28px 32px;">
+          <p style="margin:0 0 16px;font-size:15px;color:#333333;">Hi ${name},</p>
+          <p style="margin:0 0 20px;font-size:15px;color:#333333;">
+            Your <strong>${typeLabel}</strong> (${invoiceNumber}) has been generated and is ready to download.
+          </p>
+          <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+            <tr><td bgcolor="#E5312A" style="border-radius:2px;">
+              <a href="${portalUrl}/dashboard/invoices"
+                 style="display:inline-block;padding:12px 28px;color:#ffffff;font-size:14px;font-weight:bold;text-decoration:none;letter-spacing:0.05em;">
+                VIEW &amp; DOWNLOAD INVOICE
+              </a>
+            </td></tr>
+          </table>
+          <p style="margin:0;font-size:13px;color:#888888;">
+            Log in to your Podversal account and go to Invoices to download your PDF.
+          </p>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td bgcolor="#f4f4f4" style="padding:20px 32px;text-align:center;">
+          <p style="margin:0;font-size:11px;color:#aaaaaa;">
+            Podversal Studio &nbsp;&middot;&nbsp; This is an automated message, please do not reply.
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+  }
+
   // ── PRIVATE: PDF GENERATION (pdfkit — no browser required) ─
   private buildInvoicePdf(data: {
     invoiceNumber: string;
@@ -299,7 +356,9 @@ export class InvoicesService {
     }
 
     const senderEmail = this.config.get<string>('BREVO_SENDER_EMAIL') ?? 'podversalstudio@gmail.com';
-    const html = `<p>Dear ${name},</p><p>Your ${subjects[type].split('(')[0].trim()} is ready. <a href="${pdfUrl}">Download PDF</a></p><p>Thank you,<br/>Podversal Studio</p>`;
+    const portalUrl   = (this.config.get<string>('FRONTEND_URL') ?? 'https://podversal.com').split(',')[0].trim();
+    const typeLabel   = subjects[type].split('(')[0].trim();
+    const html = this.buildInvoiceEmailHtml(name, typeLabel, invoiceNumber, portalUrl);
 
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method:  'POST',
