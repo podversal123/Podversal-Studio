@@ -79,20 +79,12 @@ export default function Navbar() {
                 Dashboard
               </Link>
             ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-sm font-medium text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/register"
-                  className="text-sm font-bold px-5 py-2 bg-[#E5312A] text-white hover:bg-[#CC2A24] transition-colors"
-                >
-                  Book Now
-                </Link>
-              </>
+              <Link
+                href="/register"
+                className="text-sm font-bold px-5 py-2 bg-[#E5312A] text-white hover:bg-[#CC2A24] transition-colors"
+              >
+                Book Now
+              </Link>
             )}
           </div>
 
@@ -129,18 +121,9 @@ export default function Navbar() {
                   Go to Dashboard
                 </Link>
               ) : (
-                <div className="space-y-2 pt-1">
-                  <Link
-                    href="/login"
-                    onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-[#a0a0a0] hover:bg-[#f5f5f5] dark:hover:bg-[#181818] transition-colors"
-                  >
-                    Sign In
-                  </Link>
-                  <Link href="/register" className="btn-primary !py-2.5 text-sm text-center block" onClick={() => setMenuOpen(false)}>
-                    Book a Studio
-                  </Link>
-                </div>
+                <Link href="/register" className="btn-primary !py-2.5 text-sm text-center block" onClick={() => setMenuOpen(false)}>
+                  Book Now
+                </Link>
               )}
             </div>
           </div>

@@ -186,7 +186,7 @@ export default function Sidebar({ user, isOpen, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop */}
-      <aside className="hidden lg:flex w-64 2xl:w-72 3xl:w-80 min-h-screen bg-white dark:bg-[#0f0f0f] border-r border-[#e5e5e5] dark:border-[#2a2a2a] flex-col">
+      <aside className="hidden lg:flex w-64 2xl:w-72 3xl:w-80 sticky top-0 h-screen bg-white dark:bg-[#0f0f0f] border-r border-[#e5e5e5] dark:border-[#2a2a2a] flex-col flex-shrink-0">
         {content}
       </aside>
 
