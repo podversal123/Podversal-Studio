@@ -7,7 +7,7 @@ const SERVICES = [
     type: ServiceType.PODCAST,
     name: 'Podcast Studio',
     description: 'Professional podcast recording with high-end microphones, acoustic treatment, and multi-channel mixing.',
-    pricePerHour: 1500,
+    pricePerHour: 2500,
     minDuration: 1,
   },
   {
@@ -53,7 +53,7 @@ async function main() {
   for (const service of SERVICES) {
     await prisma.service.upsert({
       where: { type: service.type },
-      update: {},
+      update: { pricePerHour: service.pricePerHour, minDuration: service.minDuration },
       create: service,
     });
   }

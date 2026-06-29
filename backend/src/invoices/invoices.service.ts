@@ -44,10 +44,10 @@ export class InvoicesService {
       : 1;
     const invoiceNumber = `INV-${year}-${String(nextSeq).padStart(4, '0')}`;
 
-    const gstRate  = 0.18;
-    const amount   = booking.totalAmount ?? 0;
-    const gstAmount = type === InvoiceType.GST_INVOICE ? Math.round(amount * gstRate * 100) / 100 : 0;
-    const total    = amount + gstAmount;
+    const gstRate   = 0.18;
+    const amount    = booking.totalAmount ?? 0;
+    const gstAmount = Math.round(amount * gstRate * 100) / 100;
+    const total     = amount + gstAmount;
 
     // Generate PDF using pdfkit (no browser required)
     const logoBuffer = await this.fetchLogoBuffer();
