@@ -223,7 +223,7 @@ export class InvoicesService {
 
       // ── Header ────────────────────────────────────────────
       const GSTIN = '09AAMCK1657J1Z2';
-      const ADDR  = 'H No. 18, Akshay Enclave II, Govindpuram, Ghaziabad - 201001';
+      const ADDR  = 'B 812, 814, Tower 4, NX One, Greater Noida West, UP';
       const UNIT  = 'A Unit of Krishiyug Technologies Pvt. Ltd.';
       const EMAIL = process.env.ADMIN_EMAIL ?? 'podversalstudio@gmail.com';
 
