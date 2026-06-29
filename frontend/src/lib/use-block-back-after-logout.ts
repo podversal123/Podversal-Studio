@@ -1,13 +1,19 @@
 import { useEffect } from 'react';
 
 /**
- * When arriving on a login page immediately after logout, intercept the browser
- * back button so the user stays on the login page instead of stepping through
- * all the stale dashboard history entries one by one.
+ * After logout, rewrites the tail of browser history so that pressing back
+ * once from the login page always lands on '/' (landing page) — regardless
+ * of how many dashboard pages the user visited before signing out.
  *
- * Only activates when the `podversal_just_logged_out` sessionStorage flag is
- * present (set by auth.ts → logout()). The flag is consumed on first mount so
- * subsequent visits to the login page behave normally.
+ * Mechanism:
+ *   replaceState('/') — turns current '/login' entry into '/'
+ *   pushState('/login') — adds '/login' on top
+ *
+ * Result: [...stale entries, '/', '/login'(current)]
+ * One back press → '/'  ✓
+ *
+ * Only fires when auth.ts sets the 'podversal_just_logged_out' flag,
+ * so normal visits to /login are unaffected.
  */
 export function useBlockBackAfterLogout() {
   useEffect(() => {
@@ -16,14 +22,7 @@ export function useBlockBackAfterLogout() {
 
     sessionStorage.removeItem('podversal_just_logged_out');
 
-    // Push a duplicate entry so the very first back press stays on this page.
-    window.history.pushState(null, '', window.location.href);
-
-    const handlePop = () => {
-      window.history.pushState(null, '', window.location.href);
-    };
-
-    window.addEventListener('popstate', handlePop);
-    return () => window.removeEventListener('popstate', handlePop);
+    window.history.replaceState(null, '', '/');
+    window.history.pushState(null, '', '/login');
   }, []);
 }
