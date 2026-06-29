@@ -129,11 +129,18 @@ export class AgentsService {
 
   // Summary: total earned, total pending, total released
   async getCommissionSummary(agentId: string) {
-    const commissions = await this.prisma.commission.findMany({ where: { agentId } });
-    const total    = commissions.reduce((s, c) => s + c.commissionAmount, 0);
-    const pending  = commissions.filter((c) => c.status === 'PENDING').reduce((s, c) => s + c.commissionAmount, 0);
-    const released = commissions.filter((c) => c.status === 'RELEASED').reduce((s, c) => s + c.commissionAmount, 0);
-    return { total, pending, released, count: commissions.length };
+    const [totalAgg, pendingAgg, releasedAgg, count] = await Promise.all([
+      this.prisma.commission.aggregate({ where: { agentId }, _sum: { commissionAmount: true } }),
+      this.prisma.commission.aggregate({ where: { agentId, status: CommissionStatus.PENDING }, _sum: { commissionAmount: true } }),
+      this.prisma.commission.aggregate({ where: { agentId, status: CommissionStatus.RELEASED }, _sum: { commissionAmount: true } }),
+      this.prisma.commission.count({ where: { agentId } }),
+    ]);
+    return {
+      total:    totalAgg._sum.commissionAmount    ?? 0,
+      pending:  pendingAgg._sum.commissionAmount  ?? 0,
+      released: releasedAgg._sum.commissionAmount ?? 0,
+      count,
+    };
   }
 
   // Generate PDF commission statement for an agent
