@@ -62,7 +62,7 @@ export class NotificationsService {
       const empEmail = booking.employee.user.email;
       const empName  = booking.employee.user.name;
       const date     = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
-      const time     = `${booking.startTime} to${booking.endTime}`;
+      const time     = `${booking.startTime} – ${booking.endTime}`;
       const empHtml  = this.wrapEmail(`
         <p>Hi ${empName},</p>
         <p>Reminder: you have a <strong>${booking.service.name}</strong> shoot scheduled for tomorrow.</p>
@@ -80,7 +80,7 @@ export class NotificationsService {
       const agentEmail = booking.agent.user.email;
       const agentName  = booking.agent.user.name;
       const date       = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
-      const time       = `${booking.startTime} to${booking.endTime}`;
+      const time       = `${booking.startTime} – ${booking.endTime}`;
       const agentHtml  = this.wrapEmail(`
         <p>Hi ${agentName},</p>
         <p>A booking you referred is scheduled for tomorrow.</p>
@@ -100,7 +100,7 @@ export class NotificationsService {
         select: { email: true, name: true },
       });
       const date = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
-      const time = `${booking.startTime} to${booking.endTime}`;
+      const time = `${booking.startTime} – ${booking.endTime}`;
       await Promise.all(
         managers.map((manager) => {
           const html = this.wrapEmail(`
@@ -134,7 +134,7 @@ export class NotificationsService {
     const code    = booking.bookingCode;
     const service = booking.service.name;
     const date    = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
-    const time    = `${booking.startTime} to${booking.endTime}`;
+    const time    = `${booking.startTime} – ${booking.endTime}`;
     const amount  = booking.totalAmount ? `₹${Number(booking.totalAmount).toLocaleString('en-IN')}` : '';
 
     const templates: Record<NotificationEvent, { subject: string; body: string }> = {
