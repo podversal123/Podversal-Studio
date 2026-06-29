@@ -202,23 +202,29 @@ export class AuthService {
       : `<span style="color:#E5312A;font-size:20px;font-weight:900;letter-spacing:0.08em;">PODVERSAL STUDIO</span>`;
 
     const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;">
-  <div style="max-width:480px;margin:32px auto;background:#fff;border:1px solid #e5e5e5;">
-    <div style="background:#fff;padding:12px 32px;text-align:center;">
-      ${logoHtml}
-    </div>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head><meta charset="utf-8"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
+<style>
+  :root { color-scheme: light; supported-color-schemes: light; }
+  body { font-family: Arial, sans-serif; background: #f5f5f5 !important; margin: 0; padding: 0; }
+  .wrap { max-width: 540px; margin: 32px auto; background: #ffffff !important; border: 1px solid #e5e5e5; }
+  .top  { background: #ffffff !important; padding: 20px 32px; text-align: center; }
+  .body { padding: 28px 32px; color: #222222 !important; font-size: 14px; line-height: 1.7; background: #ffffff !important; }
+  .body p { margin: 0 0 16px 0; color: #222222 !important; }
+  .body p:last-child { margin-bottom: 0; }
+  .foot { padding: 16px 32px; font-size: 11px; color: #aaaaaa !important; border-top: 1px solid #eeeeee; background: #ffffff !important; }
+</style>
+</head>
+<body bgcolor="#f5f5f5">
+  <div class="wrap" bgcolor="#ffffff">
+    <div class="top" bgcolor="#ffffff">${logoHtml}</div>
     <div style="display:none;max-height:0;overflow:hidden;">${Date.now()}</div>
-    <div style="padding:28px;font-size:14px;color:#222;line-height:1.7;">
-      <p style="margin:0 0 20px 0;">We received a password reset request for your Podversal Studio account. Use the button below to set a new password. This link is valid for 15 minutes only.</p>
-      <div style="margin:0 0 20px 0;">
-        <a href="${resetUrl}" style="display:inline-block;background:#E5312A;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;text-decoration:none;">
-          Reset Password
-        </a>
-      </div>
-      <p style="margin:0;color:#888;font-size:12px;">If you didn't request this, ignore this email. Your password won't change.</p>
+    <div class="body">
+      <p>We received a password reset request for your Podversal Studio account. Use the button below to set a new password. This link is valid for 15 minutes only.</p>
+      <p><a href="${resetUrl}" style="display:inline-block;background:#E5312A;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;text-decoration:none;">Reset Password</a></p>
+      <p style="color:#888;font-size:12px;">If you didn't request this, ignore this email. Your password won't change.</p>
     </div>
-    <div style="padding:14px 28px;font-size:11px;color:#aaa;border-top:1px solid #eee;">Podversal Studio &nbsp;|&nbsp; Reply to this email or call us if you have any questions.</div>
+    <div class="foot">Podversal Studio &nbsp;|&nbsp; Reply to this email or call us if you have any questions.</div>
   </div>
 </body></html>`;
 
