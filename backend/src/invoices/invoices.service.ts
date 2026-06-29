@@ -50,6 +50,7 @@ export class InvoicesService {
     const total    = amount + gstAmount;
 
     // Generate PDF using pdfkit (no browser required)
+    const logoBuffer = await this.fetchLogoBuffer();
     const pdfBuffer = await this.buildInvoicePdf({
       invoiceNumber,
       type,
@@ -57,6 +58,7 @@ export class InvoicesService {
       amount,
       gstAmount,
       total,
+      logoBuffer,
     });
 
     // Upload PDF to Cloudinary
@@ -76,7 +78,7 @@ export class InvoicesService {
     });
 
     // Auto-email to customer — fire-and-forget so email failure doesn't kill invoice creation
-    this.sendInvoiceEmail(booking.customerEmail, booking.customerName, invoiceNumber, cloudinaryUrl, type)
+    this.sendInvoiceEmail(booking.customerEmail, booking.customerName, invoiceNumber, pdfBuffer, type)
       .catch(err => console.error(`[Invoice Email Failed] ${invoiceNumber}: ${err?.message ?? err}`));
 
     return invoice;
@@ -102,6 +104,7 @@ export class InvoicesService {
       if (!owns) throw new ForbiddenException('Access denied');
     }
 
+    const logoBuffer = await this.fetchLogoBuffer();
     const buffer = await this.buildInvoicePdf({
       invoiceNumber: invoice.invoiceNumber,
       type:          invoice.type,
@@ -109,6 +112,7 @@ export class InvoicesService {
       amount:        Number(invoice.amount),
       gstAmount:     Number(invoice.gstAmount ?? 0),
       total:         Number(invoice.totalAmount),
+      logoBuffer,
     });
 
     return { buffer, invoiceNumber: invoice.invoiceNumber };
@@ -133,7 +137,7 @@ export class InvoicesService {
   }
 
   // ── PRIVATE: INVOICE EMAIL HTML ──────────────────────────
-  private buildInvoiceEmailHtml(name: string, typeLabel: string, invoiceNumber: string, portalUrl: string): string {
+  private buildInvoiceEmailHtml(name: string, typeLabel: string, invoiceNumber: string): string {
     const logoUrl = process.env.EMAIL_LOGO_URL ?? '';
     const logo    = logoUrl
       ? `<img src="${logoUrl}" alt="Podversal Studio" height="60" style="display:block;margin:0 auto 8px;" />`
@@ -159,19 +163,14 @@ export class InvoicesService {
         <!-- Body -->
         <tr><td bgcolor="#ffffff" style="padding:28px 32px;">
           <p style="margin:0 0 16px;font-size:15px;color:#333333;">Hi ${name},</p>
-          <p style="margin:0 0 20px;font-size:15px;color:#333333;">
-            Your <strong>${typeLabel}</strong> (${invoiceNumber}) has been generated and is ready to download.
+          <p style="margin:0 0 12px;font-size:15px;color:#333333;">
+            Your <strong>${typeLabel}</strong> (<strong>${invoiceNumber}</strong>) has been generated.
           </p>
-          <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
-            <tr><td bgcolor="#E5312A" style="border-radius:2px;">
-              <a href="${portalUrl}/dashboard/invoices"
-                 style="display:inline-block;padding:12px 28px;color:#ffffff;font-size:14px;font-weight:bold;text-decoration:none;letter-spacing:0.05em;">
-                VIEW &amp; DOWNLOAD INVOICE
-              </a>
-            </td></tr>
-          </table>
+          <p style="margin:0 0 20px;font-size:15px;color:#333333;">
+            Please find your invoice PDF attached to this email.
+          </p>
           <p style="margin:0;font-size:13px;color:#888888;">
-            Log in to your Podversal account and go to Invoices to download your PDF.
+            If you have any questions, please contact us at podversalstudio@gmail.com.
           </p>
         </td></tr>
 
@@ -189,6 +188,19 @@ export class InvoicesService {
 </html>`;
   }
 
+  // ── PRIVATE: LOGO FETCH ──────────────────────────────────
+  private async fetchLogoBuffer(): Promise<Buffer | null> {
+    const logoUrl = this.config.get<string>('EMAIL_LOGO_URL');
+    if (!logoUrl) return null;
+    try {
+      const res = await fetch(logoUrl);
+      if (!res.ok) return null;
+      return Buffer.from(await res.arrayBuffer());
+    } catch {
+      return null;
+    }
+  }
+
   // ── PRIVATE: PDF GENERATION (pdfkit — no browser required) ─
   private buildInvoicePdf(data: {
     invoiceNumber: string;
@@ -197,6 +209,7 @@ export class InvoicesService {
     amount: number;
     gstAmount: number;
     total: number;
+    logoBuffer?: Buffer | null;
   }): Promise<Buffer> {
     const { invoiceNumber, type, booking, amount, gstAmount, total } = data;
 
@@ -220,23 +233,36 @@ export class InvoicesService {
       doc.on('error', reject);
 
       // ── Header ────────────────────────────────────────────
-      doc.fontSize(20).font('Helvetica-Bold').fillColor('#3b5bdb')
-         .text('Podversal Studio', LM, 50);
-      doc.fontSize(10).font('Helvetica').fillColor('#666666')
-         .text(process.env.ADMIN_EMAIL ?? '', LM, 74);
-
-      doc.fontSize(16).font('Helvetica-Bold').fillColor('#333333')
-         .text(typeLabels[type], LM, 50, { width: W, align: 'right' });
-      doc.fontSize(10).font('Helvetica').fillColor('#666666')
-         .text(`#${invoiceNumber}`, LM, 71, { width: W, align: 'right' });
-      doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, LM, 85, { width: W, align: 'right' });
-
-      // ── Divider ───────────────────────────────────────────
-      doc.moveTo(LM, 105).lineTo(RM, 105).strokeColor('#e5e7eb').lineWidth(1).stroke();
+      let headerBottom: number;
+      if (data.logoBuffer) {
+        // Logo image (square canvas — visual content is ~60% of height)
+        doc.image(data.logoBuffer, LM, 25, { width: 120 });
+        doc.fontSize(9).font('Helvetica').fillColor('#888888')
+           .text(process.env.ADMIN_EMAIL ?? 'podversalstudio@gmail.com', LM, 150);
+        doc.fontSize(16).font('Helvetica-Bold').fillColor('#333333')
+           .text(typeLabels[type], LM, 38, { width: W, align: 'right' });
+        doc.fontSize(10).font('Helvetica').fillColor('#666666')
+           .text(`#${invoiceNumber}`, LM, 60, { width: W, align: 'right' });
+        doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, LM, 74, { width: W, align: 'right' });
+        doc.moveTo(LM, 168).lineTo(RM, 168).strokeColor('#e5e7eb').lineWidth(1).stroke();
+        headerBottom = 182;
+      } else {
+        doc.fontSize(20).font('Helvetica-Bold').fillColor('#3b5bdb')
+           .text('Podversal Studio', LM, 50);
+        doc.fontSize(10).font('Helvetica').fillColor('#666666')
+           .text(process.env.ADMIN_EMAIL ?? '', LM, 74);
+        doc.fontSize(16).font('Helvetica-Bold').fillColor('#333333')
+           .text(typeLabels[type], LM, 50, { width: W, align: 'right' });
+        doc.fontSize(10).font('Helvetica').fillColor('#666666')
+           .text(`#${invoiceNumber}`, LM, 71, { width: W, align: 'right' });
+        doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, LM, 85, { width: W, align: 'right' });
+        doc.moveTo(LM, 105).lineTo(RM, 105).strokeColor('#e5e7eb').lineWidth(1).stroke();
+        headerBottom = 118;
+      }
 
       // ── Two-column info ───────────────────────────────────
       const C2 = LM + W / 2 + 10;
-      let y = 118;
+      let y = headerBottom;
 
       doc.fontSize(8).font('Helvetica-Bold').fillColor('#999999')
          .text('BILLED TO', LM, y).text('BOOKING DETAILS', C2, y);
@@ -334,12 +360,12 @@ export class InvoicesService {
     });
   }
 
-  // ── PRIVATE: EMAIL (Brevo API) ───────────────────────────
+  // ── PRIVATE: EMAIL (Brevo API — with PDF attachment) ────
   private async sendInvoiceEmail(
     to: string,
     name: string,
     invoiceNumber: string,
-    pdfUrl: string,
+    pdfBuffer: Buffer,
     type: InvoiceType,
   ) {
     const subjects: Record<InvoiceType, string> = {
@@ -356,9 +382,8 @@ export class InvoicesService {
     }
 
     const senderEmail = this.config.get<string>('BREVO_SENDER_EMAIL') ?? 'podversalstudio@gmail.com';
-    const portalUrl   = (this.config.get<string>('FRONTEND_URL') ?? 'https://podversal.com').split(',')[0].trim();
     const typeLabel   = subjects[type].split('(')[0].trim();
-    const html = this.buildInvoiceEmailHtml(name, typeLabel, invoiceNumber, portalUrl);
+    const html = this.buildInvoiceEmailHtml(name, typeLabel, invoiceNumber);
 
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method:  'POST',
@@ -368,6 +393,7 @@ export class InvoicesService {
         to:          [{ email: to, name }],
         subject:     subjects[type],
         htmlContent: html,
+        attachment:  [{ content: pdfBuffer.toString('base64'), name: `${invoiceNumber}.pdf` }],
       }),
     });
 
