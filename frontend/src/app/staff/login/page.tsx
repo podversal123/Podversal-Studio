@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import Logo from '@/components/Logo';
 import api from '@/lib/api';
 import { AuthResponse } from '@/types';
+import { useBlockBackAfterLogout } from '@/lib/use-block-back-after-logout';
 
 const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), { ssr: false });
 
@@ -37,6 +38,7 @@ type StaffRole  = 'STUDIO_MANAGER' | 'EMPLOYEE';
 
 export default function StaffLoginPage() {
   const router = useRouter();
+  useBlockBackAfterLogout();
   const [staffRole,  setStaffRole]  = useState<StaffRole>('STUDIO_MANAGER');
   const [tab,        setTab]        = useState<Tab>('email');
   const [otpSent,    setOtpSent]    = useState(false);

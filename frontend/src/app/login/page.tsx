@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 import api from '@/lib/api';
 import { AuthResponse } from '@/types';
+import { useBlockBackAfterLogout } from '@/lib/use-block-back-after-logout';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import Logo from '@/components/Logo';
@@ -35,6 +36,7 @@ type Tab        = 'email' | 'otp';
 
 function LoginForm() {
   const router = useRouter();
+  useBlockBackAfterLogout();
 
   const [tab,        setTab]        = useState<Tab>('email');
   const [otpSent,    setOtpSent]    = useState(false);

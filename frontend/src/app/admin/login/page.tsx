@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import Logo from '@/components/Logo';
 import api from '@/lib/api';
 import { AuthResponse } from '@/types';
+import { useBlockBackAfterLogout } from '@/lib/use-block-back-after-logout';
 
 const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), { ssr: false });
 
@@ -36,6 +37,7 @@ type Tab        = 'email' | 'otp';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  useBlockBackAfterLogout();
   const [tab,        setTab]        = useState<Tab>('email');
   const [otpSent,    setOtpSent]    = useState(false);
   const [loading,    setLoading]    = useState(false);
