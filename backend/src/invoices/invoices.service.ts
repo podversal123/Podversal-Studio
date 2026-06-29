@@ -1,35 +1,20 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InvoiceType } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
 import { v2 as cloudinary } from 'cloudinary';
 import PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class InvoicesService {
-  private transporter: nodemailer.Transporter;
-
   constructor(
     private prisma: PrismaService,
     private config: ConfigService,
   ) {
-    // Configure Cloudinary
     cloudinary.config({
       cloud_name: this.config.get('CLOUDINARY_CLOUD_NAME'),
       api_key:    this.config.get('CLOUDINARY_API_KEY'),
       api_secret: this.config.get('CLOUDINARY_API_SECRET'),
-    });
-
-    // Configure Nodemailer
-    this.transporter = nodemailer.createTransport({
-      host: this.config.get('SMTP_HOST'),
-      port: this.config.get<number>('SMTP_PORT'),
-      secure: false,
-      auth: {
-        user: this.config.get('SMTP_USER'),
-        pass: this.config.get('SMTP_PASS'),
-      },
     });
   }
 
@@ -292,7 +277,7 @@ export class InvoicesService {
     });
   }
 
-  // ── PRIVATE: EMAIL ───────────────────────────────────────
+  // ── PRIVATE: EMAIL (Brevo API) ───────────────────────────
   private async sendInvoiceEmail(
     to: string,
     name: string,
@@ -301,28 +286,39 @@ export class InvoicesService {
     type: InvoiceType,
   ) {
     const subjects: Record<InvoiceType, string> = {
-      QUOTATION:       `Quotation from Podversal Studio — ${invoiceNumber}`,
-      PROFORMA:        `Proforma Invoice — ${invoiceNumber}`,
-      GST_INVOICE:     `Tax Invoice — ${invoiceNumber}`,
-      PAYMENT_RECEIPT: `Payment Receipt — ${invoiceNumber}`,
+      QUOTATION:       `Quotation from Podversal Studio (${invoiceNumber})`,
+      PROFORMA:        `Proforma Invoice (${invoiceNumber})`,
+      GST_INVOICE:     `Tax Invoice (${invoiceNumber})`,
+      PAYMENT_RECEIPT: `Payment Receipt (${invoiceNumber})`,
     };
 
-    // Skip actual email in development
-    if (this.config.get('NODE_ENV') !== 'production') {
-      console.log(`[DEV EMAIL] Would send "${subjects[type]}" to ${to}`);
+    const apiKey = this.config.get<string>('BREVO_API_KEY');
+    if (!apiKey) {
+      console.log(`[Email DEV] To: ${to} | Subject: ${subjects[type]}`);
       return;
     }
 
-    await this.transporter.sendMail({
-      from: this.config.get('EMAIL_FROM'),
-      to,
-      subject: subjects[type],
-      html: `<p>Dear ${name},</p><p>Please find your document attached: <a href="${pdfUrl}">Download PDF</a></p><p>Thank you,<br/>Podversal Studio</p>`,
+    const senderEmail = this.config.get<string>('BREVO_SENDER_EMAIL') ?? 'podversalstudio@gmail.com';
+    const html = `<p>Dear ${name},</p><p>Your ${subjects[type].split('(')[0].trim()} is ready. <a href="${pdfUrl}">Download PDF</a></p><p>Thank you,<br/>Podversal Studio</p>`;
+
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method:  'POST',
+      headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sender:      { name: 'Podversal Studio', email: senderEmail },
+        to:          [{ email: to, name }],
+        subject:     subjects[type],
+        htmlContent: html,
+      }),
     });
 
-    await this.prisma.invoice.updateMany({
-      where: { invoiceNumber },
-      data: { emailSentAt: new Date() },
-    });
+    if (res.ok) {
+      await this.prisma.invoice.updateMany({
+        where: { invoiceNumber },
+        data:  { emailSentAt: new Date() },
+      });
+    } else {
+      console.error(`[Invoice Email Failed] ${invoiceNumber}: ${await res.text()}`);
+    }
   }
 }
