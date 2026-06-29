@@ -11,15 +11,9 @@ export type NotificationEvent =
   | 'INVOICE_GENERATED';
 
 const logoHtml = () => {
-  const light = process.env.EMAIL_LOGO_URL;
-  const dark  = process.env.EMAIL_LOGO_DARK_URL;
-  if (!light) return '';
-  if (dark) {
-    // Two images: CSS @media switches them for dark mode
-    return `<img class="logo-light" src="${light}" alt="Podversal Studio" height="60" style="display:block;margin:0 auto;border:0;" />
-<img class="logo-dark"  src="${dark}"  alt="Podversal Studio" height="60" style="display:none;margin:0 auto;border:0;" />`;
-  }
-  return `<img src="${light}" alt="Podversal Studio" height="60" style="display:block;margin:0 auto;border:0;" />`;
+  const url = process.env.EMAIL_LOGO_URL;
+  if (!url) return '';
+  return `<img src="${url}" alt="Podversal Studio" height="100" style="display:block;margin:0 auto;border:0;max-width:300px;" />`;
 };
 
 @Injectable()
@@ -203,20 +197,11 @@ Booking reference: <strong>${code}</strong>`,
 <style>
   body { font-family: Arial, sans-serif; background: #f5f5f5 !important; margin: 0; padding: 0; }
   .wrap { max-width: 540px; margin: 32px auto; background: #ffffff !important; border: 1px solid #e5e5e5; }
-  .top  { background: #ffffff !important; padding: 20px 32px; text-align: center; }
+  .top  { background: #ffffff !important; padding: 28px 32px; text-align: center; border-bottom: 1px solid #eeeeee; }
   .body { padding: 28px 32px; color: #222222 !important; font-size: 14px; line-height: 1.7; background: #ffffff !important; }
   .body p { margin: 0 0 16px 0; color: #222222 !important; }
   .body p:last-child { margin-bottom: 0; }
   .foot { padding: 16px 32px; font-size: 11px; color: #aaaaaa !important; border-top: 1px solid #eeeeee; background: #ffffff !important; }
-  @media (prefers-color-scheme: dark) {
-    .logo-light { display: none   !important; }
-    .logo-dark  { display: block  !important; }
-    .top  { background: #111111 !important; }
-    .wrap { background: #1a1a1a !important; border-color: #2a2a2a !important; }
-    .body { background: #1a1a1a !important; color: #d4d4d4 !important; }
-    .body p { color: #d4d4d4 !important; }
-    .foot { background: #1a1a1a !important; color: #666 !important; border-top-color: #2a2a2a !important; }
-  }
 </style>
 </head>
 <body bgcolor="#f5f5f5">
