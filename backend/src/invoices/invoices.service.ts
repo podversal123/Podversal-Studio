@@ -140,52 +140,38 @@ export class InvoicesService {
   private buildInvoiceEmailHtml(name: string, typeLabel: string, invoiceNumber: string): string {
     const logoUrl = process.env.EMAIL_LOGO_URL ?? '';
     const logo    = logoUrl
-      ? `<img src="${logoUrl}" alt="Podversal Studio" height="60" style="display:block;margin:0 auto 8px;" />`
-      : `<div style="font-size:20px;font-weight:bold;color:#111111;text-align:center;">Podversal Studio</div>`;
+      ? `<img src="${logoUrl}" alt="Podversal Studio" height="150" style="display:block;margin:0 auto;border:0;" />`
+      : `<span style="color:#E5312A;font-size:20px;font-weight:900;letter-spacing:0.08em;">PODVERSAL STUDIO</span>`;
 
     return `<!DOCTYPE html>
-<html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="color-scheme" content="light" />
-  <meta name="supported-color-schemes" content="light" />
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<style>
+  :root { color-scheme: light; supported-color-schemes: light; }
+  body { font-family: Arial, sans-serif; background: #f5f5f5 !important; margin: 0; padding: 0; }
+  .wrap { max-width: 540px; margin: 32px auto; background: #ffffff !important; border: 1px solid #e5e5e5; }
+  .top  { background: #ffffff !important; padding: 20px 32px; text-align: center; }
+  .body { padding: 28px 32px; color: #222222 !important; font-size: 14px; line-height: 1.7; background: #ffffff !important; }
+  .body p { margin: 0 0 16px 0; color: #222222 !important; }
+  .body p:last-child { margin-bottom: 0; }
+  .foot { padding: 16px 32px; font-size: 11px; color: #aaaaaa !important; border-top: 1px solid #eeeeee; background: #ffffff !important; }
+</style>
 </head>
-<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f4f4">
-    <tr><td align="center" style="padding:32px 16px;">
-      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
-
-        <!-- Header -->
-        <tr><td bgcolor="#ffffff" align="center" style="padding:28px 32px 20px;border-bottom:1px solid #eeeeee;">
-          ${logo}
-        </td></tr>
-
-        <!-- Body -->
-        <tr><td bgcolor="#ffffff" style="padding:28px 32px;">
-          <p style="margin:0 0 16px;font-size:15px;color:#333333;">Hi ${name},</p>
-          <p style="margin:0 0 12px;font-size:15px;color:#333333;">
-            Your <strong>${typeLabel}</strong> (<strong>${invoiceNumber}</strong>) has been generated.
-          </p>
-          <p style="margin:0 0 20px;font-size:15px;color:#333333;">
-            Please find your invoice PDF attached to this email.
-          </p>
-          <p style="margin:0;font-size:13px;color:#888888;">
-            If you have any questions, please contact us at podversalstudio@gmail.com.
-          </p>
-        </td></tr>
-
-        <!-- Footer -->
-        <tr><td bgcolor="#f4f4f4" style="padding:20px 32px;text-align:center;">
-          <p style="margin:0;font-size:11px;color:#aaaaaa;">
-            Podversal Studio &nbsp;&middot;&nbsp; This is an automated message, please do not reply.
-          </p>
-        </td></tr>
-
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+<body bgcolor="#f5f5f5">
+  <div class="wrap" bgcolor="#ffffff">
+    <div class="top" bgcolor="#ffffff">${logo}</div>
+    <div class="body">
+      <p>Hi ${name},</p>
+      <p>Your <strong>${typeLabel}</strong> (<strong>${invoiceNumber}</strong>) has been generated.</p>
+      <p>Please find your invoice PDF attached to this email.</p>
+      <p>If you have any questions, please contact us at podversalstudio@gmail.com.</p>
+    </div>
+    <div class="foot">Podversal Studio &nbsp;|&nbsp; Reply to this email or call us if you have any questions.</div>
+  </div>
+</body></html>`;
   }
 
   // ── PRIVATE: LOGO FETCH (cached in memory after first load) ─
