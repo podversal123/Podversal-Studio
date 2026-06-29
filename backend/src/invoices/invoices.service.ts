@@ -188,17 +188,20 @@ export class InvoicesService {
 </html>`;
   }
 
-  // ── PRIVATE: LOGO FETCH ──────────────────────────────────
+  // ── PRIVATE: LOGO FETCH (cached in memory after first load) ─
+  private _logoCache: Buffer | null | undefined = undefined;
+
   private async fetchLogoBuffer(): Promise<Buffer | null> {
+    if (this._logoCache !== undefined) return this._logoCache;
     const logoUrl = this.config.get<string>('EMAIL_LOGO_URL');
-    if (!logoUrl) return null;
+    if (!logoUrl) { this._logoCache = null; return null; }
     try {
       const res = await fetch(logoUrl);
-      if (!res.ok) return null;
-      return Buffer.from(await res.arrayBuffer());
+      this._logoCache = res.ok ? Buffer.from(await res.arrayBuffer()) : null;
     } catch {
-      return null;
+      this._logoCache = null;
     }
+    return this._logoCache;
   }
 
   // ── PRIVATE: PDF GENERATION (pdfkit — no browser required) ─
