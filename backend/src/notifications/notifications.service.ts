@@ -62,7 +62,7 @@ export class NotificationsService {
       const empEmail = booking.employee.user.email;
       const empName  = booking.employee.user.name;
       const date     = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
-      const time     = `${booking.startTime} – ${booking.endTime}`;
+      const time     = `${booking.startTime} to${booking.endTime}`;
       const empHtml  = this.wrapEmail(`
         <p>Hi ${empName},</p>
         <p>Reminder: you have a <strong>${booking.service.name}</strong> shoot scheduled for tomorrow.</p>
@@ -80,7 +80,7 @@ export class NotificationsService {
       const agentEmail = booking.agent.user.email;
       const agentName  = booking.agent.user.name;
       const date       = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
-      const time       = `${booking.startTime} – ${booking.endTime}`;
+      const time       = `${booking.startTime} to${booking.endTime}`;
       const agentHtml  = this.wrapEmail(`
         <p>Hi ${agentName},</p>
         <p>A booking you referred is scheduled for tomorrow.</p>
@@ -100,7 +100,7 @@ export class NotificationsService {
         select: { email: true, name: true },
       });
       const date = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
-      const time = `${booking.startTime} – ${booking.endTime}`;
+      const time = `${booking.startTime} to${booking.endTime}`;
       await Promise.all(
         managers.map((manager) => {
           const html = this.wrapEmail(`
@@ -134,7 +134,7 @@ export class NotificationsService {
     const code    = booking.bookingCode;
     const service = booking.service.name;
     const date    = new Date(booking.shootDate).toLocaleDateString('en-IN', { dateStyle: 'full' });
-    const time    = `${booking.startTime} – ${booking.endTime}`;
+    const time    = `${booking.startTime} to${booking.endTime}`;
     const amount  = booking.totalAmount ? `₹${Number(booking.totalAmount).toLocaleString('en-IN')}` : '';
 
     const templates: Record<NotificationEvent, { subject: string; body: string }> = {
@@ -237,7 +237,7 @@ Booking reference: <strong>${code}</strong>`,
       <p style="margin:0 0 20px 0;">
         <a href="${loginUrl}" style="display:inline-block;background:#E5312A;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;text-decoration:none;">Login Now</a>
       </p>
-      <p style="color:#888;font-size:12px;">Please change your password after your first login from Profile → Change Password.</p>
+      <p style="color:#888;font-size:12px;">Please change your password after your first login. Go to Profile and select Change Password.</p>
     `);
     return this.send(to, 'Your Podversal Studio account is ready', html);
   }
