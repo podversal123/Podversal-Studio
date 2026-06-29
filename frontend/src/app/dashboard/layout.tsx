@@ -28,13 +28,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-[#0a0a0a]">
       <Sidebar
         user={user}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <MobileHeader onOpen={() => setSidebarOpen(true)} />
         <main className="flex-1 p-4 lg:p-6 2xl:p-8 3xl:p-10 overflow-y-auto">
           {children}
