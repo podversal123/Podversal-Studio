@@ -222,31 +222,42 @@ export class InvoicesService {
       doc.on('error', reject);
 
       // ── Header ────────────────────────────────────────────
+      const GSTIN = '09AAMCK1657J1Z2';
+      const ADDR  = 'H No. 18, Akshay Enclave II, Govindpuram, Ghaziabad - 201001';
+      const UNIT  = 'A Unit of Krishiyug Technologies Pvt. Ltd.';
+      const EMAIL = process.env.ADMIN_EMAIL ?? 'podversalstudio@gmail.com';
+
       let headerBottom: number;
       if (data.logoBuffer) {
-        // Logo image (square canvas — visual content is ~60% of height)
         doc.image(data.logoBuffer, LM, 25, { width: 120 });
-        doc.fontSize(9).font('Helvetica').fillColor('#888888')
-           .text(process.env.ADMIN_EMAIL ?? 'podversalstudio@gmail.com', LM, 150);
+        doc.fontSize(8).font('Helvetica').fillColor('#666666')
+           .text(UNIT,            LM, 148)
+           .text(ADDR,            LM, 160)
+           .text(`GSTIN: ${GSTIN}`, LM, 172)
+           .text(EMAIL,           LM, 184);
         doc.fontSize(16).font('Helvetica-Bold').fillColor('#333333')
            .text(typeLabels[type], LM, 38, { width: W, align: 'right' });
         doc.fontSize(10).font('Helvetica').fillColor('#666666')
            .text(`#${invoiceNumber}`, LM, 60, { width: W, align: 'right' });
         doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, LM, 74, { width: W, align: 'right' });
-        doc.moveTo(LM, 168).lineTo(RM, 168).strokeColor('#e5e7eb').lineWidth(1).stroke();
-        headerBottom = 182;
+        doc.moveTo(LM, 200).lineTo(RM, 200).strokeColor('#e5e7eb').lineWidth(1).stroke();
+        headerBottom = 214;
       } else {
         doc.fontSize(20).font('Helvetica-Bold').fillColor('#3b5bdb')
            .text('Podversal Studio', LM, 50);
-        doc.fontSize(10).font('Helvetica').fillColor('#666666')
-           .text(process.env.ADMIN_EMAIL ?? '', LM, 74);
+        doc.fontSize(9).font('Helvetica').fillColor('#666666')
+           .text(UNIT, LM, 74);
+        doc.fontSize(8).fillColor('#888888')
+           .text(ADDR,            LM, 86)
+           .text(`GSTIN: ${GSTIN}`, LM, 97)
+           .text(EMAIL,           LM, 108);
         doc.fontSize(16).font('Helvetica-Bold').fillColor('#333333')
            .text(typeLabels[type], LM, 50, { width: W, align: 'right' });
         doc.fontSize(10).font('Helvetica').fillColor('#666666')
            .text(`#${invoiceNumber}`, LM, 71, { width: W, align: 'right' });
         doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, LM, 85, { width: W, align: 'right' });
-        doc.moveTo(LM, 105).lineTo(RM, 105).strokeColor('#e5e7eb').lineWidth(1).stroke();
-        headerBottom = 118;
+        doc.moveTo(LM, 122).lineTo(RM, 122).strokeColor('#e5e7eb').lineWidth(1).stroke();
+        headerBottom = 135;
       }
 
       // ── Two-column info ───────────────────────────────────
