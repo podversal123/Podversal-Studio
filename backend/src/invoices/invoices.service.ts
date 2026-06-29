@@ -1,9 +1,9 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InvoiceType } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import * as puppeteer from 'puppeteer';
 import * as nodemailer from 'nodemailer';
 import { v2 as cloudinary } from 'cloudinary';
+import PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -64,8 +64,8 @@ export class InvoicesService {
     const gstAmount = type === InvoiceType.GST_INVOICE ? Math.round(amount * gstRate * 100) / 100 : 0;
     const total    = amount + gstAmount;
 
-    // Generate PDF HTML
-    const html = this.buildInvoiceHtml({
+    // Generate PDF using pdfkit (no browser required)
+    const pdfBuffer = await this.buildInvoicePdf({
       invoiceNumber,
       type,
       booking,
@@ -73,9 +73,6 @@ export class InvoicesService {
       gstAmount,
       total,
     });
-
-    // Convert HTML → PDF using Puppeteer
-    const pdfBuffer = await this.generatePdf(html);
 
     // Upload PDF to Cloudinary
     const cloudinaryUrl = await this.uploadToCloudinary(pdfBuffer, invoiceNumber);
@@ -118,16 +115,17 @@ export class InvoicesService {
     });
   }
 
-  // ── PRIVATE: BUILD HTML ──────────────────────────────────
-  private buildInvoiceHtml(data: {
+  // ── PRIVATE: PDF GENERATION (pdfkit — no browser required) ─
+  private buildInvoicePdf(data: {
     invoiceNumber: string;
     type: InvoiceType;
     booking: any;
     amount: number;
     gstAmount: number;
     total: number;
-  }): string {
+  }): Promise<Buffer> {
     const { invoiceNumber, type, booking, amount, gstAmount, total } = data;
+
     const typeLabels: Record<InvoiceType, string> = {
       QUOTATION:       'Quotation',
       PROFORMA:        'Proforma Invoice',
@@ -135,122 +133,117 @@ export class InvoicesService {
       PAYMENT_RECEIPT: 'Payment Receipt',
     };
 
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <style>
-    body { font-family: Arial, sans-serif; color: #1a1a1a; margin: 0; padding: 40px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
-    .logo { font-size: 24px; font-weight: bold; color: #3b5bdb; }
-    .invoice-type { font-size: 20px; font-weight: bold; color: #333; text-align: right; }
-    .invoice-no { color: #666; font-size: 14px; margin-top: 4px; }
-    .divider { border: none; border-top: 2px solid #e5e7eb; margin: 20px 0; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-    .label { font-size: 12px; color: #666; margin-bottom: 2px; }
-    .value { font-size: 14px; color: #1a1a1a; font-weight: 500; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th { background: #f3f4f6; text-align: left; padding: 10px 12px; font-size: 13px; }
-    td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
-    .total-row td { font-weight: bold; background: #f9fafb; font-size: 14px; }
-    .footer { margin-top: 40px; font-size: 12px; color: #999; text-align: center; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <div class="logo">Podversal Studio</div>
-      <div style="font-size:13px;color:#666;margin-top:4px;">${process.env.ADMIN_EMAIL ?? process.env.SMTP_USER ?? ''}</div>
-    </div>
-    <div style="text-align:right;">
-      <div class="invoice-type">${typeLabels[type]}</div>
-      <div class="invoice-no">#${invoiceNumber}</div>
-      <div class="invoice-no">Date: ${new Date().toLocaleDateString('en-IN')}</div>
-    </div>
-  </div>
+    const fmt  = (n: number) => `Rs.${Number(n).toLocaleString('en-IN')}`;
+    const W    = 495; // usable width (A4 595 - 50*2 margins)
+    const LM   = 50;  // left margin
+    const RM   = 545; // right edge
 
-  <hr class="divider" />
+    return new Promise((resolve, reject) => {
+      const doc    = new PDFDocument({ margin: 50, size: 'A4' });
+      const chunks: Buffer[] = [];
+      doc.on('data', (c: Buffer) => chunks.push(c));
+      doc.on('end',  () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
 
-  <div class="grid">
-    <div>
-      <div class="label">Billed To</div>
-      <div class="value">${booking.customerName}</div>
-      <div style="font-size:13px;color:#666;">${booking.customerEmail}</div>
-      <div style="font-size:13px;color:#666;">${booking.customerPhone}</div>
-      ${booking.companyName ? `<div style="font-size:13px;color:#666;">${booking.companyName}</div>` : ''}
-    </div>
-    <div>
-      <div class="label">Booking Details</div>
-      <div class="value">${booking.service?.name}</div>
-      <div style="font-size:13px;color:#666;">Date: ${new Date(booking.shootDate).toLocaleDateString('en-IN')}</div>
-      <div style="font-size:13px;color:#666;">Time: ${booking.startTime} – ${booking.endTime}</div>
-      <div style="font-size:13px;color:#666;">Duration: ${booking.durationHours} hours</div>
-    </div>
-  </div>
+      // ── Header ────────────────────────────────────────────
+      doc.fontSize(20).font('Helvetica-Bold').fillColor('#3b5bdb')
+         .text('Podversal Studio', LM, 50);
+      doc.fontSize(10).font('Helvetica').fillColor('#666666')
+         .text(process.env.ADMIN_EMAIL ?? '', LM, 74);
 
-  <table>
-    <thead>
-      <tr>
-        <th>Description</th>
-        <th>Duration</th>
-        <th>Rate/Hr</th>
-        <th>Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>${booking.service?.name} Studio Session</td>
-        <td>${booking.durationHours} hrs</td>
-        <td>₹${((amount / booking.durationHours) || 0).toLocaleString('en-IN')}</td>
-        <td>₹${amount.toLocaleString('en-IN')}</td>
-      </tr>
-      ${booking.discountAmount > 0 ? `
-      <tr>
-        <td colspan="3">Discount</td>
-        <td>-₹${booking.discountAmount.toLocaleString('en-IN')}</td>
-      </tr>` : ''}
-      ${gstAmount > 0 ? `
-      <tr>
-        <td colspan="3">GST @ 18%</td>
-        <td>₹${gstAmount.toLocaleString('en-IN')}</td>
-      </tr>` : ''}
-      <tr class="total-row">
-        <td colspan="3">Total Amount</td>
-        <td>₹${total.toLocaleString('en-IN')}</td>
-      </tr>
-    </tbody>
-  </table>
+      doc.fontSize(16).font('Helvetica-Bold').fillColor('#333333')
+         .text(typeLabels[type], LM, 50, { width: W, align: 'right' });
+      doc.fontSize(10).font('Helvetica').fillColor('#666666')
+         .text(`#${invoiceNumber}`, LM, 71, { width: W, align: 'right' });
+      doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, LM, 85, { width: W, align: 'right' });
 
-  <div class="footer">
-    Thank you for choosing Podversal Studio · This is a computer-generated document
-  </div>
-</body>
-</html>`;
-  }
+      // ── Divider ───────────────────────────────────────────
+      doc.moveTo(LM, 105).lineTo(RM, 105).strokeColor('#e5e7eb').lineWidth(1).stroke();
 
-  // ── PRIVATE: PDF GENERATION ──────────────────────────────
-  private async generatePdf(html: string): Promise<Buffer> {
-    const browser = await puppeteer.launch({
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-      ],
-      headless: true,
+      // ── Two-column info ───────────────────────────────────
+      const C2 = LM + W / 2 + 10;
+      let y = 118;
+
+      doc.fontSize(8).font('Helvetica-Bold').fillColor('#999999')
+         .text('BILLED TO', LM, y).text('BOOKING DETAILS', C2, y);
+
+      y += 14;
+      doc.fontSize(12).font('Helvetica-Bold').fillColor('#1a1a1a')
+         .text(booking.customerName, LM, y, { width: W / 2 - 10 })
+         .text(booking.service?.name ?? 'Studio Session', C2, y, { width: W / 2 - 10 });
+
+      y += 16;
+      doc.fontSize(10).font('Helvetica').fillColor('#444444')
+         .text(booking.customerEmail, LM, y, { width: W / 2 - 10 })
+         .text(`Date: ${new Date(booking.shootDate).toLocaleDateString('en-IN')}`, C2, y, { width: W / 2 - 10 });
+
+      y += 14;
+      doc.text(booking.customerPhone ?? '', LM, y, { width: W / 2 - 10 })
+         .text(`Time: ${booking.startTime} – ${booking.endTime}`, C2, y, { width: W / 2 - 10 });
+
+      y += 14;
+      if (booking.companyName) {
+        doc.text(booking.companyName, LM, y, { width: W / 2 - 10 });
+      }
+      doc.text(`Duration: ${booking.durationHours} hrs`, C2, y, { width: W / 2 - 10 });
+
+      // ── Table header ─────────────────────────────────────
+      y += 36;
+      doc.rect(LM, y, W, 26).fill('#f3f4f6');
+      doc.fontSize(10).font('Helvetica-Bold').fillColor('#1a1a1a')
+         .text('Description',   LM + 8, y + 8)
+         .text('Duration',      LM + 260, y + 8, { width: 70, align: 'right' })
+         .text('Rate/Hr',       LM + 340, y + 8, { width: 70, align: 'right' })
+         .text('Amount',        LM + 420, y + 8, { width: 68, align: 'right' });
+
+      // ── Table row ────────────────────────────────────────
+      y += 26;
+      const ratePerHr = booking.durationHours ? amount / booking.durationHours : 0;
+      doc.fontSize(10).font('Helvetica').fillColor('#1a1a1a')
+         .text(`${booking.service?.name ?? 'Studio'} Session`, LM + 8, y + 8, { width: 250 })
+         .text(`${booking.durationHours} hrs`,  LM + 260, y + 8, { width: 70, align: 'right' })
+         .text(fmt(ratePerHr),                  LM + 340, y + 8, { width: 70, align: 'right' })
+         .text(fmt(amount),                     LM + 420, y + 8, { width: 68, align: 'right' });
+
+      y += 26;
+      doc.moveTo(LM, y).lineTo(RM, y).strokeColor('#f3f4f6').lineWidth(1).stroke();
+
+      // ── Discount ─────────────────────────────────────────
+      if (booking.discountAmount && booking.discountAmount > 0) {
+        doc.fontSize(10).font('Helvetica').fillColor('#1a1a1a')
+           .text('Discount', LM + 8, y + 8)
+           .fillColor('#dc2626')
+           .text(`-${fmt(booking.discountAmount)}`, LM + 420, y + 8, { width: 68, align: 'right' });
+        y += 26;
+        doc.moveTo(LM, y).lineTo(RM, y).strokeColor('#f3f4f6').lineWidth(1).stroke();
+      }
+
+      // ── GST ──────────────────────────────────────────────
+      if (gstAmount > 0) {
+        doc.fontSize(10).font('Helvetica').fillColor('#1a1a1a')
+           .text('GST @ 18%', LM + 8, y + 8)
+           .text(fmt(gstAmount), LM + 420, y + 8, { width: 68, align: 'right' });
+        y += 26;
+        doc.moveTo(LM, y).lineTo(RM, y).strokeColor('#f3f4f6').lineWidth(1).stroke();
+      }
+
+      // ── Total ─────────────────────────────────────────────
+      doc.rect(LM, y, W, 30).fill('#f9fafb');
+      doc.fontSize(12).font('Helvetica-Bold').fillColor('#1a1a1a')
+         .text('Total Amount', LM + 8, y + 9)
+         .text(fmt(total), LM + 420, y + 9, { width: 68, align: 'right' });
+
+      // ── Footer ────────────────────────────────────────────
+      const footerY = 770;
+      doc.moveTo(LM, footerY).lineTo(RM, footerY).strokeColor('#e5e7eb').lineWidth(1).stroke();
+      doc.fontSize(9).font('Helvetica').fillColor('#999999')
+         .text(
+           'Thank you for choosing Podversal Studio  ·  This is a computer-generated document',
+           LM, footerY + 10, { width: W, align: 'center' },
+         );
+
+      doc.end();
     });
-    try {
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
-      const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20px', bottom: '20px' } });
-      return Buffer.from(pdf);
-    } finally {
-      await browser.close();
-    }
   }
 
   // ── PRIVATE: CLOUDINARY UPLOAD ───────────────────────────

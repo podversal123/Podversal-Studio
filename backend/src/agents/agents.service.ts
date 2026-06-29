@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CommissionStatus, Role } from '@prisma/client';
 import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
-import * as puppeteer from 'puppeteer';
+import PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -145,134 +145,115 @@ export class AgentsService {
 
   // Generate PDF commission statement for an agent
   async generateCommissionStatement(agentId: string): Promise<Buffer> {
-    const agent = await this.findOne(agentId);
+    const agent   = await this.findOne(agentId);
     const summary = await this.getCommissionSummary(agentId);
-    const html = this.buildStatementHtml(agent, summary);
-    return this.renderPdf(html);
+    return this.buildStatementPdf(agent, summary);
   }
 
-  private buildStatementHtml(agent: any, summary: any): string {
-    const fmt  = (n: number) => `₹${Number(n).toLocaleString('en-IN')}`;
+  private buildStatementPdf(agent: any, summary: any): Promise<Buffer> {
+    const fmt  = (n: number) => `Rs.${Number(n).toLocaleString('en-IN')}`;
     const date = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+    const LM   = 50;
+    const W    = 495;
+    const RM   = 545;
 
-    const rows = (agent.commissions ?? []).map((c: any) => `
-      <tr>
-        <td>${c.booking?.bookingCode ?? '—'}</td>
-        <td>${c.booking?.service?.name ?? '—'}</td>
-        <td>${c.booking?.shootDate ? new Date(c.booking.shootDate).toLocaleDateString('en-IN') : '—'}</td>
-        <td>${fmt(c.bookingAmount)}</td>
-        <td>${Number(c.commissionRate).toFixed(1)}%</td>
-        <td>${fmt(c.commissionAmount)}</td>
-        <td style="color:${c.status === 'RELEASED' ? '#16a34a' : '#d97706'}">${c.status}</td>
-        <td>${c.releasedAt ? new Date(c.releasedAt).toLocaleDateString('en-IN') : '—'}</td>
-      </tr>`).join('');
+    return new Promise((resolve, reject) => {
+      const doc    = new PDFDocument({ margin: 50, size: 'A4' });
+      const chunks: Buffer[] = [];
+      doc.on('data', (c: Buffer) => chunks.push(c));
+      doc.on('end',  () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
 
-    return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8"/>
-  <style>
-    body { font-family: Arial, sans-serif; color: #1a1a1a; margin: 0; padding: 40px; font-size: 13px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
-    .logo { font-size: 22px; font-weight: bold; color: #3b5bdb; }
-    .title { font-size: 18px; font-weight: bold; color: #111; }
-    .subtitle { color: #666; font-size: 12px; margin-top: 4px; }
-    hr { border: none; border-top: 2px solid #e5e7eb; margin: 20px 0; }
-    .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
-    .summary-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; text-align: center; }
-    .summary-value { font-size: 20px; font-weight: bold; color: #111; }
-    .summary-label { font-size: 11px; color: #666; margin-top: 4px; }
-    .agent-info { margin-bottom: 24px; }
-    .agent-info h2 { font-size: 15px; margin-bottom: 8px; }
-    .agent-info p { margin: 2px 0; color: #444; }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #3b5bdb; color: #fff; text-align: left; padding: 10px 12px; font-size: 12px; }
-    td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; }
-    tr:nth-child(even) td { background: #f9fafb; }
-    .footer { margin-top: 32px; font-size: 11px; color: #999; text-align: center; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <div class="logo">Podversal Studio</div>
-      <div style="font-size:12px;color:#666;margin-top:4px;">${process.env.ADMIN_EMAIL ?? process.env.SMTP_USER ?? ''}</div>
-    </div>
-    <div style="text-align:right;">
-      <div class="title">Commission Statement</div>
-      <div class="subtitle">Generated: ${date}</div>
-    </div>
-  </div>
-  <hr/>
+      // ── Header ────────────────────────────────────────────
+      doc.fontSize(20).font('Helvetica-Bold').fillColor('#3b5bdb')
+         .text('Podversal Studio', LM, 50);
+      doc.fontSize(10).font('Helvetica').fillColor('#666666')
+         .text(process.env.ADMIN_EMAIL ?? '', LM, 74);
 
-  <div class="agent-info">
-    <h2>${agent.user?.name ?? 'Agent'}</h2>
-    <p>Agency: ${agent.agencyName ?? '—'}</p>
-    <p>Commission Rate: ${agent.commissionRate}%</p>
-    ${agent.gstNumber ? `<p>GST: ${agent.gstNumber}</p>` : ''}
-    ${agent.user?.email ? `<p>Email: ${agent.user.email}</p>` : ''}
-  </div>
+      doc.fontSize(16).font('Helvetica-Bold').fillColor('#111111')
+         .text('Commission Statement', LM, 50, { width: W, align: 'right' });
+      doc.fontSize(10).font('Helvetica').fillColor('#666666')
+         .text(`Generated: ${date}`, LM, 71, { width: W, align: 'right' });
 
-  <div class="summary">
-    <div class="summary-card">
-      <div class="summary-value">${fmt(summary.total)}</div>
-      <div class="summary-label">Total Earned</div>
-    </div>
-    <div class="summary-card" style="border-color:#fde68a;">
-      <div class="summary-value" style="color:#d97706;">${fmt(summary.pending)}</div>
-      <div class="summary-label">Pending Payout</div>
-    </div>
-    <div class="summary-card" style="border-color:#bbf7d0;">
-      <div class="summary-value" style="color:#16a34a;">${fmt(summary.released)}</div>
-      <div class="summary-label">Released</div>
-    </div>
-  </div>
+      doc.moveTo(LM, 95).lineTo(RM, 95).strokeColor('#e5e7eb').lineWidth(1).stroke();
 
-  <table>
-    <thead>
-      <tr>
-        <th>Booking Code</th>
-        <th>Service</th>
-        <th>Shoot Date</th>
-        <th>Booking Amount</th>
-        <th>Rate</th>
-        <th>Commission</th>
-        <th>Status</th>
-        <th>Released On</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${rows || '<tr><td colspan="8" style="text-align:center;color:#999;">No commissions yet</td></tr>'}
-    </tbody>
-  </table>
+      // ── Agent info ────────────────────────────────────────
+      let y = 110;
+      doc.fontSize(13).font('Helvetica-Bold').fillColor('#1a1a1a')
+         .text(agent.user?.name ?? 'Agent', LM, y);
+      y += 16;
+      doc.fontSize(10).font('Helvetica').fillColor('#444444')
+         .text(`Agency: ${agent.agencyName ?? '—'}`, LM, y);
+      y += 13;
+      doc.text(`Commission Rate: ${agent.commissionRate}%`, LM, y);
+      if (agent.gstNumber) { y += 13; doc.text(`GST: ${agent.gstNumber}`, LM, y); }
+      if (agent.user?.email) { y += 13; doc.text(`Email: ${agent.user.email}`, LM, y); }
 
-  <div class="footer">
-    Podversal Studio · This is a computer-generated commission statement · ${date}
-  </div>
-</body>
-</html>`;
-  }
+      // ── Summary cards ─────────────────────────────────────
+      y += 28;
+      const cardW = (W - 20) / 3;
+      const cards = [
+        { label: 'Total Earned',   value: fmt(summary.total),    color: '#1a1a1a', border: '#e5e7eb' },
+        { label: 'Pending Payout', value: fmt(summary.pending),  color: '#d97706', border: '#fde68a' },
+        { label: 'Released',       value: fmt(summary.released), color: '#16a34a', border: '#bbf7d0' },
+      ];
+      cards.forEach((card, i) => {
+        const cx = LM + i * (cardW + 10);
+        doc.rect(cx, y, cardW, 52).fillAndStroke('#f9fafb', card.border);
+        doc.fontSize(14).font('Helvetica-Bold').fillColor(card.color)
+           .text(card.value, cx, y + 10, { width: cardW, align: 'center' });
+        doc.fontSize(9).font('Helvetica').fillColor('#666666')
+           .text(card.label, cx, y + 30, { width: cardW, align: 'center' });
+      });
 
-  private async renderPdf(html: string): Promise<Buffer> {
-    const browser = await puppeteer.launch({
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-      ],
-      headless: true,
+      // ── Table ─────────────────────────────────────────────
+      y += 68;
+      const cols = [
+        { label: 'Booking',  x: LM + 4,   w: 70  },
+        { label: 'Service',  x: LM + 78,  w: 90  },
+        { label: 'Date',     x: LM + 172, w: 62  },
+        { label: 'Amount',   x: LM + 238, w: 62  },
+        { label: 'Rate',     x: LM + 304, w: 40  },
+        { label: 'Comm.',    x: LM + 348, w: 62  },
+        { label: 'Status',   x: LM + 414, w: 50  },
+        { label: 'Released', x: LM + 468, w: 72  },
+      ];
+
+      doc.rect(LM, y, W, 24).fill('#3b5bdb');
+      doc.fontSize(8).font('Helvetica-Bold').fillColor('#ffffff');
+      cols.forEach(col => doc.text(col.label, col.x, y + 8, { width: col.w }));
+
+      const commissions: any[] = agent.commissions ?? [];
+      if (commissions.length === 0) {
+        y += 24;
+        doc.rect(LM, y, W, 26).fill('#f9fafb');
+        doc.fontSize(10).font('Helvetica').fillColor('#999999')
+           .text('No commissions yet', LM, y + 8, { width: W, align: 'center' });
+      } else {
+        commissions.forEach((c: any, idx: number) => {
+          y += 24;
+          if (idx % 2 === 1) doc.rect(LM, y, W, 24).fill('#f9fafb');
+          doc.fontSize(8).font('Helvetica').fillColor('#1a1a1a');
+          const statusColor = c.status === 'RELEASED' ? '#16a34a' : '#d97706';
+          doc.text(c.booking?.bookingCode ?? '—',                                            cols[0].x, y + 7, { width: cols[0].w });
+          doc.text(c.booking?.service?.name ?? '—',                                          cols[1].x, y + 7, { width: cols[1].w });
+          doc.text(c.booking?.shootDate ? new Date(c.booking.shootDate).toLocaleDateString('en-IN') : '—', cols[2].x, y + 7, { width: cols[2].w });
+          doc.text(fmt(c.bookingAmount),                                                      cols[3].x, y + 7, { width: cols[3].w });
+          doc.text(`${Number(c.commissionRate).toFixed(1)}%`,                                 cols[4].x, y + 7, { width: cols[4].w });
+          doc.text(fmt(c.commissionAmount),                                                   cols[5].x, y + 7, { width: cols[5].w });
+          doc.fillColor(statusColor).text(c.status,                                          cols[6].x, y + 7, { width: cols[6].w });
+          doc.fillColor('#1a1a1a').text(c.releasedAt ? new Date(c.releasedAt).toLocaleDateString('en-IN') : '—', cols[7].x, y + 7, { width: cols[7].w });
+        });
+      }
+
+      // ── Footer ────────────────────────────────────────────
+      const footerY = 775;
+      doc.moveTo(LM, footerY).lineTo(RM, footerY).strokeColor('#e5e7eb').lineWidth(1).stroke();
+      doc.fontSize(9).font('Helvetica').fillColor('#999999')
+         .text(`Podversal Studio  ·  Computer-generated commission statement  ·  ${date}`,
+               LM, footerY + 8, { width: W, align: 'center' });
+
+      doc.end();
     });
-    try {
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
-      const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' } });
-      return Buffer.from(pdf);
-    } finally {
-      await browser.close();
-    }
   }
 }
