@@ -326,10 +326,10 @@ export default function BookingDetailPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div className={`grid grid-cols-1 gap-3 ${isAdmin ? 'lg:grid-cols-3' : ''}`}>
 
         {/* Left — details */}
-        <div className="lg:col-span-2 space-y-3">
+        <div className={`${isAdmin ? 'lg:col-span-2' : ''} space-y-3`}>
 
           {/* Shoot Details */}
           <SectionCard title="Shoot Details">
@@ -418,16 +418,24 @@ export default function BookingDetailPage() {
                       <p className="font-bold text-gray-900 dark:text-white text-sm">{inv.invoiceNumber}</p>
                       <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a]">₹{Number(inv.totalAmount).toLocaleString('en-IN')}</p>
                     </div>
-                    {inv.cloudinaryUrl && (
-                      <a
-                        href={inv.cloudinaryUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs font-bold text-[#E5312A] hover:underline"
-                      >
-                        <FileText size={12} /> Download PDF
-                      </a>
-                    )}
+                    <button
+                      className="flex items-center gap-1.5 text-xs font-bold text-[#E5312A] hover:underline"
+                      onClick={() => {
+                        const token = localStorage.getItem('access_token');
+                        fetch(`${process.env.NEXT_PUBLIC_API_URL}/invoices/${inv.id}/pdf`, {
+                          headers: { Authorization: `Bearer ${token}` },
+                        })
+                          .then(r => r.blob())
+                          .then(blob => {
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url; a.download = `${inv.invoiceNumber}.pdf`;
+                            a.click(); URL.revokeObjectURL(url);
+                          });
+                      }}
+                    >
+                      <FileText size={12} /> Download PDF
+                    </button>
                   </div>
                 ))}
               </div>
