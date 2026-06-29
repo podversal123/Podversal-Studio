@@ -61,10 +61,7 @@ export class InvoicesService {
       logoBuffer,
     });
 
-    // Upload PDF to Cloudinary
-    const cloudinaryUrl = await this.uploadToCloudinary(pdfBuffer, invoiceNumber);
-
-    // Save invoice to DB
+    // Save invoice to DB (PDF streamed on-demand via /invoices/:id/pdf — no Cloudinary upload needed)
     const invoice = await this.prisma.invoice.create({
       data: {
         bookingId,
@@ -73,7 +70,6 @@ export class InvoicesService {
         amount,
         gstAmount,
         totalAmount: total,
-        cloudinaryUrl,
       },
     });
 
