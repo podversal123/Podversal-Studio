@@ -20,12 +20,12 @@ class GenerateInvoiceDto {
 export class InvoicesController {
   constructor(private invoices: InvoicesService) {}
 
-  // POST /api/invoices/generate — SUPER_ADMIN, STUDIO_MANAGER only
+  // POST /api/invoices/generate — admin roles + customers (own bookings only)
   @Post('generate')
   @UseGuards(RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
-  generate(@Body() dto: GenerateInvoiceDto) {
-    return this.invoices.generate(dto.bookingId, dto.type);
+  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER', 'CUSTOMER')
+  generate(@Body() dto: GenerateInvoiceDto, @CurrentUser() user: any) {
+    return this.invoices.generate(dto.bookingId, dto.type, user.id, user.role);
   }
 
   // GET /api/invoices/booking/:bookingId — ownership enforced per role

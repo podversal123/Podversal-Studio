@@ -34,12 +34,18 @@ export class InvoicesService {
   }
 
   // ── GENERATE INVOICE ─────────────────────────────────────
-  async generate(bookingId: string, type: InvoiceType): Promise<any> {
+  async generate(bookingId: string, type: InvoiceType, requesterId?: string, requesterRole?: string): Promise<any> {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
-      include: { service: true, payments: true },
+      include: { service: true, payments: true, customer: { select: { userId: true } } },
     });
     if (!booking) throw new NotFoundException('Booking not found');
+
+    // Customers can only generate invoices for their own bookings
+    if (requesterRole === 'CUSTOMER') {
+      const owns = booking.createdById === requesterId || booking.customer?.userId === requesterId;
+      if (!owns) throw new ForbiddenException('Access denied');
+    }
 
     // Unique invoice number using max existing number (safe under concurrent load)
     const year = new Date().getFullYear();
