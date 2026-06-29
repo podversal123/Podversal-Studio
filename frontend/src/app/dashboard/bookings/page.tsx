@@ -34,9 +34,6 @@ const STATUS_META: Record<BookingStatus, { label: string; cls: string }> = {
   CANCELLED:    { label: 'Cancelled',    cls: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400' },
 };
 
-const STATUS_STEPS: BookingStatus[] = [
-  'REQUEST', 'CHECKING', 'QUOTED', 'APPROVED', 'ADVANCE_PAID', 'IN_PROGRESS', 'COMPLETED',
-];
 
 function StatusBadge({ status }: { status: BookingStatus }) {
   const meta = STATUS_META[status] ?? STATUS_META.REQUEST;
@@ -247,7 +244,7 @@ export default function BookingsPage() {
                       </Link>
                     ) : (
                       <Link href={`/dashboard/bookings/${b.id}`} className="text-[#E5312A] hover:underline text-xs font-semibold">
-                        View →
+                        View
                       </Link>
                     )}
                   </td>
@@ -258,20 +255,6 @@ export default function BookingsPage() {
         </div>
       </div>
 
-      {/* Status legend for customer */}
-      {!isAdmin && (
-        <div className="mt-6 border border-[#e5e5e5] dark:border-[#2a2a2a] p-4 bg-white dark:bg-[#111111]">
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-3">How booking status works</p>
-          <div className="flex flex-wrap gap-0 border-l border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
-            {STATUS_STEPS.map((s, i) => (
-              <div key={s} className="border-b border-r border-[#e5e5e5] dark:border-[#2a2a2a] px-3 py-2 flex-1 min-w-[100px]">
-                <p className="text-[9px] font-black tracking-widest text-[#E5312A] mb-0.5">{String(i + 1).padStart(2, '0')}</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{STATUS_META[s].label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

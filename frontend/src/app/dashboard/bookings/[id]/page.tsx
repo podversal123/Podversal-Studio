@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import {
-  CreditCard, ArrowLeft, FileText, CheckCircle, AlertTriangle, Loader2
+  CreditCard, FileText, CheckCircle, AlertTriangle, Loader2
 } from 'lucide-react';
 import api from '@/lib/api';
 import { getStoredUser } from '@/lib/auth';
@@ -248,7 +248,7 @@ export default function BookingDetailPage() {
             onClick={() => router.back()}
             className="flex items-center gap-1.5 text-xs text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white transition-colors mb-3"
           >
-            <ArrowLeft size={13} /> All Bookings
+            All Bookings
           </button>
           <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#E5312A] mb-1">Booking Details</p>
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">{booking.bookingCode}</h1>

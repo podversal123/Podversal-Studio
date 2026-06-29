@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
-import { Calendar, Tag, ArrowLeft, User } from 'lucide-react';
+import { Calendar, Tag, User } from 'lucide-react';
 
 interface BlogPost {
   id: string;
@@ -62,7 +62,7 @@ export default function BlogPostPage() {
       <div className="max-w-3xl mx-auto px-4 pt-32 pb-20">
         {/* Back */}
         <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-[#a0a0a0] hover:text-gray-900 dark:hover:text-white mb-8 transition-colors">
-          <ArrowLeft size={16} /> Back to Blog
+          Back to Blog
         </Link>
 
         {/* Category */}

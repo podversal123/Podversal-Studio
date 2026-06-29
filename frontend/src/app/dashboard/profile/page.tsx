@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { Camera, Lock, Mail, CalendarDays, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Camera, Lock, Mail, CalendarDays, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { getStoredUser } from '@/lib/auth';
@@ -193,7 +193,6 @@ export default function ProfilePage() {
               <Lock size={15} className="text-[#aaa]" />
               <span className="text-sm font-bold text-gray-900 dark:text-white">Change Password</span>
             </div>
-            <ChevronRight size={15} className="text-[#aaa] group-hover:text-[#E5312A] transition-colors" />
           </Link>
         )}
       </div>

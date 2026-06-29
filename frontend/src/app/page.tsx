@@ -253,12 +253,13 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href={bookHref}
-                className="inline-flex items-center gap-2 bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-8 py-3.5 text-sm tracking-wide transition-colors"
+                className="inline-flex items-center justify-center gap-2 min-w-[200px] bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-8 py-3.5 text-sm tracking-wide transition-colors"
               >
-                Book a Studio              </Link>
+                Book a Studio
+              </Link>
               <button
                 onClick={() => scrollTo('videos')}
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/40 text-white/80 hover:text-white font-semibold px-8 py-3.5 text-sm transition-colors"
+                className="inline-flex items-center justify-center gap-2 min-w-[200px] bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/40 text-white/80 hover:text-white font-semibold px-8 py-3.5 text-sm transition-colors"
               >
                 <Play size={11} className="fill-white" />
                 Watch Our Work
