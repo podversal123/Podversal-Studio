@@ -12,8 +12,9 @@ export type NotificationEvent =
 
 const logoHtml = () => {
   const url = process.env.EMAIL_LOGO_URL;
-  if (!url) return '';
-  return `<img src="${url}" alt="Podversal Studio" width="180" height="180" style="display:block;margin:0 auto;border:0;" />`;
+  return url
+    ? `<img src="${url}" alt="Podversal Studio" height="150" style="display:block;margin:0 auto;border:0;" />`
+    : `<span style="color:#E5312A;font-size:20px;font-weight:900;letter-spacing:0.08em;">PODVERSAL STUDIO</span>`;
 };
 
 @Injectable()
@@ -192,12 +193,13 @@ Booking reference: <strong>${code}</strong>`,
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8">
-<meta name="color-scheme" content="light dark">
-<meta name="supported-color-schemes" content="light dark">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
 <style>
+  :root { color-scheme: light; supported-color-schemes: light; }
   body { font-family: Arial, sans-serif; background: #f5f5f5 !important; margin: 0; padding: 0; }
   .wrap { max-width: 540px; margin: 32px auto; background: #ffffff !important; border: 1px solid #e5e5e5; }
-  .top  { background: #ffffff !important; padding: 28px 32px; text-align: center; border-bottom: 1px solid #eeeeee; }
+  .top  { background: #ffffff !important; padding: 20px 32px; text-align: center; }
   .body { padding: 28px 32px; color: #222222 !important; font-size: 14px; line-height: 1.7; background: #ffffff !important; }
   .body p { margin: 0 0 16px 0; color: #222222 !important; }
   .body p:last-child { margin-bottom: 0; }
