@@ -35,12 +35,13 @@ export function logout(): void {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
   localStorage.removeItem('user');
-  window.history.replaceState(null, '', '/');
 
-  if (role === 'SUPER_ADMIN')                                    window.location.href = '/admin/login';
-  else if (role === 'REFERRAL_AGENT')                            window.location.href = '/agent/login';
-  else if (role === 'STUDIO_MANAGER' || role === 'EMPLOYEE')     window.location.href = '/staff/login';
-  else                                                           window.location.href = '/login';
+  // Use replace() so the logout action itself doesn't add a history entry —
+  // pressing back from the login page won't return to the page where logout was clicked.
+  if (role === 'SUPER_ADMIN')                                    window.location.replace('/admin/login');
+  else if (role === 'REFERRAL_AGENT')                            window.location.replace('/agent/login');
+  else if (role === 'STUDIO_MANAGER' || role === 'EMPLOYEE')     window.location.replace('/staff/login');
+  else                                                           window.location.replace('/login');
 }
 
 // Role hierarchy — used to restrict page access

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { isAuthenticated } from '@/lib/auth';
 import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
 
 function ContactForm() {
@@ -157,6 +158,9 @@ export default function HomePage() {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [openFaq,     setOpenFaq]     = useState<number | null>(null);
   const [slide,       setSlide]       = useState(0);
+  const [loggedIn,    setLoggedIn]    = useState(false);
+
+  const bookHref = loggedIn ? '/dashboard/bookings/new' : '/register';
 
   const fetchPublicData = () => {
     api.get<StudioVideo[]>('/studio-videos/public').then(r => setVideos(r.data)).catch(() => {});
@@ -164,7 +168,7 @@ export default function HomePage() {
     api.get<GalleryImage[]>('/gallery/public').then(r => setGalleryImgs(r.data)).catch(() => {});
   };
 
-  useEffect(() => { fetchPublicData(); }, []);
+  useEffect(() => { setLoggedIn(isAuthenticated()); fetchPublicData(); }, []);
   useRefetchOnFocus(fetchPublicData);
 
   // Handle hash navigation from other pages (e.g. /blog → /#process)
@@ -248,7 +252,7 @@ export default function HomePage() {
             {/* CTAs */}
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/register"
+                href={bookHref}
                 className="inline-flex items-center gap-2 bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-8 py-3.5 text-sm tracking-wide transition-colors"
               >
                 Book a Studio <ArrowRight size={14} />
@@ -329,7 +333,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{s.title}</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">{s.description}</p>
-                  <Link href="/register" className="inline-flex items-center gap-1 text-xs font-semibold text-[#E5312A] hover:text-[#CC2A24] transition-colors">
+                  <Link href={bookHref} className="inline-flex items-center gap-1 text-xs font-semibold text-[#E5312A] hover:text-[#CC2A24] transition-colors">
                     Book this service <ArrowRight size={11} />
                   </Link>
                 </div>
@@ -486,7 +490,7 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-              <Link href="/register" className="inline-flex items-center gap-2 mt-8 bg-white text-[#E5312A] font-semibold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
+              <Link href={bookHref} className="inline-flex items-center gap-2 mt-8 bg-white text-[#E5312A] font-semibold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
                 Get Started <ArrowRight size={15} />
               </Link>
             </div>
