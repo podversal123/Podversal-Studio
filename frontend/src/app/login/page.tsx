@@ -119,7 +119,7 @@ function LoginForm() {
     return (
       <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#111111] flex items-center justify-center p-4 relative">
         <div className="absolute top-4 right-4"><ThemeToggle /></div>
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md 2xl:max-w-lg 3xl:max-w-xl">
           <div className="flex justify-center mb-8">
             <Link href="/"><Logo height={76} /></Link>
           </div>

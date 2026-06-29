@@ -48,7 +48,7 @@ export default function Navbar() {
         ? 'border-b border-[#e5e5e5] dark:border-[#2a2a2a] shadow-[0_1px_16px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_16px_rgba(0,0,0,0.35)]'
         : 'border-b border-transparent'
     }`}>
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="site-wrap">
         <div className="flex items-center justify-between h-[80px]">
 
           {/* Logo */}

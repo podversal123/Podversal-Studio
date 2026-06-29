@@ -237,7 +237,7 @@ export default function HomePage() {
             {/* Headline */}
             <h1
               className="font-black leading-[0.97] tracking-tight mb-6 text-white drop-shadow-2xl"
-              style={{ fontSize: 'clamp(32px, 8vw, 90px)' }}
+              style={{ fontSize: 'clamp(32px, 6vw, 120px)' }}
             >
               Your Vision,<br />
               <span className="text-[#E5312A]">Professionally</span><br />
@@ -317,7 +317,7 @@ export default function HomePage() {
 
       {/* ── SERVICES ──────────────────────────────────── */}
       <section id="services" className="pt-6 pb-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="site-wrap">
           <div className="mb-12">
             <p className="section-label mb-3">Services</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Our Studio Services</h2>
@@ -343,7 +343,7 @@ export default function HomePage() {
 
       {/* ── STUDIO VIDEOS ────────────────────────────── */}
       <section id="videos" className="pt-6 pb-20 bg-white dark:bg-[#111111]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="site-wrap">
           <div className="mb-12">
             <p className="section-label mb-3">Studio Showcase</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">See Our Work</h2>
@@ -410,7 +410,7 @@ export default function HomePage() {
 
       {/* ── GALLERY ──────────────────────────────────── */}
       <section className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="site-wrap">
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="section-label mb-3">Studio Gallery</p>
@@ -447,7 +447,7 @@ export default function HomePage() {
 
       {/* ── HOW IT WORKS ─────────────────────────────── */}
       <section id="process" className="pt-6 pb-20 bg-white dark:bg-[#111111]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="site-wrap">
           <div className="mb-12">
             <p className="section-label mb-3">How It Works</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">From Request to Invoice</h2>
@@ -466,7 +466,7 @@ export default function HomePage() {
 
       {/* ── WHY US ───────────────────────────────────── */}
       <section className="py-20 bg-[#E5312A]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="site-wrap">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             <div>
               <p className="section-label text-white/60 mb-4">Why Podversal</p>
@@ -508,7 +508,7 @@ export default function HomePage() {
 
       {/* ── TESTIMONIALS ─────────────────────────────── */}
       <section className="py-20 bg-white dark:bg-[#111111]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="site-wrap">
           <div className="mb-12">
             <p className="section-label mb-3">Testimonials</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">What our clients say</h2>
@@ -537,7 +537,7 @@ export default function HomePage() {
 
       {/* ── BLOG ─────────────────────────────────────── */}
       <section className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="site-wrap">
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="section-label mb-3">Blog</p>
@@ -620,7 +620,7 @@ export default function HomePage() {
 
       {/* ── CONTACT ──────────────────────────────────── */}
       <section id="contact" className="pt-6 pb-20 bg-white dark:bg-[#111111]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="site-wrap">
           <div className="mb-10">
             <p className="section-label mb-3">Contact</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Get in Touch</h2>

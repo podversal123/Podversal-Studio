@@ -68,11 +68,11 @@ export default function DashboardPage() {
           <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
             {greeting} &middot; {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white mt-1">{user.name}</h1>
+          <h1 className="text-2xl 2xl:text-3xl 3xl:text-4xl font-black text-gray-900 dark:text-white mt-1">{user.name}</h1>
         </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 2xl:gap-4 3xl:gap-5">
           {([
             { label: 'Total Bookings', value: myBookings === null ? '—' : bookings.length,  icon: BookOpen,  color: 'text-gray-700 dark:text-white',                                                              bg: 'bg-gray-100 dark:bg-[#2a2a2a]'                  },
             { label: 'Upcoming',       value: myBookings === null ? '—' : upcoming,          icon: Calendar,  color: 'text-blue-600 dark:text-blue-400',                                                           bg: 'bg-blue-50 dark:bg-blue-900/20'                  },
@@ -95,7 +95,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 3xl:grid-cols-4 gap-4 2xl:gap-5 3xl:gap-6">
 
           {/* Recent Bookings */}
           <div className="lg:col-span-2 card p-0 overflow-hidden">
@@ -192,10 +192,10 @@ export default function DashboardPage() {
           <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
             {greeting} &middot; {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white mt-1">{user.name}</h1>
+          <h1 className="text-2xl 2xl:text-3xl 3xl:text-4xl font-black text-gray-900 dark:text-white mt-1">{user.name}</h1>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 2xl:gap-4 3xl:gap-5">
           {([
             { label: 'Total Assigned', value: myBookings === null ? '—' : bookings.length, icon: BookOpen,  color: 'text-gray-700 dark:text-white',          bg: 'bg-gray-100 dark:bg-[#2a2a2a]'                   },
             { label: 'Upcoming',       value: myBookings === null ? '—' : upcoming,        icon: Calendar,  color: 'text-blue-600 dark:text-blue-400',       bg: 'bg-blue-50 dark:bg-blue-900/20'                   },
@@ -217,7 +217,7 @@ export default function DashboardPage() {
           })}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 3xl:grid-cols-4 gap-4 2xl:gap-5 3xl:gap-6">
           <div className="lg:col-span-2 card p-0 overflow-hidden">
             <div className="p-4 border-b border-gray-100 dark:border-[#3a3a3a] flex items-center justify-between">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white">Assigned Bookings</h3>
@@ -290,10 +290,10 @@ export default function DashboardPage() {
           <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
             {greeting} &middot; {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white mt-1">{user.name}</h1>
+          <h1 className="text-2xl 2xl:text-3xl 3xl:text-4xl font-black text-gray-900 dark:text-white mt-1">{user.name}</h1>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 2xl:gap-4 3xl:gap-5">
           {([
             { label: 'Total Referred', value: myBookings === null ? '—' : bookings.length, icon: BookOpen,   color: 'text-gray-700 dark:text-white',        bg: 'bg-gray-100 dark:bg-[#2a2a2a]'                    },
             { label: 'Active',         value: myBookings === null ? '—' : active,          icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400',    bg: 'bg-blue-50 dark:bg-blue-900/20'                    },
@@ -315,7 +315,7 @@ export default function DashboardPage() {
           })}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 3xl:grid-cols-4 gap-4 2xl:gap-5 3xl:gap-6">
           <div className="lg:col-span-2 card p-0 overflow-hidden">
             <div className="p-4 border-b border-gray-100 dark:border-[#3a3a3a] flex items-center justify-between">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white">Referred Bookings</h3>

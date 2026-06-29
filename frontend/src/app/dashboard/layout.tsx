@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       />
       <div className="flex-1 flex flex-col min-w-0">
         <MobileHeader onOpen={() => setSidebarOpen(true)} />
-        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
+        <main className="flex-1 p-4 lg:p-6 2xl:p-8 3xl:p-10 overflow-y-auto">
           {children}
         </main>
       </div>

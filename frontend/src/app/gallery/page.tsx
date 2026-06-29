@@ -93,7 +93,7 @@ export default function GalleryPage() {
 
       {/* Banner */}
       <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="site-wrap py-16">
           <p className="section-label mb-4">Studio Gallery</p>
           <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
             Studio Gallery
@@ -101,7 +101,7 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="site-wrap py-16">
         {/* Category filter */}
         {categories.length > 1 && (
           <div className="flex flex-wrap gap-2 mb-10">

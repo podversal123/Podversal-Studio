@@ -15,13 +15,31 @@ html {
   overflow-x: hidden;
   font-family: 'Inter', sans-serif;
   scroll-padding-top: 80px;
+  font-size: 16px;
 }
+@media (min-width: 1920px) { html { font-size: 18px; } }
+@media (min-width: 2560px) { html { font-size: 20px; } }
 
 body {
   max-width: 100vw;
   overflow-x: hidden;
   font-family: 'Inter', sans-serif;
 }
+
+/* Responsive container — expands on large screens instead of staying fixed */
+.site-wrap {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  max-width: 100%;
+}
+@media (min-width: 640px)  { .site-wrap { padding-left: 1.5rem;  padding-right: 1.5rem;  } }
+@media (min-width: 1024px) { .site-wrap { padding-left: 2rem;    padding-right: 2rem;    max-width: 1440px; } }
+@media (min-width: 1536px) { .site-wrap { padding-left: 3rem;    padding-right: 3rem;    max-width: 1680px; } }
+@media (min-width: 1920px) { .site-wrap { padding-left: 4rem;    padding-right: 4rem;    max-width: 1900px; } }
+@media (min-width: 2560px) { .site-wrap { padding-left: 6rem;    padding-right: 6rem;    max-width: 2400px; } }
 
 @layer components {
   .btn-primary {
