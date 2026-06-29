@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { Plus, X, Eye, EyeOff } from 'lucide-react';
 import api from '@/lib/api';
+import { getStoredUser } from '@/lib/auth';
 
 interface Agent {
   id: string;
@@ -34,6 +36,7 @@ const schema = z.object({
 type Form = z.infer<typeof schema>;
 
 export default function AgentsPage() {
+  const router = useRouter();
   const [agents,    setAgents]    = useState<Agent[]>([]);
   const [summaries, setSummaries] = useState<Record<string, CommissionSummary>>({});
   const [loading,   setLoading]   = useState(true);
@@ -45,6 +48,11 @@ export default function AgentsPage() {
     resolver: zodResolver(schema),
     defaultValues: { commissionRate: 10 },
   });
+
+  useEffect(() => {
+    const u = getStoredUser();
+    if (!u || u.role !== 'SUPER_ADMIN') { router.replace('/dashboard'); return; }
+  }, [router]);
 
   const load = () => {
     api.get<Agent[]>('/agents')

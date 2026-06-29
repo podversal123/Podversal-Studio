@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { Plus, X, Eye, EyeOff } from 'lucide-react';
 import api from '@/lib/api';
+import { getStoredUser } from '@/lib/auth';
 
 const schema = z.object({
   name:     z.string().min(2, 'Name must be at least 2 characters'),
@@ -18,6 +20,7 @@ const schema = z.object({
 type Form = z.infer<typeof schema>;
 
 export default function StaffPage() {
+  const router = useRouter();
   const [staff,     setStaff]     = useState<any[]>([]);
   const [loading,   setLoading]   = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -27,6 +30,11 @@ export default function StaffPage() {
   const { register, handleSubmit, formState: { errors }, reset } = useForm<Form>({
     resolver: zodResolver(schema),
   });
+
+  useEffect(() => {
+    const u = getStoredUser();
+    if (!u || u.role !== 'SUPER_ADMIN') { router.replace('/dashboard'); return; }
+  }, [router]);
 
   const load = () => {
     api.get('/auth/managers')

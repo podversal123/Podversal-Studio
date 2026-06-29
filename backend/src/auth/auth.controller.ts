@@ -54,6 +54,12 @@ export class AuthController {
     return res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
   }
 
+  // POST /api/auth/refresh — exchange refresh token for new access token
+  @Post('refresh')
+  refresh(@Body() body: { refreshToken: string }) {
+    return this.auth.refreshTokens(body.refreshToken);
+  }
+
   // POST /api/auth/otp/send
   @Post('otp/send')
   sendOtp(@Body() dto: SendOtpDto) {

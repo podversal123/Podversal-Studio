@@ -112,21 +112,27 @@ export class DashboardService {
   }
 
   private async getRevenueByMonth(months: number) {
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - (months - 1));
+    startDate.setDate(1);
+    startDate.setHours(0, 0, 0, 0);
+
+    const payments = await this.prisma.payment.findMany({
+      where: { status: PaymentStatus.PAID, paidAt: { gte: startDate } },
+      select: { amount: true, paidAt: true },
+    });
+
     const result = [];
     for (let i = months - 1; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const start = new Date(date.getFullYear(), date.getMonth(), 1);
-      const end   = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-
-      const revenue = await this.prisma.payment.aggregate({
-        where: { status: PaymentStatus.PAID, paidAt: { gte: start, lt: end } },
-        _sum: { amount: true },
-      });
-
+      const d     = new Date();
+      const year  = new Date(d.setMonth(d.getMonth() - i)).getFullYear();
+      const month = new Date(d).getMonth();
+      const revenue = payments
+        .filter(p => p.paidAt && new Date(p.paidAt).getFullYear() === year && new Date(p.paidAt).getMonth() === month)
+        .reduce((sum, p) => sum + Number(p.amount), 0);
       result.push({
-        month: start.toLocaleString('default', { month: 'short', year: '2-digit' }),
-        revenue: revenue._sum.amount ?? 0,
+        month: new Date(year, month, 1).toLocaleString('default', { month: 'short', year: '2-digit' }),
+        revenue,
       });
     }
     return result;

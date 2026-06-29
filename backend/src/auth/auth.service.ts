@@ -149,6 +149,25 @@ export class AuthService {
     return null;
   }
 
+  async refreshTokens(refreshToken: string) {
+    try {
+      const payload = this.jwt.verify(refreshToken, {
+        secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+      }) as { sub: string; email: string; role: string };
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+        select: { id: true, email: true, role: true, name: true, isActive: true },
+      });
+
+      if (!user || !user.isActive) throw new UnauthorizedException('Account not found or deactivated');
+
+      return this.generateTokens(user);
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+  }
+
   async setupAdmin(dto: RegisterDto) {
     const adminCount = await this.prisma.user.count({ where: { role: Role.SUPER_ADMIN } });
     if (adminCount > 0) {
