@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
-import { ArrowRight, Play, X } from 'lucide-react';
+import { Play, X } from 'lucide-react';
 import VideoThumbnail from '@/components/VideoThumbnail';
 import CldVideoThumb from '@/components/CldVideoThumb';
 import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
@@ -74,7 +74,7 @@ export default function VideosPage() {
 
       {/* Banner */}
       <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <p className="section-label mb-4">Studio Videos</p>
           <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
             Studio Videos
@@ -82,7 +82,7 @@ export default function VideosPage() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Category filter */}
         {categories.length > 1 && (
           <div className="flex flex-wrap gap-2 mb-10">
@@ -190,8 +190,8 @@ export default function VideosPage() {
       {/* Footer CTA */}
       <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#E5312A] py-14 px-4 text-center">
         <h2 className="text-2xl font-black text-white mb-6">Book your studio session today</h2>
-        <Link href="/register" className="inline-flex items-center gap-2 bg-white text-[#E5312A] font-bold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
-          Book Now <ArrowRight size={15} />
+        <Link href="/register" className="inline-flex items-center bg-white text-[#E5312A] font-bold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
+          Book Now
         </Link>
       </div>
 

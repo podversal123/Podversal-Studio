@@ -194,7 +194,7 @@ Booking reference: <strong>${code}</strong>`,
 <style>
   body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
   .wrap { max-width: 540px; margin: 32px auto; background: #fff; border: 1px solid #e5e5e5; }
-  .top  { background: #fff; padding: 12px 32px; text-align: center; }
+  .top  { background: #111111; padding: 20px 32px; text-align: center; }
   .body { padding: 28px 32px; color: #222; font-size: 14px; line-height: 1.7; }
   .body p { margin: 0 0 16px 0; }
   .body p:last-child { margin-bottom: 0; }

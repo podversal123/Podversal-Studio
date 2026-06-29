@@ -8,7 +8,7 @@ export default function RefundPolicyPage() {
   return (
     <>
       <header className="border-b border-gray-100 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Link href="/"><Logo height={48} /></Link>
         </div>
       </header>

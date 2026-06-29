@@ -8,7 +8,7 @@ import VideoThumbnail from '@/components/VideoThumbnail';
 import CldVideoThumb from '@/components/CldVideoThumb';
 import {
   Mic, Video, MonitorPlay, Newspaper, Laptop, Camera,
-  ArrowRight, CheckCircle, Phone, Mail, MapPin, Play, Star, Plus, Minus, ChevronLeft, ChevronRight,
+  CheckCircle, Phone, Mail, MapPin, Play, Star, Plus, Minus, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
@@ -255,8 +255,7 @@ export default function HomePage() {
                 href={bookHref}
                 className="inline-flex items-center gap-2 bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-8 py-3.5 text-sm tracking-wide transition-colors"
               >
-                Book a Studio <ArrowRight size={14} />
-              </Link>
+                Book a Studio              </Link>
               <button
                 onClick={() => scrollTo('videos')}
                 className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/40 text-white/80 hover:text-white font-semibold px-8 py-3.5 text-sm transition-colors"
@@ -270,7 +269,7 @@ export default function HomePage() {
 
         {/* ── Bottom bar — stats + slide controls ── */}
         <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10 backdrop-blur-sm bg-black/20">
-          <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 flex items-center justify-between py-4">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 flex items-center justify-between py-4">
 
             {/* Stats */}
             <div className="hidden sm:flex items-center divide-x divide-white/15">
@@ -318,7 +317,7 @@ export default function HomePage() {
 
       {/* ── SERVICES ──────────────────────────────────── */}
       <section id="services" className="pt-6 pb-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
             <p className="section-label mb-3">Services</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Our Studio Services</h2>
@@ -334,8 +333,7 @@ export default function HomePage() {
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{s.title}</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">{s.description}</p>
                   <Link href={bookHref} className="inline-flex items-center gap-1 text-xs font-semibold text-[#E5312A] hover:text-[#CC2A24] transition-colors">
-                    Book this service <ArrowRight size={11} />
-                  </Link>
+                    Book this service                  </Link>
                 </div>
               );
             })}
@@ -345,7 +343,7 @@ export default function HomePage() {
 
       {/* ── STUDIO VIDEOS ────────────────────────────── */}
       <section id="videos" className="pt-6 pb-20 bg-white dark:bg-[#111111]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
             <p className="section-label mb-3">Studio Showcase</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">See Our Work</h2>
@@ -412,15 +410,14 @@ export default function HomePage() {
 
       {/* ── GALLERY ──────────────────────────────────── */}
       <section className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="section-label mb-3">Studio Gallery</p>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Inside the Studio</h2>
             </div>
             <Link href="/gallery" className="hidden sm:flex items-center gap-2 text-sm font-bold text-[#E5312A] hover:underline">
-              View All <ArrowRight size={14} />
-            </Link>
+              View All            </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
             {[
@@ -443,15 +440,14 @@ export default function HomePage() {
           </div>
           <div className="flex sm:hidden justify-center mt-6">
             <Link href="/gallery" className="flex items-center gap-2 text-sm font-bold text-[#E5312A]">
-              View All Gallery <ArrowRight size={14} />
-            </Link>
+              View All Gallery            </Link>
           </div>
         </div>
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────── */}
       <section id="process" className="pt-6 pb-20 bg-white dark:bg-[#111111]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
             <p className="section-label mb-3">How It Works</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">From Request to Invoice</h2>
@@ -470,7 +466,7 @@ export default function HomePage() {
 
       {/* ── WHY US ───────────────────────────────────── */}
       <section className="py-20 bg-[#E5312A]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             <div>
               <p className="section-label text-white/60 mb-4">Why Podversal</p>
@@ -491,8 +487,7 @@ export default function HomePage() {
                 ))}
               </div>
               <Link href={bookHref} className="inline-flex items-center gap-2 mt-8 bg-white text-[#E5312A] font-semibold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
-                Get Started <ArrowRight size={15} />
-              </Link>
+                Get Started              </Link>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
@@ -513,7 +508,7 @@ export default function HomePage() {
 
       {/* ── TESTIMONIALS ─────────────────────────────── */}
       <section className="py-20 bg-white dark:bg-[#111111]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
             <p className="section-label mb-3">Testimonials</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">What our clients say</h2>
@@ -542,15 +537,14 @@ export default function HomePage() {
 
       {/* ── BLOG ─────────────────────────────────────── */}
       <section className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="section-label mb-3">Blog</p>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">From the Studio</h2>
             </div>
             <Link href="/blog" className="hidden sm:flex items-center gap-2 text-sm font-bold text-[#E5312A] hover:underline">
-              All Posts <ArrowRight size={14} />
-            </Link>
+              All Posts            </Link>
           </div>
           {posts.length === 0 ? (
             <div className="text-center py-16 border border-[#e5e5e5] dark:border-[#2a2a2a]">
@@ -586,8 +580,7 @@ export default function HomePage() {
               </div>
               <div className="flex sm:hidden justify-center mt-6">
                 <Link href="/blog" className="flex items-center gap-2 text-sm font-bold text-[#E5312A]">
-                  All Posts <ArrowRight size={14} />
-                </Link>
+                  All Posts                </Link>
               </div>
             </>
           )}
@@ -627,7 +620,7 @@ export default function HomePage() {
 
       {/* ── CONTACT ──────────────────────────────────── */}
       <section id="contact" className="pt-6 pb-20 bg-white dark:bg-[#111111]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-10">
             <p className="section-label mb-3">Contact</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Get in Touch</h2>

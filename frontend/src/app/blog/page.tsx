@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
-import { Calendar, Tag, ArrowRight } from 'lucide-react';
+import { Calendar, Tag } from 'lucide-react';
 import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
 
 interface BlogPost {
@@ -35,7 +35,7 @@ export default function BlogPage() {
 
       {/* Banner — theme-aware, no dark gradient */}
       <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <p className="section-label mb-4">Studio Blog</p>
           <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
             Studio Blog
@@ -43,7 +43,7 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Category filter */}
         {categories.length > 1 && (
           <div className="flex flex-wrap gap-2 mb-10">
@@ -117,9 +117,7 @@ export default function BlogPage() {
 
                   <div className="flex items-center justify-between border-t border-[#f5f5f5] dark:border-[#2a2a2a] pt-3">
                     <span className="text-xs text-[#aaa] dark:text-[#555]">By {post.author?.name}</span>
-                    <span className="flex items-center gap-1 text-xs font-bold text-[#E5312A]">
-                      Read <ArrowRight size={11} />
-                    </span>
+                    <span className="text-xs font-bold text-[#E5312A]">Read</span>
                   </div>
 
                   {post.tags?.length > 0 && (
@@ -143,8 +141,8 @@ export default function BlogPage() {
         <p className="text-[11px] font-black tracking-[0.2em] uppercase text-white/50 mb-4">Ready to record?</p>
         <h2 className="text-2xl font-black text-white mb-3">Book your studio session today</h2>
         <p className="text-white/70 text-sm mb-6">Professional studio. Seamless online booking. GST invoice included.</p>
-        <Link href="/register" className="inline-flex items-center gap-2 bg-white text-[#E5312A] font-bold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
-          Book Now <ArrowRight size={15} />
+        <Link href="/register" className="inline-flex items-center bg-white text-[#E5312A] font-bold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
+          Book Now
         </Link>
       </div>
 

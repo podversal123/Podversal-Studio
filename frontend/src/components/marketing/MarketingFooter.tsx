@@ -61,7 +61,7 @@ export default function MarketingFooter() {
       </button>
 
       <footer className="bg-gray-50 dark:bg-[#111111] border-t border-gray-100 dark:border-[#2a2a2a]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 py-14 border-b border-gray-100 dark:border-white/10">
             <div>
               <div className="mb-4"><Logo height={68} /></div>

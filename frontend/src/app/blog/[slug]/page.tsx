@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
-import { Calendar, Tag, ArrowLeft, ArrowRight, User } from 'lucide-react';
+import { Calendar, Tag, ArrowLeft, User } from 'lucide-react';
 
 interface BlogPost {
   id: string;
@@ -117,8 +117,8 @@ export default function BlogPostPage() {
         <div className="mt-14 p-8 bg-[#E5312A]/8 dark:bg-[#E5312A]/15 rounded-2xl text-center border border-[#E5312A]/20 dark:border-[#E5312A]/25">
           <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-2">Ready to book the studio?</h3>
           <p className="text-gray-500 dark:text-[#a0a0a0] text-sm mb-5">Professional podcast, video, and shoot sessions available online.</p>
-          <Link href="/register" className="inline-flex items-center gap-2 bg-[#E5312A] text-white font-semibold px-7 py-3 rounded-xl hover:bg-[#b51d1d] transition-all">
-            Book Now <ArrowRight size={16} />
+          <Link href="/register" className="inline-flex items-center bg-[#E5312A] text-white font-semibold px-7 py-3 rounded-xl hover:bg-[#b51d1d] transition-all">
+            Book Now
           </Link>
         </div>
       </div>
