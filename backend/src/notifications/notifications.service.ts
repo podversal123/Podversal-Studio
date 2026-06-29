@@ -13,7 +13,7 @@ export type NotificationEvent =
 const logoHtml = () => {
   const url = process.env.EMAIL_LOGO_URL;
   if (!url) return '';
-  return `<img src="${url}" alt="Podversal Studio" height="100" style="display:block;margin:0 auto;border:0;max-width:300px;" />`;
+  return `<img src="${url}" alt="Podversal Studio" width="180" height="180" style="display:block;margin:0 auto;border:0;" />`;
 };
 
 @Injectable()
