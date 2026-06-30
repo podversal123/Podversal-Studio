@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
-import { Calendar, Tag, User } from 'lucide-react';
+import { Calendar, User } from 'lucide-react';
 
 interface BlogPost {
   id: string;
@@ -41,10 +41,10 @@ export default function BlogPostPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
         <Navbar />
-        <div className="max-w-3xl mx-auto px-4 pt-36 pb-20 space-y-4 animate-pulse">
+        <div className="px-4 sm:px-10 lg:px-20 xl:px-32 pt-36 pb-20 space-y-4 animate-pulse">
           <div className="h-8 bg-gray-100 dark:bg-[#1a1a1a] rounded w-3/4" />
           <div className="h-4 bg-gray-100 dark:bg-[#1a1a1a] rounded w-1/2" />
-          <div className="h-64 bg-gray-100 dark:bg-[#1a1a1a] rounded-2xl" />
+          <div className="h-[480px] bg-gray-100 dark:bg-[#1a1a1a]" />
           <div className="space-y-2">
             {[1,2,3,4].map(i => <div key={i} className="h-4 bg-gray-100 dark:bg-[#1a1a1a] rounded" />)}
           </div>
@@ -59,68 +59,57 @@ export default function BlogPostPage() {
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
       <Navbar />
 
-      <div className="max-w-3xl mx-auto px-4 pt-32 pb-20">
+      {/* Cover image — true full bleed below navbar */}
+      {post.coverImage && (
+        <div className="pt-[72px]">
+          <div className="w-full aspect-[21/9] sm:aspect-[3/1] overflow-hidden">
+            <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+          </div>
+        </div>
+      )}
+
+      {/* Content wrapper */}
+      <div className="px-4 sm:px-10 lg:px-20 xl:px-32 pt-10 pb-24">
         {/* Back */}
         <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-[#a0a0a0] hover:text-gray-900 dark:hover:text-white mb-8 transition-colors">
           Back to Blog
         </Link>
 
-        {/* Category */}
-        <span className="inline-block text-xs font-semibold text-[#E5312A] bg-[#E5312A]/10 dark:bg-[#E5312A]/20 px-3 py-1 rounded-full mb-4">
-          {post.category}
-        </span>
-
-        {/* Title */}
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white leading-tight mb-4">{post.title}</h1>
-
-        {/* Meta */}
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-[#a0a0a0] mb-8">
-          <span className="flex items-center gap-1.5">
-            <User size={14} /> {post.author?.name}
+        {/* Category + Meta */}
+        <div className="flex flex-wrap items-center gap-4 mb-5">
+          <span className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E5312A] bg-[#E5312A]/8 dark:bg-[#E5312A]/15 px-3 py-1">
+            {post.category}
+          </span>
+          <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-[#a0a0a0]">
+            <User size={13} /> {post.author?.name}
           </span>
           {post.publishedAt && (
-            <span className="flex items-center gap-1.5">
-              <Calendar size={14} />
+            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-[#a0a0a0]">
+              <Calendar size={13} />
               {new Date(post.publishedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
             </span>
           )}
         </div>
 
-        {/* Cover image */}
-        {post.coverImage && (
-          <div className="aspect-[16/9] overflow-hidden rounded-2xl mb-10">
-            <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
-          </div>
-        )}
+        {/* Title */}
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-10">{post.title}</h1>
 
         {/* Content */}
-        <div className="overflow-x-auto">
-          <div
-            className="prose prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-[#c0c0c0] leading-relaxed"
-            style={{ lineHeight: 1.8 }}
-            dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }}
-          />
-        </div>
-
-        {/* Tags */}
-        {post.tags?.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-10 pt-8 border-t border-gray-100 dark:border-[#3a3a3a]">
-            {post.tags.map(tag => (
-              <span key={tag} className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-[#a0a0a0] bg-gray-50 dark:bg-[#1a1a1a] px-3 py-1.5 rounded-full border border-gray-100 dark:border-[#3a3a3a]">
-                <Tag size={12} /> {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* CTA */}
-        <div className="mt-14 p-8 bg-[#E5312A]/8 dark:bg-[#E5312A]/15 rounded-2xl text-center border border-[#E5312A]/20 dark:border-[#E5312A]/25">
-          <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-2">Ready to book the studio?</h3>
-          <p className="text-gray-500 dark:text-[#a0a0a0] text-sm mb-5">Professional podcast, video, and shoot sessions available online.</p>
-          <Link href="/register" className="inline-flex items-center bg-[#E5312A] text-white font-semibold px-7 py-3 rounded-xl hover:bg-[#b51d1d] transition-all">
-            Book Now
-          </Link>
-        </div>
+        <div
+          className="prose prose-gray dark:prose-invert max-w-none
+            prose-p:text-base prose-p:leading-[1.8] prose-p:my-3
+            prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white
+            prose-em:text-gray-600 dark:prose-em:text-[#aaa]
+            [&_h2]:text-xl [&_h2]:sm:text-2xl [&_h2]:font-black [&_h2]:mt-10 [&_h2]:mb-3
+            [&_h2]:text-gray-900 dark:[&_h2]:text-white [&_h2]:tracking-tight [&_h2]:border-l-4
+            [&_h2]:border-[#E5312A] [&_h2]:pl-4
+            [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-4
+            [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-4
+            [&_li]:text-base [&_li]:leading-[1.7] [&_li]:my-1.5
+            [&_li::marker]:text-[#E5312A]
+            text-gray-700 dark:text-[#c0c0c0]"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
       </div>
 
       <MarketingFooter />

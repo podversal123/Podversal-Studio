@@ -19,32 +19,22 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-const otpSchema = z.object({
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number'),
-  otp:   z.string().length(6, 'OTP must be 6 digits').optional(),
-});
-
 const forgotSchema = z.object({
   email: z.string().email('Enter a valid email address'),
 });
 
 type LoginForm  = z.infer<typeof loginSchema>;
-type OtpForm    = z.infer<typeof otpSchema>;
 type ForgotForm = z.infer<typeof forgotSchema>;
-type Tab        = 'email' | 'otp';
 
 function LoginForm() {
   const router = useRouter();
 
-  const [tab,        setTab]        = useState<Tab>('email');
-  const [otpSent,    setOtpSent]    = useState(false);
   const [loading,    setLoading]    = useState(false);
   const [showPass,   setShowPass]   = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
 
   const loginForm  = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
-  const otpForm    = useForm<OtpForm>({ resolver: zodResolver(otpSchema) });
   const forgotForm = useForm<ForgotForm>({ resolver: zodResolver(forgotSchema) });
 
   const saveAndRedirect = (data: AuthResponse) => {
@@ -77,39 +67,12 @@ function LoginForm() {
     } finally { setLoading(false); }
   };
 
-  const handleSendOtp = async () => {
-    const phone = otpForm.getValues('phone');
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-      otpForm.setError('phone', { message: 'Enter a valid 10-digit mobile number' });
-      return;
-    }
-    setLoading(true);
-    try {
-      await api.post('/auth/otp/send', { phone });
-      setOtpSent(true);
-      toast.success('OTP sent — check your messages');
-    } catch { toast.error('Could not send OTP right now. Try again in a moment.'); }
-    finally { setLoading(false); }
-  };
-
-  const handleVerifyOtp = async (values: OtpForm) => {
-    setLoading(true);
-    try {
-      const res = await api.post<AuthResponse>('/auth/otp/verify', { phone: values.phone, otp: values.otp });
-      toast.success('Logged in successfully!');
-      saveAndRedirect(res.data);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'OTP is incorrect or has expired');
-    } finally { setLoading(false); }
-  };
-
   const handleForgotPassword = async (values: ForgotForm) => {
     setLoading(true);
     try {
       await api.post('/auth/forgot-password', { email: values.email });
       setForgotSent(true);
     } catch {
-      // Always show success to avoid leaking whether email exists
       setForgotSent(true);
     } finally { setLoading(false); }
   };
@@ -139,7 +102,7 @@ function LoginForm() {
                 </div>
                 <h2 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Check your inbox</h2>
                 <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] leading-relaxed">
-                  Reset link sent. Check your inbox — also check spam if you don't see it.
+                  Reset link sent. Check your inbox — also check spam if you don&apos;t see it.
                 </p>
               </div>
             ) : (
@@ -177,7 +140,7 @@ function LoginForm() {
   // ─── Main Login View ───
   return (
     <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#111111] flex items-center justify-center p-4 relative">
-<div className="absolute top-4 right-4"><ThemeToggle /></div>
+      <div className="absolute top-4 right-4"><ThemeToggle /></div>
 
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
@@ -185,133 +148,58 @@ function LoginForm() {
         </div>
 
         <div className="card">
-          {/* Tabs */}
-          <div className="flex border border-[#e5e5e5] dark:border-[#2a2a2a] mb-6">
-            <button
-              onClick={() => setTab('email')}
-              className={`flex-1 py-2.5 text-sm font-bold transition-colors ${tab === 'email' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              Email
-            </button>
-            <button
-              onClick={() => { setTab('otp'); setOtpSent(false); }}
-              className={`flex-1 py-2.5 text-sm font-bold transition-colors ${tab === 'otp' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              Mobile OTP
-            </button>
-          </div>
-
-          {/* Email Login */}
-          {tab === 'email' && (
-            <form onSubmit={loginForm.handleSubmit(handleEmailLogin)} className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Email</label>
-                <input
-                  {...loginForm.register('email')}
-                  type="email"
-                  placeholder="E-mail"
-                  className="input-field"
-                  autoComplete="email"
-                />
-                {loginForm.formState.errors.email && (
-                  <p className="text-[#E5312A] text-xs mt-1">{loginForm.formState.errors.email.message}</p>
-                )}
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">Password</label>
-                  <button
-                    type="button"
-                    onClick={() => setShowForgot(true)}
-                    className="text-xs text-[#E5312A] hover:text-[#CC2A24] font-medium transition-colors"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-                <div className="relative">
-                  <input
-                    {...loginForm.register('password')}
-                    type={showPass ? 'text' : 'password'}
-                    placeholder="Password"
-                    className="input-field pr-11"
-                    autoComplete="current-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-gray-600 dark:hover:text-[#a0a0a0] transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                {loginForm.formState.errors.password && (
-                  <p className="text-[#E5312A] text-xs mt-1">{loginForm.formState.errors.password.message}</p>
-                )}
-              </div>
-
-              <button type="submit" disabled={loading} className="btn-primary">
-                {loading ? 'Signing in...' : 'Sign In'}
-              </button>
-            </form>
-          )}
-
-          {/* OTP Login */}
-          {tab === 'otp' && (
-            <form onSubmit={otpForm.handleSubmit(handleVerifyOtp)} className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Mobile Number</label>
-                <div className="flex gap-2 min-w-0">
-                  <input
-                    {...otpForm.register('phone')}
-                    type="tel"
-                    placeholder="98xxxxxxxx"
-                    className="input-field min-w-0"
-                    disabled={otpSent}
-                  />
-                  {!otpSent && (
-                    <button
-                      type="button"
-                      onClick={handleSendOtp}
-                      disabled={loading}
-                      className="px-4 py-3 bg-[#E5312A] text-white text-sm font-bold hover:bg-[#CC2A24] transition-colors whitespace-nowrap disabled:opacity-50"
-                    >
-                      {loading ? '...' : 'Send OTP'}
-                    </button>
-                  )}
-                </div>
-                {otpForm.formState.errors.phone && (
-                  <p className="text-[#E5312A] text-xs mt-1">{otpForm.formState.errors.phone.message}</p>
-                )}
-              </div>
-
-              {otpSent && (
-                <div>
-                  <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">OTP</label>
-                  <input
-                    {...otpForm.register('otp')}
-                    type="text"
-                    placeholder="Enter the 6-digit code"
-                    maxLength={6}
-                    className="input-field tracking-widest text-center text-lg"
-                  />
-                  {otpForm.formState.errors.otp && (
-                    <p className="text-[#E5312A] text-xs mt-1">{otpForm.formState.errors.otp.message}</p>
-                  )}
-                  <button type="button" onClick={() => setOtpSent(false)} className="text-xs text-[#E5312A] mt-2 hover:underline">
-                    Use a different number
-                  </button>
-                </div>
+          <form onSubmit={loginForm.handleSubmit(handleEmailLogin)} className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Email</label>
+              <input
+                {...loginForm.register('email')}
+                type="email"
+                placeholder="E-mail"
+                className="input-field"
+                autoComplete="email"
+              />
+              {loginForm.formState.errors.email && (
+                <p className="text-[#E5312A] text-xs mt-1">{loginForm.formState.errors.email.message}</p>
               )}
+            </div>
 
-              {otpSent && (
-                <button type="submit" disabled={loading} className="btn-primary">
-                  {loading ? 'Verifying...' : 'Verify & Sign In'}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">Password</label>
+                <button
+                  type="button"
+                  onClick={() => setShowForgot(true)}
+                  className="text-xs text-[#E5312A] hover:text-[#CC2A24] font-medium transition-colors"
+                >
+                  Forgot password?
                 </button>
+              </div>
+              <div className="relative">
+                <input
+                  {...loginForm.register('password')}
+                  type={showPass ? 'text' : 'password'}
+                  placeholder="Password"
+                  className="input-field pr-11"
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-gray-600 dark:hover:text-[#a0a0a0] transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {loginForm.formState.errors.password && (
+                <p className="text-[#E5312A] text-xs mt-1">{loginForm.formState.errors.password.message}</p>
               )}
-            </form>
-          )}
+            </div>
+
+            <button type="submit" disabled={loading} className="btn-primary">
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
 
           {/* Divider */}
           <div className="relative my-6">
@@ -341,7 +229,6 @@ function LoginForm() {
             New here?{' '}
             <a href="/register" className="text-[#E5312A] font-bold hover:underline">Create an account</a>
           </p>
-
         </div>
       </div>
     </div>

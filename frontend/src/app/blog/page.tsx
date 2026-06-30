@@ -36,7 +36,6 @@ export default function BlogPage() {
       {/* Banner — theme-aware, no dark gradient */}
       <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
         <div className="site-wrap py-16">
-          <p className="section-label mb-4">Studio Blog</p>
           <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
             Studio Blog
           </h1>
@@ -64,9 +63,16 @@ export default function BlogPage() {
         )}
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-l border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1,2,3].map(i => (
-              <div key={i} className="border-b border-r border-[#e5e5e5] dark:border-[#2a2a2a] h-64 bg-[#f5f5f5] dark:bg-[#181818] animate-pulse" />
+              <div key={i} className="rounded-2xl overflow-hidden bg-[#f5f5f5] dark:bg-[#181818] animate-pulse">
+                <div className="aspect-[16/9]" />
+                <div className="p-6 space-y-3">
+                  <div className="h-3 bg-[#e5e5e5] dark:bg-[#222] rounded w-1/4" />
+                  <div className="h-5 bg-[#e5e5e5] dark:bg-[#222] rounded w-3/4" />
+                  <div className="h-4 bg-[#e5e5e5] dark:bg-[#222] rounded w-full" />
+                </div>
+              </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -75,15 +81,15 @@ export default function BlogPage() {
             <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm">Check back soon — studio stories are on the way.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-l border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map(post => (
               <Link
                 key={post.id}
                 href={`/blog/${post.slug}`}
-                className="group border-b border-r border-[#e5e5e5] dark:border-[#2a2a2a] overflow-hidden bg-white dark:bg-[#111111] hover:bg-[#fafafa] dark:hover:bg-[#161616] transition-colors"
+                className="group flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-[#161616] border border-[#e8e8e8] dark:border-[#222] transition-all duration-300"
               >
                 {/* Cover */}
-                <div className="aspect-[16/9] overflow-hidden bg-[#f5f5f5] dark:bg-[#181818]">
+                <div className="aspect-[16/9] overflow-hidden bg-[#f5f5f5] dark:bg-[#1a1a1a]">
                   {post.coverImage ? (
                     <img
                       src={post.coverImage}
@@ -91,15 +97,15 @@ export default function BlogPage() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#f5f5f5] dark:bg-[#181818] flex items-center justify-center">
+                    <div className="w-full h-full bg-[#f5f5f5] dark:bg-[#1a1a1a] flex items-center justify-center">
                       <span className="text-5xl font-black text-[#e5e5e5] dark:text-[#2a2a2a]">{post.title.charAt(0)}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="p-5">
+                <div className="flex flex-col flex-1 p-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E5312A]">
+                    <span className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E5312A] bg-[#E5312A]/8 dark:bg-[#E5312A]/15 px-2.5 py-1">
                       {post.category}
                     </span>
                     {post.publishedAt && (
@@ -110,25 +116,15 @@ export default function BlogPage() {
                     )}
                   </div>
 
-                  <h2 className="font-bold text-gray-900 dark:text-white text-base mb-2 line-clamp-2 group-hover:text-[#E5312A] transition-colors">
+                  <h2 className="font-bold text-gray-900 dark:text-white text-base mb-3 line-clamp-2 group-hover:text-[#E5312A] transition-colors leading-snug">
                     {post.title}
                   </h2>
-                  <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm leading-relaxed line-clamp-3 mb-4">{post.excerpt}</p>
+                  <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm leading-relaxed line-clamp-2 flex-1">{post.excerpt}</p>
 
-                  <div className="flex items-center justify-between border-t border-[#f5f5f5] dark:border-[#2a2a2a] pt-3">
+                  <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#f0f0f0] dark:border-[#222]">
                     <span className="text-xs text-[#aaa] dark:text-[#555]">By {post.author?.name}</span>
-                    <span className="text-xs font-bold text-[#E5312A]">Read</span>
+                    <span className="text-xs font-bold text-[#E5312A] group-hover:underline">Read</span>
                   </div>
-
-                  {post.tags?.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {post.tags.slice(0, 3).map(tag => (
-                        <span key={tag} className="flex items-center gap-1 text-xs text-[#aaa] dark:text-[#555]">
-                          <Tag size={9} /> {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </Link>
             ))}

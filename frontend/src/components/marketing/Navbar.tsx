@@ -10,13 +10,12 @@ import Logo from '@/components/Logo';
 const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), { ssr: false });
 
 const NAV_LINKS = [
-  { label: 'Services',  href: '/#services', section: 'services' },
-  { label: 'Videos',    href: '/videos',    section: null       },
-  { label: 'Blog',      href: '/blog',       section: null       },
-  { label: 'Gallery',   href: '/gallery',   section: null       },
-  { label: 'Process',   href: '/#process',  section: 'process'  },
-  { label: 'FAQ',       href: '/#faq',       section: 'faq'      },
-  { label: 'Contact',   href: '/#contact',   section: 'contact'  },
+  { label: 'Home',     href: '/',          section: null },
+  { label: 'Pricing',  href: '/pricing',   section: null },
+  { label: 'Our Work', href: '/our-work',  section: null },
+  { label: 'Blog',     href: '/blog',      section: null },
+  { label: 'About Us', href: '/about',     section: null },
+  { label: 'Contact',  href: '/contact',   section: null },
 ];
 
 export default function Navbar() {

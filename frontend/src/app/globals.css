@@ -186,3 +186,22 @@ body {
 .dark .fc .fc-scrollgrid {
   border-color: #2a2a2a !important;
 }
+
+/* ── Marquee animations ─────────────────────────────── */
+@keyframes marquee-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee-up   { animation: marquee-up   var(--dur, 22s) linear infinite; }
+.animate-marquee-left { animation: marquee-left var(--dur, 28s) linear infinite; }
+.animate-marquee-left-slow { animation: marquee-left var(--dur, 40s) linear infinite; }
+
+/* Edge fade mask — dark mode only */
+.dark .strip-edge-fade {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}

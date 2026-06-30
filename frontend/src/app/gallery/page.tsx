@@ -94,7 +94,6 @@ export default function GalleryPage() {
       {/* Banner */}
       <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
         <div className="site-wrap py-16">
-          <p className="section-label mb-4">Studio Gallery</p>
           <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
             Studio Gallery
           </h1>

@@ -28,7 +28,7 @@ export default function MarketingFooter() {
 
   return (
     <>
-      {/* WhatsApp floating button — visible on all pages */}
+      {/* WhatsApp floating button */}
       <a
         href="https://wa.me/917827882058?text=Hi%2C%20I%20would%20like%20to%20book%20a%20studio%20session%20at%20Podversal%20Studio.%20Please%20share%20availability%20and%20pricing."
         target="_blank"
@@ -49,7 +49,7 @@ export default function MarketingFooter() {
         </div>
       </a>
 
-      {/* Scroll to top — appears after scrolling down, sits above WhatsApp */}
+      {/* Scroll to top */}
       <button
         onClick={scrollTop}
         aria-label="Back to top"
@@ -60,47 +60,101 @@ export default function MarketingFooter() {
         <ArrowUp size={16} />
       </button>
 
-      <footer className="bg-gray-50 dark:bg-[#111111] border-t border-gray-100 dark:border-[#2a2a2a]">
+      <footer className="bg-[#f8f8f8] dark:bg-[#0e0e0e] border-t border-gray-100 dark:border-[#2a2a2a]">
         <div className="site-wrap">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 py-14 border-b border-gray-100 dark:border-white/10">
-            <div>
-              <div className="mb-4"><Logo height={68} /></div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                Professional studio management platform. Podcasts, VFX, shoots — all bookable online.
+
+          {/* ── Main grid ── */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 py-14 border-b border-gray-200 dark:border-white/10">
+
+            {/* Brand */}
+            <div className="col-span-2 md:col-span-3 lg:col-span-1">
+              <div className="mb-4"><Logo height={64} /></div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4 max-w-[220px]">
+                Broadcast-quality studio in Greater Noida West. Open 6 AM – 2 AM, 7 days a week.
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">
+                +91 78278 82058
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed max-w-[220px]">
+                NX One, Tower 4, Greater Noida West, Uttar Pradesh — 201306
               </p>
             </div>
+
+            {/* Services */}
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-4">Services</h4>
-              <ul className="space-y-2">
-                {['Podcast Studio', 'VFX Podcast', 'Monologue Shoot', 'News Shoot', 'Online Classes', 'Product Shoots'].map(s => (
-                  <li key={s}>
-                    <Link href="/register" className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] dark:hover:text-[#E5312A] transition-colors">{s}</Link>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-5">Services</h4>
+              <ul className="space-y-2.5">
+                {[
+                  { label: 'Podcast Studio',  slug: 'podcast-studio'  },
+                  { label: 'VFX Podcast',     slug: 'vfx-podcast'     },
+                  { label: 'Monologue Shoot', slug: 'monologue-shoot' },
+                  { label: 'News Shoot',      slug: 'news-shoot'      },
+                  { label: 'Become a Podcaster', slug: 'become-a-podcaster' },
+                  { label: 'Product Shoots',  slug: 'product-shoots'  },
+                ].map(s => (
+                  <li key={s.slug}>
+                    <Link href={`/services/${s.slug}`} className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] dark:hover:text-[#E5312A] transition-colors">
+                      {s.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
+
+            {/* Pricing */}
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><button onClick={() => goTo('services')} className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Services</button></li>
-                <li><Link href="/videos"   className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Videos</Link></li>
-                <li><Link href="/gallery"  className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Gallery</Link></li>
-                <li><Link href="/blog"     className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Blog</Link></li>
-                <li><button onClick={() => goTo('faq')} className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">FAQ</button></li>
-                <li><Link href="/login"    className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Sign In</Link></li>
-                <li><Link href="/register" className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Book a Studio</Link></li>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-5">Pricing</h4>
+              <ul className="space-y-2.5">
+                {[
+                  'Podcast Studio',
+                  'VFX Podcast',
+                  'Monologue Shoot',
+                  'News Shoot',
+                  'Become a Podcaster',
+                  'Product Shoots',
+                ].map(label => (
+                  <li key={label}>
+                    <Link href="/pricing" className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] dark:hover:text-[#E5312A] transition-colors">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center justify-between py-5 gap-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400">© {new Date().getFullYear()} Podversal Studio. All rights reserved.</p>
-            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-              <Link href="/privacy-policy" className="hover:text-[#E5312A] transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-[#E5312A] transition-colors">Terms &amp; Conditions</Link>
-              <Link href="/refund-policy" className="hover:text-[#E5312A] transition-colors">Refund Policy</Link>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-5">Quick Links</h4>
+              <ul className="space-y-2.5">
+                <li><Link href="/"          className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Home</Link></li>
+                <li><Link href="/our-work"  className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Our Work</Link></li>
+                <li><Link href="/about"     className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">About Us</Link></li>
+                <li><Link href="/blog"      className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Blog</Link></li>
+                <li><Link href="/contact"   className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Contact</Link></li>
+                <li><Link href="/register"  className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Book a Session</Link></li>
+              </ul>
             </div>
-            {/* Social links */}
-            <div className="flex items-center gap-3">
+
+            {/* Legal */}
+            <div>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-5">Legal</h4>
+              <ul className="space-y-2.5">
+                <li><Link href="/terms"          className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Terms &amp; Conditions</Link></li>
+                <li><Link href="/privacy-policy" className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/refund-policy"  className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Refund Policy</Link></li>
+              </ul>
+            </div>
+
+          </div>
+
+          {/* ── Bottom bar ── */}
+          <div className="flex flex-col sm:flex-row items-center justify-between py-5 gap-4">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              © {new Date().getFullYear()} Podversal Studio · Krishiyug Content Pvt. Ltd. All rights reserved.
+            </p>
+
+            {/* Social icons */}
+            <div className="flex items-center gap-3 mr-16 sm:mr-20">
               {/* YouTube */}
               <a href="https://studio.youtube.com/channel/UCDpE8P1-l7zT8VyqoA3gRpw" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-[#FF0000] hover:opacity-80 transition-opacity">
@@ -132,6 +186,7 @@ export default function MarketingFooter() {
               </a>
             </div>
           </div>
+
         </div>
       </footer>
     </>

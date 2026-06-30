@@ -18,7 +18,7 @@ export default function TermsPage() {
           <h1 className="text-4xl sm:text-5xl font-black text-white mb-12">Terms and Conditions</h1>
 
           <div className="space-y-6 text-[15px] leading-relaxed text-gray-300">
-            <p><strong className="text-white">Studio Access and Bookings</strong> Podversal Studio offers bookable studio sessions including Podcast, VFX, Monologue, News Shoot, Online Classes, and Product Shoots. A booking is confirmed only after advance payment is received. Slots are held temporarily and released if payment is not completed.</p>
+            <p><strong className="text-white">Studio Access and Bookings</strong> Podversal Studio offers bookable studio sessions including Podcast, VFX, Monologue, News Shoot, Become a Podcaster, and Product Shoots. A booking is confirmed only after advance payment is received. Slots are held temporarily and released if payment is not completed.</p>
 
             <p><strong className="text-white">Payments</strong> All payments are processed securely through Razorpay in Indian Rupees (INR). An advance is required to confirm your session. The remaining balance is due on or before the day of the session.</p>
 
