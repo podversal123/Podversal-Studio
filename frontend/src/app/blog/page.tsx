@@ -7,6 +7,7 @@ import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
 import { Calendar, Tag } from 'lucide-react';
 import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
+import { useFadeIn, anim } from '@/lib/use-fade-in';
 
 interface BlogPost {
   id: string; title: string; slug: string; excerpt: string;
@@ -18,6 +19,9 @@ export default function BlogPage() {
   const [posts,    setPosts]    = useState<BlogPost[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [category, setCategory] = useState<string>('All');
+
+  const heroAnim = useFadeIn(0.05);
+  const gridAnim = useFadeIn();
 
   const fetchPosts = () => {
     api.get<BlogPost[]>('/blogs/public').then(r => setPosts(r.data)).catch(() => {}).finally(() => setLoading(false));
@@ -36,13 +40,15 @@ export default function BlogPage() {
       {/* Banner — theme-aware, no dark gradient */}
       <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
         <div className="site-wrap py-16">
-          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
-            Studio Blog
-          </h1>
+          <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
+            <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
+              Blog
+            </h1>
+          </div>
         </div>
       </section>
 
-      <div className="site-wrap py-16">
+      <div ref={gridAnim.ref} className="site-wrap py-16" style={anim(gridAnim.visible)}>
         {/* Category filter */}
         {categories.length > 1 && (
           <div className="flex flex-wrap gap-2 mb-10">

@@ -6,15 +6,14 @@ import Redis from 'ioredis';
 export class RedisService implements OnModuleInit, OnModuleDestroy {
   private client: Redis;
   private readonly logger = new Logger(RedisService.name);
+  private pingInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(private config: ConfigService) {}
 
   onModuleInit() {
-    // If REDIS_URL is set (Upstash production), use that
-    // Otherwise use host/port (local Docker)
     const redisUrl = this.config.get<string>('REDIS_URL');
 
-    const retryStrategy = (times: number) => Math.min(times * 200, 5000);
+    const retryStrategy = (times: number) => Math.min(times * 500, 10000);
 
     if (redisUrl) {
       this.client = new Redis(redisUrl, {
@@ -23,6 +22,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         retryStrategy,
         keepAlive: 10000,
         reconnectOnError: () => true,
+        enableOfflineQueue: true,
       });
     } else {
       this.client = new Redis({
@@ -31,6 +31,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         maxRetriesPerRequest: 3,
         retryStrategy,
         keepAlive: 10000,
+        enableOfflineQueue: true,
       });
     }
 
@@ -38,12 +39,23 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       this.logger.log('Redis connected successfully');
     });
 
-    this.client.on('error', (err) => {
-      this.logger.error('Redis connection error', err);
+    this.client.on('error', (err: Error) => {
+      // Only log unique error messages to avoid log spam during reconnection
+      this.logger.error(`Redis connection error: ${err.message}`);
     });
+
+    // Ping every 30 seconds to keep Upstash connection alive
+    this.pingInterval = setInterval(async () => {
+      try {
+        await this.client.ping();
+      } catch {
+        // Silent — retryStrategy will handle reconnection
+      }
+    }, 30_000);
   }
 
   async onModuleDestroy() {
+    if (this.pingInterval) clearInterval(this.pingInterval);
     await this.client.quit();
   }
 

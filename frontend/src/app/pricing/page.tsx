@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Plus, Minus } from 'lucide-react';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
+import { useFadeIn, anim } from '@/lib/use-fade-in';
 
 const ALL_PLANS = [
   {
@@ -33,25 +34,6 @@ const ALL_PLANS = [
   },
 ];
 
-function useFadeIn(threshold = 0.12) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => { setVisible(e.isIntersecting); },
-      { threshold },
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return { ref, visible };
-}
-
-const anim = (visible: boolean, delay = 0): React.CSSProperties => ({
-  opacity:    visible ? 1 : 0,
-  transform:  visible ? 'translateY(0)' : 'translateY(24px)',
-  transition: `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`,
-});
 
 
 const FAQS = [
@@ -71,15 +53,15 @@ export default function PricingPage() {
   const faqAnim   = useFadeIn();
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="pt-[80px] bg-[#0a0a0a]">
+      <section className="pt-[80px] bg-white dark:bg-[#0a0a0a]">
         <div className="site-wrap pt-14 pb-12">
           <div ref={heroAnim.ref}>
             <h1
-              className="text-4xl sm:text-5xl font-black text-white leading-tight"
+              className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white leading-tight"
               style={anim(heroAnim.visible, 0.08)}
             >
               Broadcast Quality.<br />Hourly Rates.
@@ -89,13 +71,13 @@ export default function PricingPage() {
       </section>
 
       {/* ── Pricing cards ── */}
-      <section className="pb-24 bg-[#0a0a0a]">
+      <section className="pb-24 bg-white dark:bg-[#0a0a0a]">
         <div className="site-wrap">
           <div ref={cardsAnim.ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {ALL_PLANS.map((plan, i) => (
               <div
                 key={plan.slug}
-                className="bg-[#161616] flex flex-col"
+                className="bg-[#f8f8f8] dark:bg-[#161616] flex flex-col"
                 style={anim(cardsAnim.visible, i * 0.1)}
               >
                 <div className="p-8 flex-1">
@@ -104,17 +86,17 @@ export default function PricingPage() {
                     {plan.price}{' '}
                     <span className="text-base font-semibold text-[#E5312A]/70">{plan.unit}</span>
                   </p>
-                  <h3 className="text-white text-xl font-bold mb-1">{plan.name}</h3>
-                  <p className="text-white/35 text-xs mb-7 tracking-wide">{plan.min}</p>
+                  <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-1">{plan.name}</h3>
+                  <p className="text-gray-400 dark:text-white/35 text-xs mb-7 tracking-wide">{plan.min}</p>
 
-                  <div className="border-t border-dashed border-white/10 mb-7" />
+                  <div className="border-t border-dashed border-gray-200 dark:border-white/10 mb-7" />
 
                   {/* Features */}
                   <ul className="space-y-4">
                     {plan.features.map(f => (
                       <li key={f} className="flex items-start gap-3">
                         <span className="text-[#E5312A] font-bold text-base mt-0.5 flex-shrink-0">•</span>
-                        <span className="text-white/65 text-sm leading-relaxed">{f}</span>
+                        <span className="text-gray-600 dark:text-white/65 text-sm leading-relaxed">{f}</span>
                       </li>
                     ))}
                   </ul>
@@ -124,13 +106,13 @@ export default function PricingPage() {
                 <div className="p-6 pt-0 space-y-2">
                   <Link
                     href="/register"
-                    className="block w-full text-center bg-black hover:bg-[#E5312A] text-white font-bold py-4 text-[11px] tracking-[0.22em] uppercase transition-colors"
+                    className="block w-full text-center bg-gray-900 dark:bg-black hover:bg-[#E5312A] text-white font-bold py-4 text-[11px] tracking-[0.22em] uppercase transition-colors"
                   >
                     Book Now
                   </Link>
                   <Link
                     href={`/services/${plan.slug}`}
-                    className="block w-full text-center text-white/30 hover:text-white/70 text-xs py-2 transition-colors"
+                    className="block w-full text-center text-gray-400 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/70 text-xs py-2 transition-colors"
                   >
                     About this service
                   </Link>
@@ -140,40 +122,40 @@ export default function PricingPage() {
           </div>
 
           {/* GST note */}
-          <p className="mt-10 text-white/25 text-xs text-center" style={anim(cardsAnim.visible, 0.35)}>
+          <p className="mt-10 text-gray-400 dark:text-white/25 text-xs text-center" style={anim(cardsAnim.visible, 0.35)}>
             All rates are per hour · 18% GST applicable · Tax-compliant invoice sent by email after every session
           </p>
         </div>
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-20 bg-[#111111]">
+      <section className="py-20 bg-[#f4f4f4] dark:bg-[#111111]">
         <div className="site-wrap">
           <div ref={faqAnim.ref}>
             <div className="mb-12" style={anim(faqAnim.visible)}>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white">Common Questions</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Common Questions</h2>
             </div>
 
             <div className="space-y-3">
               {FAQS.map((faq, i) => (
                 <div
                   key={i}
-                  className="bg-[#161616]"
+                  className="bg-white dark:bg-[#161616]"
                   style={anim(faqAnim.visible, 0.05 + i * 0.05)}
                 >
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between px-6 py-7 text-left hover:bg-[#1a1a1a] transition-colors"
+                    className="w-full flex items-center justify-between px-6 py-7 text-left hover:bg-[#f0f0f0] dark:hover:bg-[#1a1a1a] transition-colors"
                   >
-                    <span className="font-semibold text-white text-base pr-4">{faq.q}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-base pr-4">{faq.q}</span>
                     {openFaq === i
                       ? <Minus size={16} className="text-[#E5312A] flex-shrink-0" />
-                      : <Plus  size={16} className="text-white/30 flex-shrink-0" />
+                      : <Plus  size={16} className="text-gray-400 dark:text-white/30 flex-shrink-0" />
                     }
                   </button>
                   {openFaq === i && (
                     <div className="px-6 pb-6">
-                      <p className="text-sm text-white/55 leading-relaxed">{faq.a}</p>
+                      <p className="text-sm text-gray-600 dark:text-white/55 leading-relaxed">{faq.a}</p>
                     </div>
                   )}
                 </div>

@@ -5,35 +5,14 @@ import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import VideoThumbnail from '@/components/VideoThumbnail';
-import CldVideoThumb from '@/components/CldVideoThumb';
 import {
   Mic, Video, MonitorPlay, Newspaper, Laptop, Camera,
-  CheckCircle, Play, Star,
+  CheckCircle, Play,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
 import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
-
-// ── Scroll animation hook ──────────────────────────────
-function useFadeIn(threshold = 0.12) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => { setVisible(e.isIntersecting); },
-      { threshold },
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return { ref, visible };
-}
-
-const anim = (visible: boolean, delay = 0): React.CSSProperties => ({
-  opacity:    visible ? 1 : 0,
-  transform:  visible ? 'translateY(0)' : 'translateY(24px)',
-  transition: `opacity 0.7s ease ${delay}s, transform 0.7s ease ${delay}s`,
-});
+import { useFadeIn, anim } from '@/lib/use-fade-in';
 
 // ── Static data ───────────────────────────────────────
 const SERVICES = [
@@ -93,6 +72,7 @@ export default function HomePage() {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [loggedIn,    setLoggedIn]    = useState(false);
   const [slide,       setSlide]       = useState(0);
+  const videosRef = useRef<HTMLElement>(null);
 
   const bookHref = loggedIn ? '/dashboard/bookings/new' : '/register';
 
@@ -116,6 +96,22 @@ export default function HomePage() {
       document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 120);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Pause all videos when section scrolls out of view
+  useEffect(() => {
+    const onScroll = () => {
+      const el = videosRef.current;
+      if (!el) return;
+      const { top, bottom } = el.getBoundingClientRect();
+      const outOfView = bottom < 0 || top > window.innerHeight;
+      if (outOfView) {
+        el.querySelectorAll<HTMLVideoElement>('video').forEach(v => { if (!v.paused) v.pause(); });
+        setActiveVideo(null);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
 
@@ -176,16 +172,16 @@ export default function HomePage() {
             <p className="text-sm sm:text-[15px] text-white/55 leading-relaxed mb-9 max-w-lg">
               Six studio services under one roof — podcasts, VFX, news shoots, online classes, monologues, and product photography. Book online in minutes.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:gap-3">
               <Link
                 href={bookHref}
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto sm:min-w-[200px] bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-8 py-3.5 text-sm tracking-wide transition-colors"
+                className="inline-flex items-center justify-center bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-7 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm tracking-wide transition-colors sm:min-w-[180px]"
               >
                 Book a Studio
               </Link>
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto sm:min-w-[200px] bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/40 text-white/80 hover:text-white font-semibold px-8 py-3.5 text-sm transition-colors"
+                className="inline-flex items-center justify-center border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-semibold px-7 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm transition-colors sm:min-w-[180px]"
               >
                 View Pricing
               </Link>
@@ -232,7 +228,7 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           FEATURED PRODUCTIONS
       ════════════════════════════════════════════════════ */}
-      <section id="videos" className="pt-6 pb-14 bg-white dark:bg-[#111111] overflow-hidden">
+      <section id="videos" ref={videosRef} className="pt-6 pb-14 bg-white dark:bg-[#111111] overflow-hidden">
         <div className="site-wrap">
           <div ref={prodAnim.ref} className="mb-10" style={anim(prodAnim.visible)}>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Featured Productions</h2>
@@ -246,43 +242,37 @@ export default function HomePage() {
             : allVideos;
           const strip = [...base, ...base];
           return (
-            <div className="w-full overflow-hidden group/strip strip-edge-fade pl-4 sm:pl-6 lg:pl-8" style={anim(prodAnim.visible, 0.15)}>
+            <div className="w-full overflow-hidden group/strip pl-4 sm:pl-6 lg:pl-8" style={anim(prodAnim.visible, 0.15)}>
               <div className="animate-marquee-left group-hover/strip:[animation-play-state:paused] flex gap-6" style={{ '--dur': '55s', width: 'max-content' } as React.CSSProperties}>
                 {strip.map((video, i) => (
                   <div key={`${video.id}-${i}`} className="flex-none w-[75vw] sm:w-[44vw] lg:w-[38vw] max-w-[600px] group">
-                    {activeVideo === video.id ? (
-                      <div className="aspect-video bg-black">
-                        {video.videoUrl ? (
-                          // eslint-disable-next-line jsx-a11y/media-has-caption
-                          <video src={video.videoUrl} controls autoPlay className="w-full h-full" />
-                        ) : video.cloudinaryUrl ? (
-                          // eslint-disable-next-line jsx-a11y/media-has-caption
-                          <video src={video.cloudinaryUrl} controls autoPlay className="w-full h-full" />
-                        ) : video.youtubeId ? (
+                    <div className="relative aspect-video bg-black overflow-hidden">
+                      {(video.videoUrl || video.cloudinaryUrl) ? (
+                        // eslint-disable-next-line jsx-a11y/media-has-caption
+                        <video
+                          src={video.videoUrl ?? video.cloudinaryUrl ?? ''}
+                          controls
+                          preload="metadata"
+                          className="w-full h-full"
+                          onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1.5; }}
+                        />
+                      ) : video.youtubeId ? (
+                        activeVideo === video.id ? (
                           <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`} title={video.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                        ) : null}
-                      </div>
-                    ) : (
-                      <button className="relative block w-full aspect-video overflow-hidden bg-[#0a0a0a]" onClick={() => setActiveVideo(video.id)}>
-                        {video.cloudinaryUrl ? (
-                          <CldVideoThumb src={video.cloudinaryUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        ) : video.thumbnailUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        ) : video.youtubeId ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={e => { (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`; }} />
-                        ) : video.videoUrl ? (
-                          <VideoThumbnail src={video.videoUrl} className="w-full h-full object-cover" />
-                        ) : null}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition-colors">
-                          <div className="w-12 h-12 bg-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                            <Play size={16} className="text-gray-900 ml-1" fill="currentColor" />
-                          </div>
-                        </div>
-                        <span className="absolute top-3 left-3 bg-[#E5312A] text-white text-[10px] font-semibold px-2 py-1 uppercase tracking-wide">{video.category}</span>
-                      </button>
-                    )}
+                        ) : (
+                          <button className="relative w-full h-full" onClick={() => setActiveVideo(video.id)}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`} alt={video.title} className="w-full h-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`; }} />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/20 transition-colors">
+                              <div className="w-12 h-12 bg-white flex items-center justify-center shadow-lg">
+                                <Play size={16} className="text-gray-900 ml-1" fill="currentColor" />
+                              </div>
+                            </div>
+                          </button>
+                        )
+                      ) : null}
+                      <span className="absolute top-3 left-3 z-10 bg-[#E5312A] text-white text-[10px] font-semibold px-2 py-1 uppercase tracking-wide pointer-events-none">{video.category}</span>
+                    </div>
                     <div className="py-3 px-1">
                       <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{video.title}</h3>
                       {video.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{video.description}</p>}
@@ -298,16 +288,16 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           TESTIMONIALS — large photo top, quote below, red name
       ════════════════════════════════════════════════════ */}
-      <section className="py-20 bg-[#0a0a0a]">
+      <section className="py-20 bg-[#f8f8f8] dark:bg-[#0a0a0a]">
         <div className="site-wrap">
           <div ref={testAnim.ref} className="mb-12" style={anim(testAnim.visible)}>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">Testimonials</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Testimonials</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t, i) => (
               <div
                 key={t.name}
-                className="bg-[#141414] flex flex-col"
+                className="bg-white dark:bg-[#141414] flex flex-col border border-[#e8e8e8] dark:border-transparent"
                 style={anim(testAnim.visible, 0.1 + i * 0.1)}
               >
                 {/* Large photo */}
@@ -320,12 +310,12 @@ export default function HomePage() {
                 </div>
                 {/* Quote + name */}
                 <div className="p-6 flex flex-col flex-1">
-                  <p className="text-sm text-white/70 leading-relaxed flex-1">
+                  <p className="text-sm text-gray-600 dark:text-white/70 leading-relaxed flex-1">
                     &ldquo;{t.quote}&rdquo;
                   </p>
-                  <div className="mt-5 pt-4 border-t border-white/10">
+                  <div className="mt-5 pt-4 border-t border-gray-100 dark:border-white/10">
                     <p className="font-bold text-[#E5312A] text-sm">{t.name}</p>
-                    <p className="text-white/40 text-xs mt-0.5">{t.role}</p>
+                    <p className="text-gray-400 dark:text-white/40 text-xs mt-0.5">{t.role}</p>
                   </div>
                 </div>
               </div>
@@ -390,7 +380,7 @@ export default function HomePage() {
 
         {/* Strip fades in on scroll, pauses on hover */}
         <div
-          className="w-full overflow-hidden group/inv strip-edge-fade pl-4 sm:pl-6 lg:pl-8"
+          className="w-full overflow-hidden group/inv pl-4 sm:pl-6 lg:pl-8"
           style={anim(invAnim.visible, 0.15)}
         >
           <div
@@ -429,7 +419,7 @@ export default function HomePage() {
           <div ref={blogAnim.ref}>
             <div className="flex items-end justify-between mb-10" style={anim(blogAnim.visible)}>
               <div>
-                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">From the Studio</h2>
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Blog</h2>
               </div>
               <Link href="/blog" className="hidden sm:flex items-center gap-2 text-sm font-bold text-[#E5312A] hover:underline">
                 All Posts

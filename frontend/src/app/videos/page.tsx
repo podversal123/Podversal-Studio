@@ -9,6 +9,7 @@ import { Play, X } from 'lucide-react';
 import VideoThumbnail from '@/components/VideoThumbnail';
 import CldVideoThumb from '@/components/CldVideoThumb';
 import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
+import { useFadeIn, anim } from '@/lib/use-fade-in';
 
 interface StudioVideo {
   id:            string;
@@ -40,6 +41,9 @@ export default function VideosPage() {
   const [category,  setCategory]  = useState<string>('All');
   const [visible,   setVisible]   = useState(PAGE_SIZE);
   const [playing,   setPlaying]   = useState<string | null>(null);
+
+  const heroAnim = useFadeIn(0.05);
+  const gridAnim = useFadeIn();
 
   const fetchVideos = () => {
     api.get<StudioVideo[]>('/studio-videos/public')
@@ -75,9 +79,11 @@ export default function VideosPage() {
       {/* Banner */}
       <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
         <div className="site-wrap py-16">
-          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
-            Studio Videos
-          </h1>
+          <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
+            <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
+              Studio Videos
+            </h1>
+          </div>
         </div>
       </section>
 
@@ -107,7 +113,7 @@ export default function VideosPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-l border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
+            <div ref={gridAnim.ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-l border-t border-[#e5e5e5] dark:border-[#2a2a2a]" style={anim(gridAnim.visible)}>
               {shown.map(video => {
                 const thumb = getThumbnail(video);
                 const isPlaying = playing === video.id;

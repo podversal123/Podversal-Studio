@@ -100,7 +100,7 @@ export default function BlogPostPage() {
             prose-p:text-base prose-p:leading-[1.8] prose-p:my-3
             prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white
             prose-em:text-gray-600 dark:prose-em:text-[#aaa]
-            [&_h2]:text-xl [&_h2]:sm:text-2xl [&_h2]:font-black [&_h2]:mt-10 [&_h2]:mb-3
+            [&_h2]:text-2xl [&_h2]:font-black [&_h2]:mt-10 [&_h2]:mb-3
             [&_h2]:text-gray-900 dark:[&_h2]:text-white [&_h2]:tracking-tight [&_h2]:border-l-4
             [&_h2]:border-[#E5312A] [&_h2]:pl-4
             [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-4

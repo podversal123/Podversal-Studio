@@ -7,6 +7,7 @@ import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
+import { useFadeIn, anim } from '@/lib/use-fade-in';
 
 interface GalleryImage {
   id: string;
@@ -32,6 +33,9 @@ export default function GalleryPage() {
   const [category,  setCategory]  = useState<string>('All');
   const [visible,   setVisible]   = useState(PAGE_SIZE);
   const [lightbox,  setLightbox]  = useState<number | null>(null);
+
+  const heroAnim = useFadeIn(0.05);
+  const gridAnim = useFadeIn();
 
   const fetchImages = () => {
     api.get<GalleryImage[]>('/gallery/public')
@@ -94,9 +98,11 @@ export default function GalleryPage() {
       {/* Banner */}
       <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
         <div className="site-wrap py-16">
-          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
-            Studio Gallery
-          </h1>
+          <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
+            <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
+              Studio Gallery
+            </h1>
+          </div>
         </div>
       </section>
 
@@ -126,7 +132,7 @@ export default function GalleryPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
+            <div ref={gridAnim.ref} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1" style={anim(gridAnim.visible)}>
               {shown.map((img, index) => (
                 <div
                   key={img.id}

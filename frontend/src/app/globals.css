@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 * {
   box-sizing: border-box;
   padding: 0;
@@ -11,9 +9,6 @@
 }
 
 html {
-  max-width: 100vw;
-  overflow-x: hidden;
-  font-family: 'Inter', sans-serif;
   scroll-padding-top: 80px;
   font-size: 16px;
 }
@@ -200,8 +195,3 @@ body {
 .animate-marquee-left { animation: marquee-left var(--dur, 28s) linear infinite; }
 .animate-marquee-left-slow { animation: marquee-left var(--dur, 40s) linear infinite; }
 
-/* Edge fade mask — dark mode only */
-.dark .strip-edge-fade {
-  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-}

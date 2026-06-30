@@ -1,33 +1,12 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Play, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
-import VideoThumbnail from '@/components/VideoThumbnail';
-import CldVideoThumb from '@/components/CldVideoThumb';
 import api from '@/lib/api';
-
-function useFadeIn(threshold = 0.10) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => { setVisible(e.isIntersecting); },
-      { threshold },
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return { ref, visible };
-}
-
-const anim = (visible: boolean, delay = 0): React.CSSProperties => ({
-  opacity:    visible ? 1 : 0,
-  transform:  visible ? 'translateY(0)' : 'translateY(24px)',
-  transition: `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`,
-});
+import { useFadeIn, anim } from '@/lib/use-fade-in';
 
 interface StudioVideo {
   id: string; title: string; description: string | null;
@@ -109,19 +88,21 @@ export default function OurWorkPage() {
               {allVideos.map((video, i) => (
                 <div
                   key={video.id}
-                  id={`video-card-${video.id}`}
                   className="group"
                   style={anim(videoAnim.visible, 0.08 + i * 0.06)}
                 >
-                  {activeVideo === video.id ? (
-                    <div className="aspect-video bg-black">
-                      {video.videoUrl ? (
-                        // eslint-disable-next-line jsx-a11y/media-has-caption
-                        <video src={video.videoUrl} controls autoPlay className="w-full h-full" />
-                      ) : video.cloudinaryUrl ? (
-                        // eslint-disable-next-line jsx-a11y/media-has-caption
-                        <video src={video.cloudinaryUrl} controls autoPlay className="w-full h-full" />
-                      ) : video.youtubeId ? (
+                  <div className="relative aspect-video bg-black overflow-hidden">
+                    {(video.videoUrl || video.cloudinaryUrl) ? (
+                      // eslint-disable-next-line jsx-a11y/media-has-caption
+                      <video
+                        src={video.videoUrl ?? video.cloudinaryUrl ?? ''}
+                        controls
+                        preload="metadata"
+                        className="w-full h-full"
+                        onLoadedMetadata={e => { e.currentTarget.currentTime = 1.5; }}
+                      />
+                    ) : video.youtubeId ? (
+                      activeVideo === video.id ? (
                         <iframe
                           className="w-full h-full"
                           src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`}
@@ -129,41 +110,30 @@ export default function OurWorkPage() {
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         />
-                      ) : null}
-                    </div>
-                  ) : (
-                    <button
-                      className="relative block w-full aspect-video overflow-hidden bg-[#0a0a0a]"
-                      onClick={() => setActiveVideo(video.id)}
-                    >
-                      {video.cloudinaryUrl ? (
-                        <CldVideoThumb src={video.cloudinaryUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : video.thumbnailUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : video.youtubeId ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`}
-                          alt={video.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          onError={e => { (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`; }}
-                        />
-                      ) : video.videoUrl ? (
-                        <VideoThumbnail src={video.videoUrl} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full bg-[#161616]" />
-                      )}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/35 group-hover:bg-black/20 transition-colors">
-                        <div className="w-14 h-14 bg-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
-                          <Play size={18} className="text-gray-900 ml-1" fill="currentColor" />
-                        </div>
-                      </div>
-                      <span className="absolute top-3 left-3 bg-[#E5312A] text-white text-[10px] font-semibold px-2 py-1 uppercase tracking-wide">
-                        {video.category}
-                      </span>
-                    </button>
-                  )}
+                        <button
+                          className="absolute inset-0 w-full h-full"
+                          onClick={() => setActiveVideo(video.id)}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`}
+                            alt={video.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={e => { (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`; }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/35 group-hover:bg-black/20 transition-colors">
+                            <div className="w-14 h-14 bg-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
+                              <Play size={18} className="text-gray-900 ml-1" fill="currentColor" />
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    ) : null}
+                    <span className="absolute top-3 left-3 z-10 pointer-events-none bg-[#E5312A] text-white text-[10px] font-semibold px-2 py-1 uppercase tracking-wide">
+                      {video.category}
+                    </span>
+                  </div>
                   <div className="py-4 bg-white dark:bg-[#111111]">
                     <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{video.title}</h3>
                     {video.description && (

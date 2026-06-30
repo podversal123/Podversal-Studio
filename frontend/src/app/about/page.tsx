@@ -1,28 +1,8 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
-
-function useFadeIn(threshold = 0.10) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => { setVisible(e.isIntersecting); },
-      { threshold },
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return { ref, visible };
-}
-
-const anim = (visible: boolean, delay = 0): React.CSSProperties => ({
-  opacity:    visible ? 1 : 0,
-  transform:  visible ? 'translateY(0)' : 'translateY(24px)',
-  transition: `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`,
-});
+import { useFadeIn, anim } from '@/lib/use-fade-in';
 
 const VALUES = [
   {
