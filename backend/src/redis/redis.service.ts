@@ -14,19 +14,23 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     // Otherwise use host/port (local Docker)
     const redisUrl = this.config.get<string>('REDIS_URL');
 
+    const retryStrategy = (times: number) => Math.min(times * 200, 5000);
+
     if (redisUrl) {
-      // Production — Upstash gives a full URL like:
-      // rediss://default:password@host:port
       this.client = new Redis(redisUrl, {
-        tls: {}, // Upstash requires TLS
+        tls: {},
         maxRetriesPerRequest: 3,
+        retryStrategy,
+        keepAlive: 10000,
+        reconnectOnError: () => true,
       });
     } else {
-      // Local development — Docker Redis
       this.client = new Redis({
         host: this.config.get<string>('REDIS_HOST') || 'localhost',
         port: this.config.get<number>('REDIS_PORT') || 6379,
         maxRetriesPerRequest: 3,
+        retryStrategy,
+        keepAlive: 10000,
       });
     }
 

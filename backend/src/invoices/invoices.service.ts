@@ -1,22 +1,20 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InvoiceType } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { v2 as cloudinary } from 'cloudinary';
 import PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
+
+const PDF_CACHE_TTL = 30 * 24 * 60 * 60; // 30 days
+const PDF_CACHE_VERSION = 'v2'; // bump this whenever PDF template changes
 
 @Injectable()
 export class InvoicesService {
   constructor(
     private prisma: PrismaService,
     private config: ConfigService,
-  ) {
-    cloudinary.config({
-      cloud_name: this.config.get('CLOUDINARY_CLOUD_NAME'),
-      api_key:    this.config.get('CLOUDINARY_API_KEY'),
-      api_secret: this.config.get('CLOUDINARY_API_SECRET'),
-    });
-  }
+    private redis: RedisService,
+  ) {}
 
   // ── GENERATE INVOICE ─────────────────────────────────────
   async generate(bookingId: string, type: InvoiceType, requesterId?: string, requesterRole?: string): Promise<any> {
@@ -73,6 +71,10 @@ export class InvoicesService {
       },
     });
 
+    // Cache the already-built PDF so /pdf download doesn't rebuild from scratch
+    this.redis.set(`pdf:invoice:${PDF_CACHE_VERSION}:${invoice.id}`, pdfBuffer.toString('base64'), PDF_CACHE_TTL)
+      .catch(() => { /* non-critical — streamPdf will rebuild on cache miss */ });
+
     // Auto-email to customer — fire-and-forget so email failure doesn't kill invoice creation
     this.sendInvoiceEmail(booking.customerEmail, booking.customerName, invoiceNumber, pdfBuffer, type)
       .catch(err => console.error(`[Invoice Email Failed] ${invoiceNumber}: ${err?.message ?? err}`));
@@ -100,16 +102,34 @@ export class InvoicesService {
       if (!owns) throw new ForbiddenException('Access denied');
     }
 
+    const cacheKey = `pdf:invoice:${PDF_CACHE_VERSION}:${invoiceId}`;
+
+    // Serve from Redis cache if available (set during generate)
+    const cached = await this.redis.get(cacheKey).catch(() => null);
+    if (cached) {
+      return { buffer: Buffer.from(cached, 'base64'), invoiceNumber: invoice.invoiceNumber };
+    }
+
+    // Cache miss — rebuild PDF and recache
+    // Always derive gstAmount from invoice.amount so old invoices with stale
+    // DB values still render the correct 18% GST row.
+    const amount    = Number(invoice.amount);
+    const gstAmount = Math.round(amount * 0.18 * 100) / 100;
+    const total     = amount + gstAmount;
+
     const logoBuffer = await this.fetchLogoBuffer();
     const buffer = await this.buildInvoicePdf({
       invoiceNumber: invoice.invoiceNumber,
       type:          invoice.type,
       booking:       invoice.booking,
-      amount:        Number(invoice.amount),
-      gstAmount:     Number(invoice.gstAmount ?? 0),
-      total:         Number(invoice.totalAmount),
+      amount,
+      gstAmount,
+      total,
       logoBuffer,
     });
+
+    this.redis.set(cacheKey, buffer.toString('base64'), PDF_CACHE_TTL)
+      .catch(() => { /* non-critical */ });
 
     return { buffer, invoiceNumber: invoice.invoiceNumber };
   }
@@ -339,20 +359,6 @@ export class InvoicesService {
          );
 
       doc.end();
-    });
-  }
-
-  // ── PRIVATE: CLOUDINARY UPLOAD ───────────────────────────
-  private async uploadToCloudinary(pdfBuffer: Buffer, invoiceNumber: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: 'podversal/invoices', public_id: invoiceNumber, resource_type: 'raw', format: 'pdf' },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result!.secure_url);
-        },
-      );
-      stream.end(pdfBuffer);
     });
   }
 

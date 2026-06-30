@@ -41,6 +41,7 @@ export class InvoicesController {
     const { buffer, invoiceNumber } = await this.invoices.streamPdf(id, user.id, user.role);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${invoiceNumber}.pdf"`);
+    res.setHeader('Content-Length', buffer.length);
     res.end(buffer);
   }
 }
