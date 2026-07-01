@@ -97,9 +97,39 @@ export function generateStaticParams() {
   return Object.keys(SERVICES).map(slug => ({ slug }));
 }
 
-export default function ServicePage({ params }: { params: { slug: string } }) {
+// Maps marketing slugs to the Service.type enum values in the database, so the
+// rate shown here always matches whatever an admin sets in Dashboard > Settings
+// instead of a hardcoded number that drifts out of sync.
+const SLUG_TO_SERVICE_TYPE: Record<string, string> = {
+  'podcast-studio':      'PODCAST',
+  'vfx-podcast':         'VFX_PODCAST',
+  'monologue-shoot':     'MONOLOGUE',
+  'news-shoot':          'NEWS_SHOOT',
+  'become-a-podcaster':  'ONLINE_CLASS',
+  'product-shoots':      'PRODUCT_SHOOT',
+};
+
+async function getLivePricePerHour(serviceType: string): Promise<number | null> {
+  try {
+    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    // Revalidate every 5 min so a dashboard price change shows up without a redeploy
+    const res = await fetch(`${base}/services`, { next: { revalidate: 300 } });
+    if (!res.ok) return null;
+    const services: Array<{ type: string; pricePerHour: number }> = await res.json();
+    const match = services.find(s => s.type === serviceType);
+    return match ? Number(match.pricePerHour) : null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function ServicePage({ params }: { params: { slug: string } }) {
   const service = SERVICES[params.slug];
   if (!service) notFound();
+
+  const serviceType = SLUG_TO_SERVICE_TYPE[params.slug];
+  const livePrice = serviceType ? await getLivePricePerHour(serviceType) : null;
+  const rate = livePrice != null ? `₹${livePrice.toLocaleString('en-IN')} / hour` : service.rate;
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#111111]">
@@ -144,7 +174,7 @@ export default function ServicePage({ params }: { params: { slug: string } }) {
               <div className="bg-[#f8f8f8] dark:bg-[#161616] p-6 sticky top-[100px]">
                 <div className="mb-5 pb-5 border-b border-gray-200 dark:border-[#2a2a2a]">
                   <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">Rate</p>
-                  <p className="text-2xl font-black text-gray-900 dark:text-white">{service.rate}</p>
+                  <p className="text-2xl font-black text-gray-900 dark:text-white">{rate}</p>
                 </div>
                 <div className="mb-6 pb-5 border-b border-gray-200 dark:border-[#2a2a2a]">
                   <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">Duration</p>

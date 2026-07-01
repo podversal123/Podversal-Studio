@@ -7,7 +7,7 @@ import MarketingFooter from '@/components/marketing/MarketingFooter';
 import VideoThumbnail from '@/components/VideoThumbnail';
 import {
   Mic, Video, MonitorPlay, Newspaper, Laptop, Camera,
-  CheckCircle, Play, Pause,
+  CheckCircle, Play, Pause, Calendar,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
@@ -459,27 +459,49 @@ export default function HomePage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {posts.slice(0, 3).map((post, i) => (
                     <Link
                       key={post.id}
                       href={`/blog/${post.slug}`}
-                      className="group bg-white dark:bg-[#161616] block"
+                      className="group flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-[#161616] border border-[#e8e8e8] dark:border-[#222] transition-all duration-300"
                       style={anim(blogAnim.visible, 0.1 + i * 0.1)}
                     >
-                      {post.coverImage ? (
-                        <div className="aspect-video overflow-hidden">
-                          <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <div className="aspect-[16/9] overflow-hidden bg-[#f5f5f5] dark:bg-[#1a1a1a]">
+                        {post.coverImage ? (
+                          <img
+                            src={post.coverImage}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-[#f5f5f5] dark:bg-[#1a1a1a] flex items-center justify-center">
+                            <span className="text-5xl font-black text-[#e5e5e5] dark:text-[#2a2a2a]">{post.title.charAt(0)}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col flex-1 p-6">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E5312A] bg-[#E5312A]/8 dark:bg-[#E5312A]/15 px-2.5 py-1">
+                            {post.category}
+                          </span>
+                          {post.publishedAt && (
+                            <span className="flex items-center gap-1 text-xs text-[#aaa] dark:text-[#555]">
+                              <Calendar size={10} />
+                              {new Date(post.publishedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </span>
+                          )}
                         </div>
-                      ) : (
-                        <div className="aspect-video bg-[#e5e5e5] dark:bg-[#1a1a1a] flex items-center justify-center">
-                          <span className="text-4xl font-black text-gray-300 dark:text-[#2a2a2a]">{post.title.charAt(0)}</span>
+
+                        <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-2 group-hover:text-[#E5312A] transition-colors leading-snug flex-1">
+                          {post.title}
+                        </h3>
+
+                        <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#f0f0f0] dark:border-[#222]">
+                          <span className="text-xs text-[#aaa] dark:text-[#555]">By {post.author?.name}</span>
+                          <span className="text-xs font-bold text-[#E5312A] group-hover:underline">Read</span>
                         </div>
-                      )}
-                      <div className="p-5">
-                        <p className="section-label text-[10px] mb-2">{post.category}</p>
-                        <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-2 group-hover:text-[#E5312A] transition-colors line-clamp-2">{post.title}</h3>
-                        {post.excerpt && <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{post.excerpt}</p>}
                       </div>
                     </Link>
                   ))}

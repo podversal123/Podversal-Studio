@@ -30,23 +30,23 @@ export default function AboutPage() {
 
       {/* ── Hero ── */}
       <section className="pt-[80px] bg-white dark:bg-[#111111]">
-        <div className="site-wrap pt-12 pb-10">
+        <div className="site-wrap pt-12 pb-4">
           <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white leading-tight">
-              We Are Podversal Studio.
+              We Are Podversal Studio
             </h1>
           </div>
         </div>
       </section>
 
       {/* ── Story ── */}
-      <section className="py-20 bg-white dark:bg-[#111111]">
+      <section className="pt-10 pb-20 bg-white dark:bg-[#111111]">
         <div className="site-wrap">
           <div ref={storyAnim.ref} className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
             <div style={anim(storyAnim.visible)}>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-                Built for creators<br />who mean business.
+                Built for creators<br />who mean business
               </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-5">
                 Podversal Studio was founded with a single conviction — creators, educators, and brands in India deserve broadcast-quality infrastructure without having to build it themselves. Too many talented people were held back not by lack of ideas, but by lack of access to the right tools.

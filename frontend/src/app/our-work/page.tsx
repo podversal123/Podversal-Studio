@@ -56,7 +56,7 @@ export default function OurWorkPage() {
 
       {/* ── Hero ── */}
       <section className="pt-[80px] bg-white dark:bg-[#111111]">
-        <div className="site-wrap pt-12 pb-10">
+        <div className="site-wrap pt-12 pb-4">
           <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white leading-tight">
               Our Work
@@ -66,7 +66,7 @@ export default function OurWorkPage() {
       </section>
 
       {/* ── Productions ── */}
-      <section className="py-20 bg-white dark:bg-[#111111]">
+      <section className="pt-10 pb-20 bg-white dark:bg-[#111111]">
         <div className="site-wrap">
           <div ref={videoAnim.ref}>
             <div className="mb-12" style={anim(videoAnim.visible)}>
