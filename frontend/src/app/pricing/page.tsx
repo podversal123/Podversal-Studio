@@ -1,24 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Plus, Minus } from 'lucide-react';
 import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
-import api from '@/lib/api';
 import { useFadeIn, anim } from '@/lib/use-fade-in';
-
-// Maps marketing slugs to the Service.type enum values in the database, so the
-// price shown here always matches whatever an admin sets in Dashboard > Settings
-// instead of a hardcoded number that drifts out of sync.
-const SLUG_TO_SERVICE_TYPE: Record<string, string> = {
-  'podcast-studio':      'PODCAST',
-  'vfx-podcast':         'VFX_PODCAST',
-  'monologue-shoot':     'MONOLOGUE',
-  'news-shoot':          'NEWS_SHOOT',
-  'become-a-podcaster':  'ONLINE_CLASS',
-  'product-shoots':      'PRODUCT_SHOOT',
-};
 
 const ALL_PLANS = [
   {
@@ -60,17 +47,10 @@ const FAQS = [
 
 export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [livePrices, setLivePrices] = useState<Record<string, number>>({});
 
   const heroAnim  = useFadeIn();
   const cardsAnim = useFadeIn();
   const faqAnim   = useFadeIn();
-
-  useEffect(() => {
-    api.get<Array<{ type: string; pricePerHour: number }>>('/services')
-      .then(r => setLivePrices(Object.fromEntries(r.data.map(s => [s.type, Number(s.pricePerHour)]))))
-      .catch(() => {});
-  }, []);
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
@@ -94,10 +74,7 @@ export default function PricingPage() {
       <section className="pb-24 bg-white dark:bg-[#0a0a0a]">
         <div className="site-wrap">
           <div ref={cardsAnim.ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {ALL_PLANS.map((plan, i) => {
-              const liveRate = livePrices[SLUG_TO_SERVICE_TYPE[plan.slug]];
-              const price = liveRate != null ? `₹${liveRate.toLocaleString('en-IN')}` : plan.price;
-              return (
+            {ALL_PLANS.map((plan, i) => (
               <div
                 key={plan.slug}
                 className="bg-[#f8f8f8] dark:bg-[#161616] flex flex-col"
@@ -106,7 +83,7 @@ export default function PricingPage() {
                 <div className="p-8 flex-1">
                   {/* Price */}
                   <p className="font-black text-[#E5312A] mb-1" style={{ fontSize: 'clamp(22px, 2.5vw, 30px)' }}>
-                    {price}{' '}
+                    {plan.price}{' '}
                     <span className="text-base font-semibold text-[#E5312A]/70">{plan.unit}</span>
                   </p>
                   <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-1">{plan.name}</h3>
@@ -141,8 +118,7 @@ export default function PricingPage() {
                   </Link>
                 </div>
               </div>
-              );
-            })}
+            ))}
           </div>
 
           {/* GST note */}

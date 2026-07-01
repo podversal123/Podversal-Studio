@@ -38,7 +38,7 @@ export default function BlogPage() {
       <Navbar />
 
       {/* Banner — theme-aware, no dark gradient */}
-      <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+      <section className="pt-20 bg-white dark:bg-[#111111]">
         <div className="site-wrap py-16">
           <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
