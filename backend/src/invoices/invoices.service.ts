@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { InvoiceType } from '@prisma/client';
+import { InvoiceType, Prisma } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
@@ -30,45 +30,56 @@ export class InvoicesService {
       if (!owns) throw new ForbiddenException('Access denied');
     }
 
-    // Unique invoice number using max existing number (safe under concurrent load)
-    const year = new Date().getFullYear();
-    const latest = await this.prisma.invoice.findFirst({
-      where:   { invoiceNumber: { startsWith: `INV-${year}-` } },
-      orderBy: { invoiceNumber: 'desc' },
-      select:  { invoiceNumber: true },
-    });
-    const nextSeq = latest
-      ? parseInt(latest.invoiceNumber.split('-')[2], 10) + 1
-      : 1;
-    const invoiceNumber = `INV-${year}-${String(nextSeq).padStart(4, '0')}`;
+    const gstRate    = 0.18;
+    const grossAmount = booking.totalAmount ?? 0;
+    const discount    = booking.discountAmount ?? 0;
+    // GST is charged on the amount actually payable (after discount), not the gross rate
+    const netAmount   = grossAmount - discount;
+    const gstAmount   = Math.round(netAmount * gstRate * 100) / 100;
+    const total       = netAmount + gstAmount;
 
-    const gstRate   = 0.18;
-    const amount    = booking.totalAmount ?? 0;
-    const gstAmount = Math.round(amount * gstRate * 100) / 100;
-    const total     = amount + gstAmount;
+    // Generate the invoice number and create the row inside one Serializable
+    // transaction so two concurrent generate() calls can't read the same
+    // "latest" number and collide. Postgres aborts one side with a
+    // serialization failure (Prisma P2034) under real contention — retry it.
+    const year = new Date().getFullYear();
+    const invoice = await this.createInvoiceWithRetry(async (tx) => {
+      const latest = await tx.invoice.findFirst({
+        where:   { invoiceNumber: { startsWith: `INV-${year}-` } },
+        orderBy: { invoiceNumber: 'desc' },
+        select:  { invoiceNumber: true },
+      });
+      const nextSeq = latest
+        ? parseInt(latest.invoiceNumber.split('-')[2], 10) + 1
+        : 1;
+      const invoiceNumber = `INV-${year}-${String(nextSeq).padStart(4, '0')}`;
+
+      // Save invoice to DB (PDF streamed on-demand via /invoices/:id/pdf — no Cloudinary upload needed)
+      // `amount` is stored net-of-discount so amount + gstAmount === totalAmount holds.
+      return tx.invoice.create({
+        data: {
+          bookingId,
+          type,
+          invoiceNumber,
+          amount: netAmount,
+          gstAmount,
+          totalAmount: total,
+        },
+      });
+    });
 
     // Generate PDF using pdfkit (no browser required)
+    // `amount` passed to the PDF stays gross — the line item shows the full
+    // rate/hr breakdown, with the discount and GST applied as separate rows below.
     const logoBuffer = await this.fetchLogoBuffer();
     const pdfBuffer = await this.buildInvoicePdf({
-      invoiceNumber,
+      invoiceNumber: invoice.invoiceNumber,
       type,
       booking,
-      amount,
+      amount: grossAmount,
       gstAmount,
       total,
       logoBuffer,
-    });
-
-    // Save invoice to DB (PDF streamed on-demand via /invoices/:id/pdf — no Cloudinary upload needed)
-    const invoice = await this.prisma.invoice.create({
-      data: {
-        bookingId,
-        type,
-        invoiceNumber,
-        amount,
-        gstAmount,
-        totalAmount: total,
-      },
     });
 
     // Cache the already-built PDF so /pdf download doesn't rebuild from scratch
@@ -76,10 +87,28 @@ export class InvoicesService {
       .catch(() => { /* non-critical — streamPdf will rebuild on cache miss */ });
 
     // Auto-email to customer — fire-and-forget so email failure doesn't kill invoice creation
-    this.sendInvoiceEmail(booking.customerEmail, booking.customerName, invoiceNumber, pdfBuffer, type)
-      .catch(err => console.error(`[Invoice Email Failed] ${invoiceNumber}: ${err?.message ?? err}`));
+    this.sendInvoiceEmail(booking.customerEmail, booking.customerName, invoice.invoiceNumber, pdfBuffer, type)
+      .catch(err => console.error(`[Invoice Email Failed] ${invoice.invoiceNumber}: ${err?.message ?? err}`));
 
     return invoice;
+  }
+
+  // ── PRIVATE: retry an invoice-number-then-create transaction on write conflict ─
+  private async createInvoiceWithRetry<T>(
+    work: (tx: Prisma.TransactionClient) => Promise<T>,
+    attemptsLeft = 5,
+  ): Promise<T> {
+    try {
+      return await this.prisma.$transaction(work, {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      });
+    } catch (err: any) {
+      // P2034: write conflict/deadlock under Serializable isolation — safe to retry
+      if (err?.code === 'P2034' && attemptsLeft > 1) {
+        return this.createInvoiceWithRetry(work, attemptsLeft - 1);
+      }
+      throw err;
+    }
   }
 
   // ── STREAM PDF (bypass Cloudinary auth) ─────────────────
@@ -113,16 +142,20 @@ export class InvoicesService {
     // Cache miss — rebuild PDF and recache
     // Always derive gstAmount from invoice.amount so old invoices with stale
     // DB values still render the correct 18% GST row.
-    const amount    = Number(invoice.amount);
-    const gstAmount = Math.round(amount * 0.18 * 100) / 100;
-    const total     = amount + gstAmount;
+    // invoice.amount is stored net-of-discount (see generate()); add the
+    // booking's discount back to get the gross amount for the line-item display.
+    const netAmount   = Number(invoice.amount);
+    const discount    = invoice.booking.discountAmount ?? 0;
+    const grossAmount = netAmount + discount;
+    const gstAmount   = Math.round(netAmount * 0.18 * 100) / 100;
+    const total       = netAmount + gstAmount;
 
     const logoBuffer = await this.fetchLogoBuffer();
     const buffer = await this.buildInvoicePdf({
       invoiceNumber: invoice.invoiceNumber,
       type:          invoice.type,
       booking:       invoice.booking,
-      amount,
+      amount: grossAmount,
       gstAmount,
       total,
       logoBuffer,

@@ -48,6 +48,17 @@ const ALL_END_SLOTS = [
 ];
 
 const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+
+// toISOString() converts to UTC, which rolls back to "yesterday" during the
+// 00:00-05:30 IST window (IST is UTC+5:30) — use local date parts instead so
+// the date-picker minimum always matches the customer's actual local today.
+const todayLocalDateString = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
 const getEndSlots = (start: string) =>
   !start ? [] : ALL_END_SLOTS.filter(s => toMin(s.value) > toMin(start));
 
@@ -88,7 +99,8 @@ export default function NewBookingPage() {
   });
 
   useEffect(() => {
-    api.get<Service[]>('/services').then(r => setServices(r.data)).catch(() => {});
+    api.get<Service[]>('/services').then(r => setServices(r.data))
+      .catch(() => toast.error('Failed to load services. Please refresh the page.'));
   }, []);
 
   const startTime   = watch('startTime');
@@ -113,12 +125,17 @@ export default function NewBookingPage() {
   endTimeRef.current   = endTime;
   shootDateRef.current = shootDate;
 
+  // Tags each request with an incrementing id so a slower, older response
+  // can't overwrite the result of a newer one if the user toggles slots fast.
+  const availabilityReqId = useRef(0);
+
   const checkAvailability = (st: string, et: string, sd: string) => {
+    const reqId = ++availabilityReqId.current;
     setChecking(true);
     api.get<AvailabilityResult>('/bookings/availability', { params: { date: sd, startTime: st, endTime: et } })
-      .then(r => setAvailability(r.data))
-      .catch(() => setAvailability(null))
-      .finally(() => setChecking(false));
+      .then(r => { if (reqId === availabilityReqId.current) setAvailability(r.data); })
+      .catch(() => { if (reqId === availabilityReqId.current) setAvailability(null); })
+      .finally(() => { if (reqId === availabilityReqId.current) setChecking(false); });
   };
 
   useEffect(() => {
@@ -223,7 +240,7 @@ export default function NewBookingPage() {
             <input
               {...register('shootDate')}
               type="date"
-              min={new Date().toISOString().split('T')[0]}
+              min={todayLocalDateString()}
               className="input-field"
             />
             {errors.shootDate && <p className="text-[#E5312A] text-xs mt-1">{errors.shootDate.message}</p>}

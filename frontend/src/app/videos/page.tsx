@@ -10,17 +10,7 @@ import VideoThumbnail from '@/components/VideoThumbnail';
 import CldVideoThumb from '@/components/CldVideoThumb';
 import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
 import { useFadeIn, anim } from '@/lib/use-fade-in';
-
-interface StudioVideo {
-  id:            string;
-  title:         string;
-  description:   string | null;
-  youtubeId:     string | null;
-  cloudinaryUrl: string | null;
-  thumbnailUrl:  string | null;
-  videoUrl?:     string | null;
-  category:      string;
-}
+import { FEATURED_VIDEOS, type FeaturedVideo as StudioVideo } from '@/lib/featured-videos';
 
 function cloudinaryThumb(url: string): string {
   const transformed = url.replace('/video/upload/', '/video/upload/so_1,w_1280,h_720,c_fill,q_100/');
@@ -28,11 +18,6 @@ function cloudinaryThumb(url: string): string {
     ? transformed.replace(/\.(mp4|mov|avi|webm|mkv|flv|wmv)$/i, '.jpg')
     : transformed + '.jpg';
 }
-
-const FEATURED_VIDEOS: StudioVideo[] = [
-  { id: 'feat-mandala', title: 'Mandala', description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/mandala.mp4', category: 'Podcast' },
-  { id: 'feat-du',      title: 'DU',      description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/du.mp4',      category: 'Podcast' },
-];
 
 const PAGE_SIZE = 9;
 

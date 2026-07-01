@@ -179,7 +179,7 @@ export default function EmployeesPage() {
                 {errors.jobTitle && <p className="text-[#E5312A] text-xs mt-1">{errors.jobTitle.message}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">Shift Start *</label>
                   <input {...register('shiftStart')} type="time" className="input-field" />

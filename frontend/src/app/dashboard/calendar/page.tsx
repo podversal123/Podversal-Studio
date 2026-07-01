@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -30,12 +30,33 @@ const SERVICE_LABELS: Record<string, string> = {
 export default function CalendarPage() {
   const router = useRouter();
   const calendarRef = useRef<any>(null);
+  // Starts false to match the server-rendered markup, then flips after mount
+  // based on actual viewport width — avoids a hydration mismatch.
+  const [isMobile, setIsMobile] = useState(false);
+  const wasMobile = useRef(false);
 
   // When any booking is created, updated, or payment confirmed — refresh calendar immediately
   useEffect(() => {
     const handler = () => calendarRef.current?.getApi().refetchEvents();
     window.addEventListener('podversal:live', handler);
     return () => window.removeEventListener('podversal:live', handler);
+  }, []);
+
+  // 6 toolbar buttons in one row overflow small screens — switch to a 2-row
+  // toolbar (view buttons in the footer) and default to the single-day view
+  // below the sm breakpoint. Desktop layout is untouched.
+  useEffect(() => {
+    const checkSize = () => {
+      const mobile = window.innerWidth < 640;
+      setIsMobile(mobile);
+      if (mobile !== wasMobile.current) {
+        wasMobile.current = mobile;
+        calendarRef.current?.getApi()?.changeView(mobile ? 'timeGridDay' : 'timeGridWeek');
+      }
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    return () => window.removeEventListener('resize', checkSize);
   }, []);
 
   const fetchEvents = async (info: any, successCb: any, failureCb: any) => {
@@ -80,25 +101,30 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendar */}
-      <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#0f0f0f] p-4">
+      <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#0f0f0f] p-2 sm:p-4 overflow-x-auto">
+        <div className="min-w-[320px]">
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
-          headerToolbar={{
-            left:   'prev,next today',
-            center: 'title',
-            right:  'dayGridMonth,timeGridWeek,timeGridDay',
-          }}
+          headerToolbar={
+            isMobile
+              ? { left: 'prev,next', center: 'title', right: 'today' }
+              : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }
+          }
+          footerToolbar={isMobile ? { left: 'dayGridMonth,timeGridWeek,timeGridDay', center: '', right: '' } : undefined}
           slotMinTime="06:00:00"
           slotMaxTime="26:00:00"
           allDaySlot={false}
+          slotLabelFormat={{ hour: 'numeric', minute: '2-digit', hour12: true }}
+          eventTimeFormat={{ hour: 'numeric', minute: '2-digit', hour12: true }}
           events={fetchEvents}
           eventClick={info => router.push(`/dashboard/bookings/${info.event.id}`)}
           height="auto"
           nowIndicator
           businessHours={{ daysOfWeek: [0,1,2,3,4,5,6], startTime: '06:00', endTime: '26:00' }}
         />
+        </div>
       </div>
 
     </div>

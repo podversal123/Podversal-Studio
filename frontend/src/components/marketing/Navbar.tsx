@@ -56,13 +56,13 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-7">
+          <div className="hidden md:flex items-center gap-4 lg:gap-7">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleAnchorClick(e, link.section)}
-                className="text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-[#E5312A] dark:hover:text-[#E5312A] transition-colors"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-[#E5312A] dark:hover:text-[#E5312A] transition-colors whitespace-nowrap"
               >
                 {link.label}
               </Link>

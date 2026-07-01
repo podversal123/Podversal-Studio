@@ -156,6 +156,7 @@ export default function BlogsAdminPage() {
         </div>
       ) : (
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
@@ -212,6 +213,7 @@ export default function BlogsAdminPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

@@ -7,12 +7,13 @@ import MarketingFooter from '@/components/marketing/MarketingFooter';
 import VideoThumbnail from '@/components/VideoThumbnail';
 import {
   Mic, Video, MonitorPlay, Newspaper, Laptop, Camera,
-  CheckCircle, Play,
+  CheckCircle, Play, Pause,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
 import { useRefetchOnFocus } from '@/lib/use-refetch-on-focus';
 import { useFadeIn, anim } from '@/lib/use-fade-in';
+import { FEATURED_VIDEOS } from '@/lib/featured-videos';
 
 // ── Static data ───────────────────────────────────────
 const SERVICES = [
@@ -51,12 +52,6 @@ interface BlogPost {
   publishedAt: string | null; author: { name: string };
 }
 
-const FEATURED_VIDEOS: StudioVideo[] = [
-  { id: 'feat-mandala',     title: 'Mandala',     description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/mandala.mp4',     category: 'Podcast' },
-  { id: 'feat-du',          title: 'DU',          description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/du.mp4',          category: 'Podcast' },
-  { id: 'feat-agriculture', title: 'Agriculture', description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/agriculture.mp4', category: 'Shoot'   },
-];
-
 const HERO_SLIDES = [
   '/studio/s1.jpg',
   '/studio/s6.jpg',
@@ -70,6 +65,8 @@ export default function HomePage() {
   const [videos,      setVideos]      = useState<StudioVideo[]>([]);
   const [posts,       setPosts]       = useState<BlogPost[]>([]);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
+  const [playingKey,  setPlayingKey]  = useState<string | null>(null);
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
   const [loggedIn,    setLoggedIn]    = useState(false);
   const [slide,       setSlide]       = useState(0);
   const videosRef = useRef<HTMLElement>(null);
@@ -167,7 +164,7 @@ export default function HomePage() {
             >
               Where Ideas<br />
               <span className="text-[#E5312A]">Become</span><br />
-              Content.
+              Content
             </h1>
             <p className="text-sm sm:text-[15px] text-white/55 leading-relaxed mb-9 max-w-lg">
               Six studio services under one roof — podcasts, VFX, news shoots, online classes, monologues, and product photography. Book online in minutes.
@@ -175,13 +172,13 @@ export default function HomePage() {
             <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:gap-3">
               <Link
                 href={bookHref}
-                className="inline-flex items-center justify-center bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-7 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm tracking-wide transition-colors sm:min-w-[180px]"
+                className="inline-flex items-center justify-center bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-7 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm tracking-wide transition-colors min-w-[160px] sm:min-w-[180px]"
               >
                 Book a Studio
               </Link>
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-semibold px-7 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm transition-colors sm:min-w-[180px]"
+                className="inline-flex items-center justify-center border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-semibold px-7 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm transition-colors min-w-[160px] sm:min-w-[180px]"
               >
                 View Pricing
               </Link>
@@ -235,50 +232,80 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Pad to min 6 items so the loop isn't immediately visible with few videos */}
+        {/* Just double (not pad-then-double) — with large local video files, every
+            extra copy is another full video element loading concurrently, which
+            was starving bandwidth and leaving some thumbnails stuck black. */}
         {(() => {
-          const base = allVideos.length > 0
-            ? Array(Math.ceil(6 / allVideos.length)).fill(allVideos).flat() as typeof allVideos
-            : allVideos;
-          const strip = [...base, ...base];
+          const strip = [...allVideos, ...allVideos];
           return (
             <div className="w-full overflow-hidden group/strip pl-4 sm:pl-6 lg:pl-8" style={anim(prodAnim.visible, 0.15)}>
               <div className="animate-marquee-left group-hover/strip:[animation-play-state:paused] flex gap-6" style={{ '--dur': '55s', width: 'max-content' } as React.CSSProperties}>
-                {strip.map((video, i) => (
-                  <div key={`${video.id}-${i}`} className="flex-none w-[75vw] sm:w-[44vw] lg:w-[38vw] max-w-[600px] group">
-                    <div className="relative aspect-video bg-black overflow-hidden">
-                      {(video.videoUrl || video.cloudinaryUrl) ? (
-                        // eslint-disable-next-line jsx-a11y/media-has-caption
-                        <video
-                          src={video.videoUrl ?? video.cloudinaryUrl ?? ''}
-                          controls
-                          preload="metadata"
-                          className="w-full h-full"
-                          onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1.5; }}
-                        />
-                      ) : video.youtubeId ? (
-                        activeVideo === video.id ? (
-                          <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`} title={video.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                        ) : (
-                          <button className="relative w-full h-full" onClick={() => setActiveVideo(video.id)}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`} alt={video.title} className="w-full h-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`; }} />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/20 transition-colors">
+                {strip.map((video, i) => {
+                  const key = `${video.id}-${i}`;
+                  return (
+                    <div key={key} className="flex-none w-[75vw] sm:w-[44vw] lg:w-[38vw] max-w-[600px] group">
+                      <div className="relative aspect-video bg-black overflow-hidden">
+                        {(video.videoUrl || video.cloudinaryUrl) ? (
+                          <>
+                            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                            <video
+                              ref={el => { videoRefs.current[key] = el; }}
+                              src={video.videoUrl ?? video.cloudinaryUrl ?? ''}
+                              poster={video.thumbnailUrl ?? undefined}
+                              preload={i < allVideos.length ? 'metadata' : 'none'}
+                              playsInline
+                              className="w-full h-full object-cover"
+                              onPlay={() => setPlayingKey(key)}
+                              onPause={() => setPlayingKey(p => p === key ? null : p)}
+                              onEnded={(e) => {
+                                // load() resets the element so the poster image reappears
+                                // instead of the video sitting on its last/black frame
+                                e.currentTarget.load();
+                                setPlayingKey(p => p === key ? null : p);
+                              }}
+                            />
+                            {/* Play/pause only appears on hover — hidden during playback and after pausing */}
+                            <button
+                              type="button"
+                              aria-label={playingKey === key ? 'Pause video' : 'Play video'}
+                              className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 focus:opacity-100 bg-black/0 hover:bg-black/20 transition-opacity"
+                              onClick={() => {
+                                const el = videoRefs.current[key];
+                                if (!el) return;
+                                if (el.paused) el.play(); else el.pause();
+                              }}
+                            >
                               <div className="w-12 h-12 bg-white flex items-center justify-center shadow-lg">
-                                <Play size={16} className="text-gray-900 ml-1" fill="currentColor" />
+                                {playingKey === key
+                                  ? <Pause size={16} className="text-gray-900" fill="currentColor" />
+                                  : <Play size={16} className="text-gray-900 ml-1" fill="currentColor" />}
                               </div>
-                            </div>
-                          </button>
-                        )
-                      ) : null}
-                      <span className="absolute top-3 left-3 z-10 bg-[#E5312A] text-white text-[10px] font-semibold px-2 py-1 uppercase tracking-wide pointer-events-none">{video.category}</span>
+                            </button>
+                          </>
+                        ) : video.youtubeId ? (
+                          activeVideo === video.id ? (
+                            <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`} title={video.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                          ) : (
+                            <button className="relative w-full h-full" onClick={() => setActiveVideo(video.id)}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`} alt={video.title} className="w-full h-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`; }} />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/20 transition-colors">
+                                <div className="w-12 h-12 bg-white flex items-center justify-center shadow-lg">
+                                  <Play size={16} className="text-gray-900 ml-1" fill="currentColor" />
+                                </div>
+                              </div>
+                            </button>
+                          )
+                        ) : null}
+                        <span className="absolute top-3 left-3 z-10 bg-[#E5312A] text-white text-[10px] font-semibold px-2 py-1 uppercase tracking-wide pointer-events-none">{video.category}</span>
+                      </div>
+                      <div className="py-3 px-1">
+                        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{video.title}</h3>
+                        {video.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{video.description}</p>}
+                      </div>
                     </div>
-                    <div className="py-3 px-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{video.title}</h3>
-                      {video.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{video.description}</p>}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );

@@ -9,14 +9,16 @@ interface ThemeContextType {
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({ theme: 'light', toggleTheme: () => {} });
+const ThemeContext = createContext<ThemeContextType>({ theme: 'dark', toggleTheme: () => {} });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark');
 
   useEffect(() => {
+    // Always start dark unless the user has explicitly picked a theme before —
+    // ignores the phone/browser's system light/dark setting on first visit.
     const saved = localStorage.getItem('podversal-theme') as Theme | null;
-    const init = saved ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const init = saved ?? 'dark';
     setTheme(init);
     document.documentElement.classList.toggle('dark', init === 'dark');
   }, []);

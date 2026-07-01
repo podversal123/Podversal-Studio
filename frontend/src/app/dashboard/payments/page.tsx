@@ -127,7 +127,7 @@ export default function PaymentsPage() {
             </div>
 
             {/* Type + Mode */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Payment Type</label>
                 <select {...register('type')} className="input-field">
@@ -149,7 +149,7 @@ export default function PaymentsPage() {
             </div>
 
             {/* Amount + Reference */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Amount (₹)</label>
                 <input {...register('amount')} type="number" className="input-field" placeholder="25000" />

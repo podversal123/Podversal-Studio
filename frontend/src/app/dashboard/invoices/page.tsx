@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { downloadInvoicePdf } from '@/lib/invoices';
 
 const INVOICE_TYPES = [
   { value: 'QUOTATION',       label: 'Quotation'          },
@@ -182,21 +183,7 @@ export default function InvoicesPage() {
                       <td className="px-4 py-3">
                         <button
                           className="text-[#E5312A] hover:underline text-xs font-bold"
-                          onClick={() => {
-                            const token = localStorage.getItem('access_token');
-                            fetch(`${process.env.NEXT_PUBLIC_API_URL}/invoices/${inv.id}/pdf`, {
-                              headers: { Authorization: `Bearer ${token}` },
-                            })
-                              .then(r => r.blob())
-                              .then(blob => {
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `${inv.invoiceNumber}.pdf`;
-                                a.click();
-                                URL.revokeObjectURL(url);
-                              });
-                          }}
+                          onClick={() => downloadInvoicePdf(inv.id, inv.invoiceNumber)}
                         >
                           Download
                         </button>

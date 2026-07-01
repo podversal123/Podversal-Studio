@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 import { getStoredUser } from '@/lib/auth';
+import { downloadInvoicePdf } from '@/lib/invoices';
 
 type BookingStatus =
   | 'REQUEST' | 'CHECKING' | 'QUOTED' | 'APPROVED'
@@ -145,17 +146,21 @@ export default function BookingDetailPage() {
 
   const refresh = () => api.get<Booking>(`/bookings/${id}`).then(r => setBooking(r.data));
 
-  const action = async (fn: () => Promise<unknown>, successMsg: string) => {
+  // Returns whether the action succeeded so callers (e.g. the cancel-confirm
+  // dialog) can decide what to do next instead of always assuming success.
+  const action = async (fn: () => Promise<unknown>, successMsg: string): Promise<boolean> => {
     setActionLoading(true);
     try {
       await fn();
       await refresh();
       toast.success(successMsg);
+      return true;
     } catch (err: unknown) {
       const msg = err && typeof err === 'object' && 'response' in err
         ? (err as any).response?.data?.message
         : null;
       toast.error(msg ?? 'Action failed');
+      return false;
     } finally {
       setActionLoading(false);
     }
@@ -309,7 +314,7 @@ export default function BookingDetailPage() {
             <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a] mb-3">This action cannot be undone.</p>
             <div className="flex gap-2">
               <button
-                onClick={() => action(() => api.patch(`/bookings/${id}/cancel`), 'Booking cancelled').then(() => setConfirmCancel(false))}
+                onClick={() => action(() => api.patch(`/bookings/${id}/cancel`), 'Booking cancelled').then(ok => { if (ok) setConfirmCancel(false); })}
                 disabled={actionLoading}
                 className="px-4 py-2 bg-[#E5312A] text-white text-xs font-bold hover:bg-[#CC2A24] transition-colors disabled:opacity-50"
               >
@@ -420,19 +425,7 @@ export default function BookingDetailPage() {
                     </div>
                     <button
                       className="flex items-center gap-1.5 text-xs font-bold text-[#E5312A] hover:underline"
-                      onClick={() => {
-                        const token = localStorage.getItem('access_token');
-                        fetch(`${process.env.NEXT_PUBLIC_API_URL}/invoices/${inv.id}/pdf`, {
-                          headers: { Authorization: `Bearer ${token}` },
-                        })
-                          .then(r => r.blob())
-                          .then(blob => {
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url; a.download = `${inv.invoiceNumber}.pdf`;
-                            a.click(); URL.revokeObjectURL(url);
-                          });
-                      }}
+                      onClick={() => downloadInvoicePdf(inv.id, inv.invoiceNumber)}
                     >
                       <FileText size={12} /> Download PDF
                     </button>
@@ -463,7 +456,7 @@ export default function BookingDetailPage() {
             {(status === 'REQUEST' || status === 'CHECKING') && (
               <SectionCard title="Send Quote">
                 {showQuote ? (
-                  <form onSubmit={handleSubmit(d => action(() => api.patch(`/bookings/${id}/quote`, d), 'Quote sent to customer').then(() => setShowQuote(false)))} className="space-y-3">
+                  <form onSubmit={handleSubmit(d => action(() => api.patch(`/bookings/${id}/quote`, d), 'Quote sent to customer').then(ok => { if (ok) setShowQuote(false); }))} className="space-y-3">
                     <div>
                       <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Total Amount (₹)</label>
                       <input {...register('totalAmount')} type="number" className="input-field" placeholder="50000" />
@@ -557,7 +550,7 @@ export default function BookingDetailPage() {
                   <div className="space-y-2">
                     <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a]">This will cancel the booking and release the slot.</p>
                     <div className="flex gap-2">
-                      <button onClick={() => action(() => api.patch(`/bookings/${id}/cancel`), 'Booking cancelled').then(() => setConfirmCancel(false))} disabled={actionLoading} className="flex-1 bg-[#E5312A] text-white text-xs font-bold py-2 hover:bg-[#CC2A24] transition-colors disabled:opacity-50">
+                      <button onClick={() => action(() => api.patch(`/bookings/${id}/cancel`), 'Booking cancelled').then(ok => { if (ok) setConfirmCancel(false); })} disabled={actionLoading} className="flex-1 bg-[#E5312A] text-white text-xs font-bold py-2 hover:bg-[#CC2A24] transition-colors disabled:opacity-50">
                         {actionLoading ? '…' : 'Confirm Cancel'}
                       </button>
                       <button onClick={() => setConfirmCancel(false)} className="flex-1 border border-[#e5e5e5] dark:border-[#2a2a2a] text-xs font-bold text-[#6b6b6b] dark:text-[#8a8a8a] py-2">

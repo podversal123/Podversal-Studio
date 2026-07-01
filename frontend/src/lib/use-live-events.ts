@@ -17,16 +17,22 @@ export function useLiveEvents(onEvent: (e: LiveEvent) => void) {
   handlerRef.current = onEvent;
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (!token) return;
-
     const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-    const url  = `${base}/events?token=${encodeURIComponent(token)}`;
 
-    let es: EventSource;
+    let es: EventSource | undefined;
     let retryTimer: ReturnType<typeof setTimeout>;
+    let stopped = false;
 
+    // Re-read the token from localStorage on every (re)connect attempt instead
+    // of once at mount, so a refreshed access_token (rotated by the axios
+    // interceptor in lib/api.ts) is picked up instead of retrying forever
+    // against the same stale token.
     const connect = () => {
+      if (stopped) return;
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
+      const url = `${base}/events?token=${encodeURIComponent(token)}`;
       es = new EventSource(url);
 
       es.onmessage = (raw) => {
@@ -44,7 +50,7 @@ export function useLiveEvents(onEvent: (e: LiveEvent) => void) {
       };
 
       es.onerror = () => {
-        es.close();
+        es?.close();
         retryTimer = setTimeout(connect, 3000);
       };
     };
@@ -52,6 +58,7 @@ export function useLiveEvents(onEvent: (e: LiveEvent) => void) {
     connect();
 
     return () => {
+      stopped = true;
       es?.close();
       clearTimeout(retryTimer);
     };

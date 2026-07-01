@@ -178,7 +178,7 @@ export default function SettingsPage() {
                 {errors.description && <p className="text-[#E5312A] text-xs mt-1">{errors.description.message}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Price / Hour (₹)</label>
                   <input {...register('pricePerHour')} type="number" className="input-field" />

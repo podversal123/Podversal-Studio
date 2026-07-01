@@ -7,18 +7,7 @@ import Navbar from '@/components/marketing/Navbar';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import api from '@/lib/api';
 import { useFadeIn, anim } from '@/lib/use-fade-in';
-
-interface StudioVideo {
-  id: string; title: string; description: string | null;
-  youtubeId: string | null; cloudinaryUrl: string | null;
-  thumbnailUrl: string | null; videoUrl?: string | null; category: string;
-}
-
-const FEATURED_VIDEOS: StudioVideo[] = [
-  { id: 'feat-mandala',     title: 'Mandala',     description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/mandala.mp4',     category: 'Podcast' },
-  { id: 'feat-du',          title: 'DU',          description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/du.mp4',          category: 'Podcast' },
-  { id: 'feat-agriculture', title: 'Agriculture', description: null, youtubeId: null, cloudinaryUrl: null, thumbnailUrl: null, videoUrl: '/videos/agriculture.mp4', category: 'Shoot'   },
-];
+import { FEATURED_VIDEOS, type FeaturedVideo as StudioVideo } from '@/lib/featured-videos';
 
 const GALLERY = [
   { src: '/studio/s1.jpg', alt: 'Studio seating area — ambient bookshelf lighting' },
@@ -70,7 +59,7 @@ export default function OurWorkPage() {
         <div className="site-wrap pt-12 pb-10">
           <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white leading-tight">
-              Our Work.
+              Our Work
             </h1>
           </div>
         </div>
@@ -98,8 +87,8 @@ export default function OurWorkPage() {
                         src={video.videoUrl ?? video.cloudinaryUrl ?? ''}
                         controls
                         preload="metadata"
+                        poster={video.thumbnailUrl ?? undefined}
                         className="w-full h-full"
-                        onLoadedMetadata={e => { e.currentTarget.currentTime = 1.5; }}
                       />
                     ) : video.youtubeId ? (
                       activeVideo === video.id ? (
