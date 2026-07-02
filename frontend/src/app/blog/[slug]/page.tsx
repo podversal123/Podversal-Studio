@@ -1,11 +1,8 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/marketing/Navbar";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
-import api from "@/lib/api";
 import { Calendar, User } from "lucide-react";
 
 interface BlogPost {
@@ -21,45 +18,42 @@ interface BlogPost {
   author: { name: string };
 }
 
-export default function BlogPostPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const slug = (params?.slug ?? "") as string;
-
-  useEffect(() => {
-    if (!slug) return;
-    api
-      .get<BlogPost>(`/blogs/public/${slug}`)
-      .then((r) => setPost(r.data))
-      .catch(() => router.replace("/blog"))
-      .finally(() => setLoading(false));
-  }, [slug, router]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
-        <Navbar />
-        <div className="px-4 sm:px-10 lg:px-20 xl:px-32 pt-36 pb-20 space-y-4 animate-pulse">
-          <div className="h-8 bg-gray-100 dark:bg-[#1a1a1a] rounded w-3/4" />
-          <div className="h-4 bg-gray-100 dark:bg-[#1a1a1a] rounded w-1/2" />
-          <div className="h-[480px] bg-gray-100 dark:bg-[#1a1a1a]" />
-          <div className="space-y-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="h-4 bg-gray-100 dark:bg-[#1a1a1a] rounded"
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+async function getPost(slug: string): Promise<BlogPost | null> {
+  const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+  try {
+    const res = await fetch(`${base}/blogs/public/${slug}`, { next: { revalidate: 300 } });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
   }
+}
 
-  if (!post) return null;
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const post = await getPost(params.slug);
+  if (!post) return {};
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      images: post.coverImage ? [{ url: post.coverImage }] : undefined,
+    },
+  };
+}
+
+export default async function BlogPostPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const post = await getPost(params.slug);
+  if (!post) notFound();
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
