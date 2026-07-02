@@ -1,16 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { Subject } from 'rxjs';
+import { Injectable } from "@nestjs/common";
+import { Subject } from "rxjs";
 
 export type SseEventType =
-  | 'booking.created'
-  | 'booking.updated'
-  | 'payment.confirmed';
+  | "booking.created"
+  | "booking.updated"
+  | "payment.confirmed";
 
 export interface SseEvent {
-  type:      SseEventType;
+  type: SseEventType;
   bookingId: string;
-  status?:   string;
-  userId?:   string; // owner of the booking — frontend uses this to skip unrelated events
+  status?: string;
+  userId?: string; // owner of the booking  frontend uses this to skip unrelated events
 }
 
 @Injectable()

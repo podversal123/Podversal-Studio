@@ -7,11 +7,11 @@ import { useFadeIn, anim } from '@/lib/use-fade-in';
 const VALUES = [
   {
     title: 'Creator First',
-    body: 'Every equipment choice, every scheduling decision, and every upgrade we make is driven by what creators actually need — not what looks impressive on a spec sheet. We listen, we adapt, and we build around you.',
+    body: 'Every equipment choice, every scheduling decision, and every upgrade we make is driven by what creators actually need, not what looks impressive on a spec sheet. We listen, we adapt, and we build around you.',
   },
   {
     title: 'No Surprises',
-    body: 'Online booking, auto-generated quotations, and GST invoices arrive by email. Every step is documented, transparent, and trackable from your personal dashboard — so you always know exactly where you stand.',
+    body: 'Online booking, auto-generated quotations, and GST invoices arrive by email. Every step is documented, transparent, and trackable from your personal dashboard, so you always know exactly where you stand.',
   },
   {
     title: 'Quality Without Overhead',
@@ -49,16 +49,16 @@ export default function AboutPage() {
                 Built for creators<br />who mean business
               </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-5">
-                Podversal Studio was founded with a single conviction — creators, educators, and brands in India deserve broadcast-quality infrastructure without having to build it themselves. Too many talented people were held back not by lack of ideas, but by lack of access to the right tools.
+                Podversal Studio was founded with a single conviction: creators, educators, and brands in India deserve broadcast-quality infrastructure without having to build it themselves. Too many talented people were held back not by lack of ideas, but by lack of access to the right tools.
               </p>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-5">
-                Located at NX One, Greater Noida West, our studio brings together professional acoustic treatment, 4K multi-camera rigs, broadcast-grade Sennheiser microphones, LED backdrops, a professional teleprompter, and a fully digital booking system — all under one roof, available by the hour.
+                Located at NX One, Greater Noida West, our studio brings together professional acoustic treatment, 4K multi-camera rigs, broadcast-grade Sennheiser microphones, LED backdrops, a professional teleprompter, and a fully digital booking system, all under one roof, available by the hour.
               </p>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-5">
                 We serve solo creators recording their debut podcast, corporate teams producing training modules, e-commerce brands shooting product campaigns, and news channels needing a professional on-demand studio. Every session is supported by our on-ground team so you can focus entirely on what you came to create.
               </p>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                Podversal is more than a studio — it is a platform. Online booking, auto-generated invoices, referral commissions, and a client dashboard make the entire experience seamless from the moment you land on this page to the moment your content goes live.
+                Podversal is more than a studio. It is a platform. Online booking, auto-generated invoices, referral commissions, and a client dashboard make the entire experience seamless from the moment you land on this page to the moment your content goes live.
               </p>
             </div>
 

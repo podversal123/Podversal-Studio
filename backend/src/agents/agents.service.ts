@@ -183,7 +183,7 @@ export class AgentsService {
          .text(agent.user?.name ?? 'Agent', LM, y);
       y += 16;
       doc.fontSize(10).font('Helvetica').fillColor('#444444')
-         .text(`Agency: ${agent.agencyName ?? '—'}`, LM, y);
+         .text(`Agency: ${agent.agencyName ?? ''}`, LM, y);
       y += 13;
       doc.text(`Commission Rate: ${agent.commissionRate}%`, LM, y);
       if (agent.gstNumber) { y += 13; doc.text(`GST: ${agent.gstNumber}`, LM, y); }
@@ -235,14 +235,14 @@ export class AgentsService {
           if (idx % 2 === 1) doc.rect(LM, y, W, 24).fill('#f9fafb');
           doc.fontSize(8).font('Helvetica').fillColor('#1a1a1a');
           const statusColor = c.status === 'RELEASED' ? '#16a34a' : '#d97706';
-          doc.text(c.booking?.bookingCode ?? '—',                                            cols[0].x, y + 7, { width: cols[0].w });
-          doc.text(c.booking?.service?.name ?? '—',                                          cols[1].x, y + 7, { width: cols[1].w });
-          doc.text(c.booking?.shootDate ? new Date(c.booking.shootDate).toLocaleDateString('en-IN') : '—', cols[2].x, y + 7, { width: cols[2].w });
+          doc.text(c.booking?.bookingCode ?? '',                                            cols[0].x, y + 7, { width: cols[0].w });
+          doc.text(c.booking?.service?.name ?? '',                                          cols[1].x, y + 7, { width: cols[1].w });
+          doc.text(c.booking?.shootDate ? new Date(c.booking.shootDate).toLocaleDateString('en-IN') : '', cols[2].x, y + 7, { width: cols[2].w });
           doc.text(fmt(c.bookingAmount),                                                      cols[3].x, y + 7, { width: cols[3].w });
           doc.text(`${Number(c.commissionRate).toFixed(1)}%`,                                 cols[4].x, y + 7, { width: cols[4].w });
           doc.text(fmt(c.commissionAmount),                                                   cols[5].x, y + 7, { width: cols[5].w });
           doc.fillColor(statusColor).text(c.status,                                          cols[6].x, y + 7, { width: cols[6].w });
-          doc.fillColor('#1a1a1a').text(c.releasedAt ? new Date(c.releasedAt).toLocaleDateString('en-IN') : '—', cols[7].x, y + 7, { width: cols[7].w });
+          doc.fillColor('#1a1a1a').text(c.releasedAt ? new Date(c.releasedAt).toLocaleDateString('en-IN') : '', cols[7].x, y + 7, { width: cols[7].w });
         });
       }
 

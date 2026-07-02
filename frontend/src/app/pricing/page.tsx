@@ -10,7 +10,7 @@ import { useFadeIn, anim } from '@/lib/use-fade-in';
 const ALL_PLANS = [
   {
     price: '₹12,500', unit: '+ GST / hour', name: 'Podcast Studio',  min: 'Minimum 1 hour',  slug: 'podcast-studio',
-    features: ['Sennheiser professional condenser microphones','Full ceiling & wall acoustic treatment','Multi-channel recording — up to 4 guests','Live headphone monitoring for all guests','Raw WAV + professionally mixed MP3 delivered','Studio crew support available on request'],
+    features: ['Sennheiser professional condenser microphones','Full ceiling & wall acoustic treatment','Multi-channel recording, up to 4 guests','Live headphone monitoring for all guests','Raw WAV + professionally mixed MP3 delivered','Studio crew support available on request'],
   },
   {
     price: '₹20,000', unit: '+ GST / hour', name: 'VFX Podcast',     min: 'Minimum 2 hours', slug: 'vfx-podcast',
@@ -18,11 +18,11 @@ const ALL_PLANS = [
   },
   {
     price: '₹25,000', unit: '+ GST / hour', name: 'Become a Podcaster', min: 'Minimum 1 hour', slug: 'become-a-podcaster',
-    features: ['Acoustically isolated near-silent recording room','Professional teleprompter for seamless delivery','Screen capture integration for slide-based content','Consistent multi-point lighting for long shoots','Multiple backdrop options — white, black, colour','Ideal for solo or 2-person class sessions'],
+    features: ['Acoustically isolated near-silent recording room','Professional teleprompter for seamless delivery','Screen capture integration for slide-based content','Consistent multi-point lighting for long shoots','Multiple backdrop options: white, black, colour','Ideal for solo or 2-person class sessions'],
   },
   {
     price: '₹15,000', unit: '+ GST / hour', name: 'Monologue Shoot', min: 'Minimum 1 hour',  slug: 'monologue-shoot',
-    features: ['Digitek professional teleprompter with tablet remote','Three-point lighting — broadcast standard','Multi-angle Sony Alpha 4K camera coverage','Colour-graded footage delivered post-session','Same-day export available on request','Perfect for creators, educators, and speakers'],
+    features: ['Digitek professional teleprompter with tablet remote','Three-point lighting, broadcast standard','Multi-angle Sony Alpha 4K camera coverage','Colour-graded footage delivered post-session','Same-day export available on request','Perfect for creators, educators, and speakers'],
   },
   {
     price: '₹22,500', unit: '+ GST / hour', name: 'News Shoot',      min: 'Minimum 2 hours', slug: 'news-shoot',
@@ -30,14 +30,14 @@ const ALL_PLANS = [
   },
   {
     price: '₹17,500', unit: '+ GST / hour', name: 'Product Shoots',  min: 'Minimum 2 hours', slug: 'product-shoots',
-    features: ['Multiple backdrops — white, black, and colour','Softbox + reflector controlled lighting rig','Precise colour-temperature environment','High-resolution image delivery included','Same-day turnaround available on request','Ideal for e-commerce, brand, and ad shoots'],
+    features: ['Multiple backdrops: white, black, and colour','Softbox + reflector controlled lighting rig','Precise colour-temperature environment','High-resolution image delivery included','Same-day turnaround available on request','Ideal for e-commerce, brand, and ad shoots'],
   },
 ];
 
 
 
 const FAQS = [
-  { q: 'What are your operating hours?',               a: 'The studio is open from 6:00 AM to 2:00 AM the next day, seven days a week — including weekends and public holidays.' },
+  { q: 'What are your operating hours?',               a: 'The studio is open from 6:00 AM to 2:00 AM the next day, seven days a week, including weekends and public holidays.' },
   { q: 'How early should I book?',                     a: 'We recommend booking at least 48 hours in advance. For weekends and peak hours, a few days ahead gives you more slot options.' },
   { q: 'What payment methods do you accept?',          a: 'You can pay via UPI, credit/debit card, or net banking through Razorpay. We also accept cash and bank transfers.' },
   { q: 'Is there a minimum booking duration?',         a: 'Podcast and monologue sessions start at 1 hour. Product shoots and VFX sessions have a 2-hour minimum.' },

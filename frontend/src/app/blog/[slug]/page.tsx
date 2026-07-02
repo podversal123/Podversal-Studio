@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Navbar from '@/components/marketing/Navbar';
-import MarketingFooter from '@/components/marketing/MarketingFooter';
-import api from '@/lib/api';
-import { Calendar, User } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import Navbar from "@/components/marketing/Navbar";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
+import api from "@/lib/api";
+import { Calendar, User } from "lucide-react";
 
 interface BlogPost {
   id: string;
@@ -22,18 +22,19 @@ interface BlogPost {
 }
 
 export default function BlogPostPage() {
-  const params   = useParams();
-  const router   = useRouter();
-  const [post,    setPost]    = useState<BlogPost | null>(null);
+  const params = useParams();
+  const router = useRouter();
+  const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const slug = (params?.slug ?? '') as string;
+  const slug = (params?.slug ?? "") as string;
 
   useEffect(() => {
     if (!slug) return;
-    api.get<BlogPost>(`/blogs/public/${slug}`)
-      .then(r => setPost(r.data))
-      .catch(() => router.replace('/blog'))
+    api
+      .get<BlogPost>(`/blogs/public/${slug}`)
+      .then((r) => setPost(r.data))
+      .catch(() => router.replace("/blog"))
       .finally(() => setLoading(false));
   }, [slug, router]);
 
@@ -46,7 +47,12 @@ export default function BlogPostPage() {
           <div className="h-4 bg-gray-100 dark:bg-[#1a1a1a] rounded w-1/2" />
           <div className="h-[480px] bg-gray-100 dark:bg-[#1a1a1a]" />
           <div className="space-y-2">
-            {[1,2,3,4].map(i => <div key={i} className="h-4 bg-gray-100 dark:bg-[#1a1a1a] rounded" />)}
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-4 bg-gray-100 dark:bg-[#1a1a1a] rounded"
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -59,11 +65,15 @@ export default function BlogPostPage() {
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
       <Navbar />
 
-      {/* Cover image — true full bleed below navbar */}
+      {/* Cover image  true full bleed below navbar */}
       {post.coverImage && (
         <div className="pt-[72px]">
           <div className="w-full aspect-[21/9] sm:aspect-[3/1] overflow-hidden">
-            <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       )}
@@ -71,7 +81,10 @@ export default function BlogPostPage() {
       {/* Content wrapper */}
       <div className="px-4 sm:px-10 lg:px-20 xl:px-32 pt-6 sm:pt-8 lg:pt-10 pb-14 sm:pb-20 lg:pb-24">
         {/* Back */}
-        <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-[#a0a0a0] hover:text-gray-900 dark:hover:text-white mb-5 sm:mb-6 lg:mb-8 transition-colors">
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-[#a0a0a0] hover:text-gray-900 dark:hover:text-white mb-5 sm:mb-6 lg:mb-8 transition-colors"
+        >
           Back to Blog
         </Link>
 
@@ -86,13 +99,19 @@ export default function BlogPostPage() {
           {post.publishedAt && (
             <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-[#a0a0a0]">
               <Calendar size={13} />
-              {new Date(post.publishedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
+              {new Date(post.publishedAt).toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
             </span>
           )}
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-6 sm:mb-8 lg:mb-10">{post.title}</h1>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-6 sm:mb-8 lg:mb-10">
+          {post.title}
+        </h1>
 
         {/* Content */}
         <div

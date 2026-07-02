@@ -43,10 +43,10 @@ export default function RegisterPage() {
       localStorage.setItem('access_token',  res.data.accessToken);
       localStorage.setItem('refresh_token', res.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(res.data.user));
-      toast.success('Account created — welcome to Podversal!');
+      toast.success('Account created. Welcome to Podversal!');
       router.push('/dashboard');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Something went wrong — please try again');
+      toast.error(err.response?.data?.message || 'Something went wrong. Please try again.');
     } finally { setLoading(false); }
   };
 
@@ -61,7 +61,7 @@ export default function RegisterPage() {
 
         <div className="card">
           <h1 className="font-black text-gray-900 dark:text-white text-xl mb-1">Create your account</h1>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-6">Get started with Podversal Studio — it only takes a minute.</p>
+          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-6">Get started with Podversal Studio, it only takes a minute.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>

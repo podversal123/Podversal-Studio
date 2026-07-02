@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
           <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white mb-6 sm:mb-8 lg:mb-12">Privacy Policy</h1>
 
           <div className="space-y-6 text-[15px] leading-relaxed text-gray-600 dark:text-gray-300">
-            <p><strong className="text-gray-900 dark:text-white">Information We Collect</strong> We collect your name, email address, and phone number when you register. Booking details and payment records are stored to manage your sessions. If you upload a profile photo, it is stored securely on Cloudinary. We do not store card or UPI details — payments are handled entirely by Razorpay.</p>
+            <p><strong className="text-gray-900 dark:text-white">Information We Collect</strong> We collect your name, email address, and phone number when you register. Booking details and payment records are stored to manage your sessions. If you upload a profile photo, it is stored securely on Cloudinary. We do not store card or UPI details. Payments are handled entirely by Razorpay.</p>
 
             <p><strong className="text-gray-900 dark:text-white">How We Use It</strong> Your information is used to process bookings, send confirmations and reminders, generate invoices, and respond to support queries. We do not use your data for advertising or sell it to third parties.</p>
 

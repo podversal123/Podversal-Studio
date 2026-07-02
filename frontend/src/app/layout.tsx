@@ -16,7 +16,7 @@ const SITE_URL = 'https://www.podversal.com';
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Podversal Studio — Professional Podcast & Video Studio in Greater Noida',
+    default: 'Podversal Studio: Professional Podcast & Video Studio in Greater Noida',
     template: '%s | Podversal Studio',
   },
   description: 'Podversal Studio is a professional podcast and video production studio in Greater Noida West. Book studio sessions for podcasts, video shoots, VFX, monologue, news, and product shoots.',
@@ -36,13 +36,13 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: SITE_URL,
     siteName: 'Podversal Studio',
-    title: 'Podversal Studio — Professional Podcast & Video Studio in Greater Noida',
+    title: 'Podversal Studio: Professional Podcast & Video Studio in Greater Noida',
     description: 'Book a professional podcast or video recording session at Podversal Studio, Greater Noida West.',
     images: [{ url: '/studio/s2.jpg', width: 1200, height: 630, alt: 'Podversal Studio' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Podversal Studio — Podcast & Video Studio',
+    title: 'Podversal Studio: Podcast & Video Studio',
     description: 'Book a professional podcast or video recording session at Podversal Studio, Greater Noida West.',
     images: ['/studio/s2.jpg'],
   },

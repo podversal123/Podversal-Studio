@@ -1,5 +1,5 @@
 # ─── Environment Variables ────────────────────────────────────────────────────
-# NEVER commit .env files — they contain secrets (DB, JWT, API keys)
+# NEVER commit .env files  they contain secrets (DB, JWT, API keys)
 .env
 .env.*
 !.env.example
@@ -21,7 +21,7 @@ backend/dist/
 backend/tsconfig.build.tsbuildinfo
 backend/tsconfig.tsbuildinfo
 
-# Compiled seed files — only keep the .ts source
+# Compiled seed files  only keep the .ts source
 backend/prisma/seed.js
 backend/prisma/seed.js.map
 backend/prisma/seed.d.ts

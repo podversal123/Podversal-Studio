@@ -1,7 +1,12 @@
-import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
-import * as crypto from 'crypto';
+import {
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+  Logger,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import Redis from "ioredis";
+import * as crypto from "crypto";
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
@@ -12,7 +17,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   constructor(private config: ConfigService) {}
 
   onModuleInit() {
-    const redisUrl = this.config.get<string>('REDIS_URL');
+    const redisUrl = this.config.get<string>("REDIS_URL");
 
     const retryStrategy = (times: number) => Math.min(times * 500, 10000);
 
@@ -27,8 +32,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       });
     } else {
       this.client = new Redis({
-        host: this.config.get<string>('REDIS_HOST') || 'localhost',
-        port: this.config.get<number>('REDIS_PORT') || 6379,
+        host: this.config.get<string>("REDIS_HOST") || "localhost",
+        port: this.config.get<number>("REDIS_PORT") || 6379,
         maxRetriesPerRequest: 3,
         retryStrategy,
         keepAlive: 10000,
@@ -36,11 +41,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       });
     }
 
-    this.client.on('connect', () => {
-      this.logger.log('Redis connected successfully');
+    this.client.on("connect", () => {
+      this.logger.log("Redis connected successfully");
     });
 
-    this.client.on('error', (err: Error) => {
+    this.client.on("error", (err: Error) => {
       // Only log unique error messages to avoid log spam during reconnection
       this.logger.error(`Redis connection error: ${err.message}`);
     });
@@ -50,7 +55,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       try {
         await this.client.ping();
       } catch {
-        // Silent — retryStrategy will handle reconnection
+        // Silent  retryStrategy will handle reconnection
       }
     }, 30_000);
   }
@@ -61,17 +66,17 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ─────────────────────────────────────────
-  // SLOT LOCKING — core feature
+  // SLOT LOCKING  core feature
   // Locks a time slot for 10 minutes when
   // a customer selects it during booking
   // ─────────────────────────────────────────
 
-  // Lock a slot — returns true if lock acquired, false if already locked
+  // Lock a slot  returns true if lock acquired, false if already locked
   async lockSlot(slotKey: string, userId: string): Promise<boolean> {
     // NX = only set if key does NOT exist (prevents overwriting existing lock)
     // EX = expire after 600 seconds (10 minutes)
-    const result = await this.client.set(slotKey, userId, 'EX', 600, 'NX');
-    return result === 'OK';
+    const result = await this.client.set(slotKey, userId, "EX", 600, "NX");
+    return result === "OK";
   }
 
   // Check who holds the lock on a slot
@@ -85,21 +90,27 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ─────────────────────────────────────────
-  // DATE-LEVEL MUTEX — serializes the check-then-insert
+  // DATE-LEVEL MUTEX  serializes the check-then-insert
   // critical section in BookingsService.create() so two
   // overlapping-but-different time ranges on the same date
   // can't both pass the overlap check before either commits.
-  // Short-lived (10s) — only held for the duration of one create() call.
+  // Short-lived (10s)  only held for the duration of one create() call.
   // ─────────────────────────────────────────
 
   async acquireDateLock(date: string): Promise<string | null> {
-    const token  = crypto.randomUUID();
-    const result = await this.client.set(`booking-lock:${date}`, token, 'EX', 10, 'NX');
-    return result === 'OK' ? token : null;
+    const token = crypto.randomUUID();
+    const result = await this.client.set(
+      `booking-lock:${date}`,
+      token,
+      "EX",
+      10,
+      "NX",
+    );
+    return result === "OK" ? token : null;
   }
 
   async releaseDateLock(date: string, token: string): Promise<void> {
-    // Only release if we still hold it — avoids deleting a newer holder's
+    // Only release if we still hold it  avoids deleting a newer holder's
     // lock if ours already expired.
     const script = `if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end`;
     await this.client.eval(script, 1, `booking-lock:${date}`, token);
@@ -112,7 +123,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async saveOtp(phone: string, otp: string): Promise<void> {
     // OTP expires in 5 minutes (300 seconds)
-    await this.client.set(`otp:${phone}`, otp, 'EX', 300);
+    await this.client.set(`otp:${phone}`, otp, "EX", 300);
   }
 
   async getOtp(phone: string): Promise<string | null> {
@@ -129,7 +140,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
     if (ttlSeconds) {
-      await this.client.set(key, value, 'EX', ttlSeconds);
+      await this.client.set(key, value, "EX", ttlSeconds);
     } else {
       await this.client.set(key, value);
     }

@@ -30,7 +30,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     // Load .env file globally across all modules
     ConfigModule.forRoot({ isGlobal: true }),
 
-    // Rate limiting — max 100 requests per minute per IP
+    // Rate limiting  max 100 requests per minute per IP
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
 
     // Core infrastructure

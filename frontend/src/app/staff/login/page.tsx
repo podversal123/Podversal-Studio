@@ -76,7 +76,7 @@ export default function StaffLoginPage() {
       toast.success('Welcome back!');
       saveAndRedirect(res.data);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Wrong email or password — please try again');
+      toast.error(err.response?.data?.message || 'Wrong email or password. Please try again.');
     } finally { setLoading(false); }
   };
 
@@ -90,7 +90,7 @@ export default function StaffLoginPage() {
     try {
       await api.post('/auth/otp/send', { phone });
       setOtpSent(true);
-      toast.success('OTP sent — check your messages');
+      toast.success('OTP sent. Check your messages.');
     } catch { toast.error('Could not send OTP right now. Try again in a moment.'); }
     finally { setLoading(false); }
   };
@@ -137,7 +137,7 @@ export default function StaffLoginPage() {
                 </div>
                 <h2 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Check your inbox</h2>
                 <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] leading-relaxed">
-                  Reset link sent. Check your inbox — also check spam if you don't see it.
+                  Reset link sent. Check your inbox, and check spam if you don't see it.
                 </p>
               </div>
             ) : (

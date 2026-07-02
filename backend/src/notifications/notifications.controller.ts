@@ -1,15 +1,18 @@
-import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../common/guards/jwt.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { PrismaService } from '../prisma/prisma.service';
-import { NotificationsService } from './notifications.service';
+import { Controller, Get, Post, Body, Query, UseGuards } from "@nestjs/common";
+import { JwtAuthGuard } from "../common/guards/jwt.guard";
+import { RolesGuard } from "../common/guards/roles.guard";
+import { Roles } from "../common/decorators/roles.decorator";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { PrismaService } from "../prisma/prisma.service";
+import { NotificationsService } from "./notifications.service";
 
 const sanitize = (s: string) =>
-  s.replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c] ?? c));
+  s.replace(
+    /[<>&"]/g,
+    (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" })[c] ?? c,
+  );
 
-@Controller('notifications')
+@Controller("notifications")
 export class NotificationsController {
   constructor(
     private prisma: PrismaService,
@@ -19,32 +22,57 @@ export class NotificationsController {
   // SUPER_ADMIN sees all; STUDIO_MANAGER sees only their own
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'STUDIO_MANAGER')
+  @Roles("SUPER_ADMIN", "STUDIO_MANAGER")
   async findAll(@CurrentUser() user: any) {
-    const where = user.role === 'SUPER_ADMIN' ? {} : { userId: user.id };
+    const where = user.role === "SUPER_ADMIN" ? {} : { userId: user.id };
     return this.prisma.notification.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: 50,
     });
   }
 
-  // POST /api/notifications/test?to=yourEmail — SUPER_ADMIN only
-  @Post('test')
+  // POST /api/notifications/test?to=yourEmail  SUPER_ADMIN only
+  @Post("test")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN')
-  async testEmails(@Query('to') to: string) {
+  @Roles("SUPER_ADMIN")
+  async testEmails(@Query("to") to: string) {
     const target = to || process.env.ADMIN_EMAIL || process.env.SMTP_USER;
-    if (!target) return { error: 'Provide ?to=email or set ADMIN_EMAIL in .env' };
+    if (!target)
+      return { error: "Provide ?to=email or set ADMIN_EMAIL in .env" };
     return this.notifications.sendTestEmails(target);
   }
 
-  @Post('contact')
-  async contact(@Body() body: { name: string; phone?: string; email: string; message: string }) {
-    const name    = sanitize(String(body.name    ?? '').trim().slice(0, 200));
-    const phone   = sanitize(String(body.phone   ?? '').trim().slice(0, 20));
-    const email   = sanitize(String(body.email   ?? '').trim().slice(0, 200));
-    const message = sanitize(String(body.message ?? '').trim().slice(0, 2000)).replace(/\n/g, '<br>');
+  @Post("contact")
+  async contact(
+    @Body()
+    body: {
+      name: string;
+      phone?: string;
+      email: string;
+      message: string;
+    },
+  ) {
+    const name = sanitize(
+      String(body.name ?? "")
+        .trim()
+        .slice(0, 200),
+    );
+    const phone = sanitize(
+      String(body.phone ?? "")
+        .trim()
+        .slice(0, 20),
+    );
+    const email = sanitize(
+      String(body.email ?? "")
+        .trim()
+        .slice(0, 200),
+    );
+    const message = sanitize(
+      String(body.message ?? "")
+        .trim()
+        .slice(0, 2000),
+    ).replace(/\n/g, "<br>");
 
     const adminEmail = process.env.ADMIN_EMAIL ?? process.env.SMTP_USER;
     if (!adminEmail) return { success: true };
@@ -72,7 +100,7 @@ export class NotificationsController {
       <p style="margin:0 0 16px;font-weight:bold;">New enquiry from the website</p>
       <table style="width:100%;border-collapse:collapse;">
         <tr><td style="padding:6px 0;color:#888;width:80px;">Name</td><td style="padding:6px 0;"><strong>${name}</strong></td></tr>
-        <tr><td style="padding:6px 0;color:#888;">Phone</td><td style="padding:6px 0;">${phone || '—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#888;">Phone</td><td style="padding:6px 0;">${phone || ""}</td></tr>
         <tr><td style="padding:6px 0;color:#888;">Email</td><td style="padding:6px 0;">${email}</td></tr>
         <tr><td style="padding:6px 0;color:#888;vertical-align:top;">Message</td><td style="padding:6px 0;">${message}</td></tr>
       </table>
@@ -81,9 +109,11 @@ export class NotificationsController {
   </div>
 </body></html>`;
 
-    this.notifications.sendRawEmail(adminEmail, `New Enquiry from ${name}`, html).catch((err: any) => {
-      console.error(`[Contact] FAILED: ${err?.message ?? err}`);
-    });
+    this.notifications
+      .sendRawEmail(adminEmail, `New Enquiry from ${name}`, html)
+      .catch((err: any) => {
+        console.error(`[Contact] FAILED: ${err?.message ?? err}`);
+      });
 
     return { success: true };
   }

@@ -10,14 +10,14 @@ import { useFadeIn, anim } from '@/lib/use-fade-in';
 import { FEATURED_VIDEOS, type FeaturedVideo as StudioVideo } from '@/lib/featured-videos';
 
 const GALLERY = [
-  { src: '/studio/s1.jpg', alt: 'Studio seating area — ambient bookshelf lighting' },
-  { src: '/studio/s3.jpg', alt: 'Sennheiser mic — green accent wall'               },
-  { src: '/studio/s4.jpg', alt: 'Sennheiser mic — blue accent wall'                },
+  { src: '/studio/s1.jpg', alt: 'Studio seating area, ambient bookshelf lighting' },
+  { src: '/studio/s3.jpg', alt: 'Sennheiser mic, green accent wall'               },
+  { src: '/studio/s4.jpg', alt: 'Sennheiser mic, blue accent wall'                },
   { src: '/studio/s2.jpg', alt: 'Full studio setup with professional lighting'      },
   { src: '/studio/s5.jpg', alt: 'Sony Alpha ZV-E10 camera on rig'                  },
   { src: '/studio/s6.jpg', alt: 'Digitek professional teleprompter'                 },
   { src: '/studio/s7.jpg', alt: 'Studio microphone on chair arm'                   },
-  { src: '/studio/s8.jpg', alt: 'Chairs and ambient bookshelf — evening look'      },
+  { src: '/studio/s8.jpg', alt: 'Chairs and ambient bookshelf, evening look'      },
 ];
 
 export default function OurWorkPage() {
@@ -137,12 +137,12 @@ export default function OurWorkPage() {
       </section>
 
       {/* ── Studio Gallery ── */}
-      <section className="py-10 sm:py-14 lg:py-20 bg-[#0a0a0a]">
+      <section className="py-10 sm:py-14 lg:py-20 bg-[#f8f8f8] dark:bg-[#0a0a0a]">
         <div className="site-wrap">
           <div ref={galleryAnim.ref}>
             <div className="mb-6 sm:mb-8 lg:mb-12" style={anim(galleryAnim.visible)}>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white">Studio Gallery</h2>
-              <p className="text-white/40 text-sm mt-2">Click any image to view full size</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Studio Gallery</h2>
+              <p className="text-gray-400 dark:text-white/40 text-sm mt-2">Click any image to view full size</p>
             </div>
 
             <div
@@ -153,7 +153,7 @@ export default function OurWorkPage() {
                 <button
                   key={i}
                   onClick={() => setLightbox(i)}
-                  className="relative overflow-hidden bg-[#161616] group cursor-zoom-in aspect-[4/3]"
+                  className="relative overflow-hidden bg-gray-100 dark:bg-[#161616] group cursor-zoom-in aspect-[4/3]"
                   style={anim(galleryAnim.visible, 0.1 + i * 0.06)}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}

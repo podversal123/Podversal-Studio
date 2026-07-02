@@ -87,7 +87,7 @@ export default function DashboardGalleryPage() {
           fetchImages();
         } catch (err: any) {
           setImages(prev => prev.filter(i => i.id !== optimistic.id));
-          toast.error(err?.response?.data?.message || 'Save failed — please try again');
+          toast.error(err?.response?.data?.message || 'Save failed. Please try again.');
         }
       },
       () => { setUploading(false); toast.error('Upload failed'); },

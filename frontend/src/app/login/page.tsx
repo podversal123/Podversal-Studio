@@ -63,7 +63,7 @@ function LoginForm() {
       toast.success('Welcome back!');
       saveAndRedirect(res.data);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Wrong email or password — please try again');
+      toast.error(err.response?.data?.message || 'Wrong email or password. Please try again.');
     } finally { setLoading(false); }
   };
 
@@ -102,7 +102,7 @@ function LoginForm() {
                 </div>
                 <h2 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Check your inbox</h2>
                 <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] leading-relaxed">
-                  Reset link sent. Check your inbox — also check spam if you don&apos;t see it.
+                  Reset link sent. Check your inbox, and check spam if you don&apos;t see it.
                 </p>
               </div>
             ) : (

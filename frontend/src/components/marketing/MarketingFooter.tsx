@@ -76,7 +76,7 @@ export default function MarketingFooter() {
                 +91 78278 82058
               </p>
               <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed max-w-[220px]">
-                NX One, Tower 4, Greater Noida West, Uttar Pradesh — 201306
+                NX One, Tower 4, Greater Noida West, Uttar Pradesh, 201306
               </p>
             </div>
 

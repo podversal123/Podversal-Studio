@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { BookingStatus } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { BookingStatus } from "@prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class CalendarService {
   constructor(private prisma: PrismaService) {}
 
-  // Returns all bookings for a date range — used by FullCalendar on frontend
+  // Returns all bookings for a date range  used by FullCalendar on frontend
   async getEvents(from: string, to: string) {
     const bookings = await this.prisma.booking.findMany({
       where: {
@@ -22,14 +22,14 @@ export class CalendarService {
         service: { select: { name: true, type: true } },
         employee: { include: { user: { select: { name: true } } } },
       },
-      orderBy: [{ shootDate: 'asc' }, { startTime: 'asc' }],
+      orderBy: [{ shootDate: "asc" }, { startTime: "asc" }],
     });
 
     // Shape data as FullCalendar events
     return bookings.map((b) => ({
       id: b.id,
-      title: `${b.service.name} — ${b.customerName}`,
-      date: b.shootDate.toISOString().split('T')[0],
+      title: `${b.service.name}  ${b.customerName}`,
+      date: b.shootDate.toISOString().split("T")[0],
       startTime: b.startTime,
       endTime: b.endTime,
       status: b.status,
@@ -40,7 +40,7 @@ export class CalendarService {
     }));
   }
 
-  // Returns booked slots for a specific date — used during booking form
+  // Returns booked slots for a specific date  used during booking form
   async getBookedSlots(date: string) {
     const start = new Date(date);
     const end = new Date(date);
