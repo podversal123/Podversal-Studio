@@ -53,7 +53,7 @@ export default function MarketingFooter() {
       <button
         onClick={scrollTop}
         aria-label="Back to top"
-        className={`fixed bottom-24 right-6 z-40 w-11 h-11 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#2a2a2a] shadow-md hover:border-[#E5312A] hover:text-[#E5312A] text-gray-500 dark:text-gray-400 flex items-center justify-center transition-all duration-300 ${
+        className={`fixed bottom-24 right-6 z-40 w-11 h-11 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#2a2a2a] shadow-md hover:border-[#E5312A] hover:text-[#E5312A] text-gray-500 dark:text-gray-300 flex items-center justify-center transition-all duration-300 ${
           showTop ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >
@@ -69,20 +69,20 @@ export default function MarketingFooter() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-3 lg:col-span-1">
               <div className="mb-4"><Logo height={64} /></div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4 max-w-[220px]">
+              <p className="text-sm text-gray-500 dark:text-gray-300 leading-relaxed mb-4 max-w-[220px]">
                 Broadcast-quality studio in Greater Noida West. Open 6 AM – 2 AM, 7 days a week.
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-300 mb-1">
                 +91 78278 82058
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed max-w-[220px]">
+              <p className="text-xs text-gray-500 dark:text-gray-300 leading-relaxed max-w-[220px]">
                 NX One, Tower 4, Greater Noida West, Uttar Pradesh, 201306
               </p>
             </div>
 
             {/* Services */}
             <div>
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-5">Services</h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-white/60 mb-5">Services</h4>
               <ul className="space-y-2.5">
                 {[
                   { label: 'Podcast Studio',  slug: 'podcast-studio'  },
@@ -103,7 +103,7 @@ export default function MarketingFooter() {
 
             {/* Pricing */}
             <div>
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-5">Pricing</h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-white/60 mb-5">Pricing</h4>
               <ul className="space-y-2.5">
                 {[
                   'Podcast Studio',
@@ -124,7 +124,7 @@ export default function MarketingFooter() {
 
             {/* Quick Links */}
             <div>
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-5">Quick Links</h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-white/60 mb-5">Quick Links</h4>
               <ul className="space-y-2.5">
                 <li><Link href="/"          className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Home</Link></li>
                 <li><Link href="/our-work"  className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Our Work</Link></li>
@@ -137,7 +137,7 @@ export default function MarketingFooter() {
 
             {/* Legal */}
             <div>
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 mb-5">Legal</h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-white/60 mb-5">Legal</h4>
               <ul className="space-y-2.5">
                 <li><Link href="/terms"          className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Terms &amp; Conditions</Link></li>
                 <li><Link href="/privacy-policy" className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#E5312A] transition-colors">Privacy Policy</Link></li>
@@ -149,7 +149,7 @@ export default function MarketingFooter() {
 
           {/* ── Bottom bar ── */}
           <div className="flex flex-col sm:flex-row items-center justify-between py-5 gap-4">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-300">
               © {new Date().getFullYear()} Podversal Studio · A Unit Krishiyug Technologies Pvt. Ltd. All rights reserved.
             </p>
 

@@ -129,7 +129,7 @@ export default function AgentsPage() {
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">
             Referral Agents
           </h1>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-1">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mt-1">
             {agents.length} agent{agents.length !== 1 ? "s" : ""} total
           </p>
         </div>
@@ -155,7 +155,7 @@ export default function AgentsPage() {
           <p className="font-bold text-gray-900 dark:text-white mb-1">
             No agents yet
           </p>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
             Click "Add Agent" to onboard a referral agent.
           </p>
         </div>
@@ -163,7 +163,7 @@ export default function AgentsPage() {
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+              <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
                 <th className="px-4 py-3">Agent</th>
                 <th className="px-4 py-3 hidden sm:table-cell">Contact</th>
                 <th className="px-4 py-3">Rate</th>
@@ -186,17 +186,17 @@ export default function AgentsPage() {
                         {a.user?.name ?? ""}
                       </p>
                       {a.agencyName && (
-                        <p className="text-[10px] text-[#aaa] dark:text-[#555] mt-0.5">
+                        <p className="text-[10px] text-[#888] dark:text-[#999] mt-0.5">
                           {a.agencyName}
                         </p>
                       )}
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">
-                      <p className="text-[#6b6b6b] dark:text-[#8a8a8a]">
+                      <p className="text-[#6b6b6b] dark:text-[#b0b0b0]">
                         {a.user?.email ?? ""}
                       </p>
                       {a.user?.phone && (
-                        <p className="text-[10px] text-[#aaa] dark:text-[#555] mt-0.5">
+                        <p className="text-[10px] text-[#888] dark:text-[#999] mt-0.5">
                           {a.user.phone}
                         </p>
                       )}
@@ -211,7 +211,7 @@ export default function AgentsPage() {
                         {s ? (
                           fmt(s.total)
                         ) : (
-                          <span className="text-[#aaa] dark:text-[#555]"></span>
+                          <span className="text-[#888] dark:text-[#999]"></span>
                         )}
                       </span>
                     </td>
@@ -220,7 +220,7 @@ export default function AgentsPage() {
                         {s ? (
                           fmt(s.pending)
                         ) : (
-                          <span className="text-[#aaa] dark:text-[#555]"></span>
+                          <span className="text-[#888] dark:text-[#999]"></span>
                         )}
                       </span>
                     </td>
@@ -229,7 +229,7 @@ export default function AgentsPage() {
                         {s ? (
                           fmt(s.released)
                         ) : (
-                          <span className="text-[#aaa] dark:text-[#555]"></span>
+                          <span className="text-[#888] dark:text-[#999]"></span>
                         )}
                       </span>
                     </td>
@@ -265,14 +265,14 @@ export default function AgentsPage() {
                   setShowModal(false);
                   reset();
                 }}
-                className="text-[#aaa] hover:text-gray-700 dark:hover:text-white"
+                className="text-[#888] hover:text-gray-700 dark:hover:text-white"
               >
                 <X size={18} />
               </button>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-4">
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Full Name *
                 </label>
                 <input
@@ -288,7 +288,7 @@ export default function AgentsPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Email *
                 </label>
                 <input
@@ -305,7 +305,7 @@ export default function AgentsPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Password *
                 </label>
                 <div className="relative">
@@ -318,7 +318,7 @@ export default function AgentsPage() {
                   <button
                     type="button"
                     onClick={() => setShowPass((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888]"
                   >
                     {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -331,7 +331,7 @@ export default function AgentsPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Mobile Number
                 </label>
                 <input
@@ -348,7 +348,7 @@ export default function AgentsPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Agency / Brand Name *
                 </label>
                 <input
@@ -364,7 +364,7 @@ export default function AgentsPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Commission Rate (%) *
                 </label>
                 <input
@@ -397,7 +397,7 @@ export default function AgentsPage() {
                     setShowModal(false);
                     reset();
                   }}
-                  className="px-5 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-semibold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#aaa] transition-colors"
+                  className="px-5 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-semibold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#aaa] transition-colors"
                 >
                   Cancel
                 </button>

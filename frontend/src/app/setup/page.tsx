@@ -67,32 +67,32 @@ export default function SetupAdminPage() {
             <ShieldCheck size={18} className="text-[#E5312A] flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold text-gray-900 dark:text-white">First-Time Admin Setup</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-300 mt-0.5">
                 This page only works once, when no Super Admin exists yet, and requires the setup key from the server environment.
               </p>
             </div>
           </div>
 
           <h1 className="font-bold text-gray-900 dark:text-white text-xl mb-1">Create Super Admin</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-sm text-gray-500 dark:text-gray-300 mb-6">
             This account will have full access to all studio management features.
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Full Name</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">Full Name</label>
               <input {...register('name')} type="text" placeholder="Studio Owner Name" className="input-field" autoComplete="name" />
               {errors.name && <p className="text-[#E5312A] text-xs mt-1">{errors.name.message}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Email</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">Email</label>
               <input {...register('email')} type="email" placeholder="admin@podversal.com" className="input-field" autoComplete="email" />
               {errors.email && <p className="text-[#E5312A] text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Password</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">Password</label>
               <div className="relative">
                 <input
                   {...register('password')}
@@ -104,7 +104,7 @@ export default function SetupAdminPage() {
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   tabIndex={-1}
                 >
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -114,10 +114,10 @@ export default function SetupAdminPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Setup Key</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">Setup Key</label>
               <input {...register('setupSecret')} type="password" placeholder="SETUP_SECRET from server .env" className="input-field" autoComplete="off" />
               {errors.setupSecret && <p className="text-[#E5312A] text-xs mt-1">{errors.setupSecret.message}</p>}
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Value of SETUP_SECRET in the backend environment. Only you should know it.</p>
+              <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">Value of SETUP_SECRET in the backend environment. Only you should know it.</p>
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary">
@@ -125,15 +125,15 @@ export default function SetupAdminPage() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
+          <p className="text-center text-sm text-gray-500 dark:text-gray-300 mt-5">
             Already have an account?{' '}
             <a href="/login" className="text-[#E5312A] font-semibold hover:underline">Sign in</a>
           </p>
         </div>
 
         <div className="mt-4 p-4 bg-white dark:bg-[#181818] border border-gray-100 dark:border-[#2a2a2a]">
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">After this, you can create:</p>
-          <ul className="space-y-1 text-xs text-gray-400 dark:text-gray-500">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-300 mb-2">After this, you can create:</p>
+          <ul className="space-y-1 text-xs text-gray-500 dark:text-gray-300">
             <li>• Studio Manager accounts via Dashboard → Settings</li>
             <li>• Employee accounts via Dashboard → Employees</li>
             <li>• Referral Agent accounts via Dashboard → Agents</li>

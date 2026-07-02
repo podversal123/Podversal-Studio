@@ -62,7 +62,7 @@ export default function CustomersPage() {
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">
             Customers
           </h1>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-1">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mt-1">
             {customers.length} customer{customers.length !== 1 ? "s" : ""} total
           </p>
         </div>
@@ -91,7 +91,7 @@ export default function CustomersPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
                     <th className="px-4 py-3">Name</th>
                     <th className="px-4 py-3 hidden sm:table-cell">Contact</th>
                     <th className="px-4 py-3 hidden md:table-cell">Company</th>
@@ -103,7 +103,7 @@ export default function CustomersPage() {
                     <tr>
                       <td
                         colSpan={4}
-                        className="text-center text-[#aaa] dark:text-[#555] py-10"
+                        className="text-center text-[#888] dark:text-[#999] py-10"
                       >
                         {search
                           ? "No customers match your search"
@@ -125,21 +125,21 @@ export default function CustomersPage() {
                           <p className="font-bold text-gray-900 dark:text-white">
                             {c.user?.name ?? ""}
                           </p>
-                          <p className="text-[10px] text-[#aaa] dark:text-[#555] sm:hidden mt-0.5">
+                          <p className="text-[10px] text-[#888] dark:text-[#999] sm:hidden mt-0.5">
                             {c.user?.email}
                           </p>
                         </td>
                         <td className="py-3 px-4 hidden sm:table-cell">
-                          <p className="text-[#6b6b6b] dark:text-[#8a8a8a]">
+                          <p className="text-[#6b6b6b] dark:text-[#b0b0b0]">
                             {c.user?.email ?? ""}
                           </p>
                           {c.user?.phone && (
-                            <p className="text-[10px] text-[#aaa] dark:text-[#555] mt-0.5">
+                            <p className="text-[10px] text-[#888] dark:text-[#999] mt-0.5">
                               {c.user.phone}
                             </p>
                           )}
                         </td>
-                        <td className="py-3 px-4 hidden md:table-cell text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="py-3 px-4 hidden md:table-cell text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {c.companyName ?? ""}
                         </td>
                         <td className="py-3 px-4">
@@ -165,7 +165,7 @@ export default function CustomersPage() {
                     <h2 className="font-black text-gray-900 dark:text-white">
                       {selected.user?.name}
                     </h2>
-                    <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a] mt-0.5">
+                    <p className="text-xs text-[#6b6b6b] dark:text-[#b0b0b0] mt-0.5">
                       {selected.companyName ??
                         selected.category ??
                         "Individual"}
@@ -173,7 +173,7 @@ export default function CustomersPage() {
                   </div>
                   <button
                     onClick={() => setSelected(null)}
-                    className="text-[#aaa] hover:text-gray-900 dark:hover:text-white text-xl leading-none transition-colors"
+                    className="text-[#888] hover:text-gray-900 dark:hover:text-white text-xl leading-none transition-colors"
                   >
                     ×
                   </button>
@@ -182,14 +182,14 @@ export default function CustomersPage() {
                 {/* Contact info */}
                 <div className="space-y-2 text-sm border-t border-[#f0f0f0] dark:border-[#1e1e1e] pt-3">
                   <div className="flex justify-between">
-                    <span className="text-[#aaa] dark:text-[#555]">Email</span>
+                    <span className="text-[#888] dark:text-[#999]">Email</span>
                     <span className="font-bold text-gray-900 dark:text-white text-right truncate ml-3">
                       {selected.user?.email}
                     </span>
                   </div>
                   {selected.user?.phone && (
                     <div className="flex justify-between">
-                      <span className="text-[#aaa] dark:text-[#555]">
+                      <span className="text-[#888] dark:text-[#999]">
                         Phone
                       </span>
                       <span className="font-bold text-gray-900 dark:text-white">
@@ -199,14 +199,14 @@ export default function CustomersPage() {
                   )}
                   {selected.gstNumber && (
                     <div className="flex justify-between">
-                      <span className="text-[#aaa] dark:text-[#555]">GST</span>
+                      <span className="text-[#888] dark:text-[#999]">GST</span>
                       <span className="font-bold text-gray-900 dark:text-white font-mono text-xs">
                         {selected.gstNumber}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-[#aaa] dark:text-[#555]">
+                    <span className="text-[#888] dark:text-[#999]">
                       Category
                     </span>
                     <span className="font-bold text-gray-900 dark:text-white">
@@ -223,7 +223,7 @@ export default function CustomersPage() {
                         <div className="text-xl font-black text-gray-900 dark:text-white">
                           {stats.totalBookings}
                         </div>
-                        <div className="text-[10px] text-[#aaa] dark:text-[#555] uppercase tracking-wide mt-0.5">
+                        <div className="text-[10px] text-[#888] dark:text-[#999] uppercase tracking-wide mt-0.5">
                           Total
                         </div>
                       </div>
@@ -231,7 +231,7 @@ export default function CustomersPage() {
                         <div className="text-xl font-black text-green-600 dark:text-green-400">
                           {stats.completedBookings}
                         </div>
-                        <div className="text-[10px] text-[#aaa] dark:text-[#555] uppercase tracking-wide mt-0.5">
+                        <div className="text-[10px] text-[#888] dark:text-[#999] uppercase tracking-wide mt-0.5">
                           Done
                         </div>
                       </div>
@@ -239,7 +239,7 @@ export default function CustomersPage() {
                         <div className="text-sm font-black text-[#E5312A]">
                           ₹{Number(stats.totalSpent).toLocaleString("en-IN")}
                         </div>
-                        <div className="text-[10px] text-[#aaa] dark:text-[#555] uppercase tracking-wide mt-0.5">
+                        <div className="text-[10px] text-[#888] dark:text-[#999] uppercase tracking-wide mt-0.5">
                           Spent
                         </div>
                       </div>
@@ -259,7 +259,7 @@ export default function CustomersPage() {
                 {/* Recent Bookings */}
                 {selected.bookings?.length > 0 && (
                   <div className="border-t border-[#f0f0f0] dark:border-[#1e1e1e] pt-3 space-y-1">
-                    <p className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] mb-2">
+                    <p className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] mb-2">
                       Recent Bookings
                     </p>
                     {selected.bookings.slice(0, 5).map((b: any) => (
@@ -267,7 +267,7 @@ export default function CustomersPage() {
                         <span className="font-bold text-gray-900 dark:text-white">
                           {b.bookingCode}
                         </span>
-                        <span className="text-[#aaa] dark:text-[#555]">
+                        <span className="text-[#888] dark:text-[#999]">
                           {new Date(b.shootDate).toLocaleDateString("en-IN", {
                             day: "2-digit",
                             month: "short",
@@ -281,7 +281,7 @@ export default function CustomersPage() {
 
                 {/* Internal Notes */}
                 <div className="border-t border-[#f0f0f0] dark:border-[#1e1e1e] pt-3 space-y-2">
-                  <p className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555]">
+                  <p className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999]">
                     Internal Notes
                   </p>
                   <textarea
@@ -302,7 +302,7 @@ export default function CustomersPage() {
               </div>
             ) : (
               <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] text-center py-16">
-                <p className="text-sm text-[#aaa] dark:text-[#555]">
+                <p className="text-sm text-[#888] dark:text-[#999]">
                   Select a customer to view details
                 </p>
               </div>

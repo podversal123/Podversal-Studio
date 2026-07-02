@@ -104,7 +104,7 @@ export default function InvoicesPage() {
       {/* Generate panel */}
       <div className="border border-[#e5e5e5] dark:border-[#2a2a2a]">
         <div className="px-5 py-4 border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f9f9f9] dark:bg-[#161616]">
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">
             Generate Invoice
           </p>
         </div>
@@ -112,7 +112,7 @@ export default function InvoicesPage() {
         <div className="p-5 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                 Booking
               </label>
               <select
@@ -133,14 +133,14 @@ export default function InvoicesPage() {
                 ))}
               </select>
               {bookings.length === 0 && (
-                <p className="text-xs text-[#aaa] dark:text-[#555] mt-1">
+                <p className="text-xs text-[#888] dark:text-[#999] mt-1">
                   No bookings found (Quoted and above)
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                 Invoice Type
               </label>
               <select
@@ -160,19 +160,19 @@ export default function InvoicesPage() {
           {/* Selected booking info */}
           {selected && (
             <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] px-4 py-3 text-sm flex flex-wrap gap-4">
-              <span className="text-[#6b6b6b] dark:text-[#8a8a8a]">
+              <span className="text-[#6b6b6b] dark:text-[#b0b0b0]">
                 Customer:{" "}
                 <span className="font-bold text-gray-900 dark:text-white">
                   {selected.customerName ?? selected.customer?.user?.name ?? ""}
                 </span>
               </span>
-              <span className="text-[#6b6b6b] dark:text-[#8a8a8a]">
+              <span className="text-[#6b6b6b] dark:text-[#b0b0b0]">
                 Amount:{" "}
                 <span className="font-bold text-gray-900 dark:text-white">
                   ₹{Number(selected.totalAmount ?? 0).toLocaleString("en-IN")}
                 </span>
               </span>
-              <span className="text-[#6b6b6b] dark:text-[#8a8a8a]">
+              <span className="text-[#6b6b6b] dark:text-[#b0b0b0]">
                 Status:{" "}
                 <span className="font-bold text-gray-900 dark:text-white">
                   {STATUS_LABEL[selected.status] ?? selected.status}
@@ -205,14 +205,14 @@ export default function InvoicesPage() {
         ) : invoices.length > 0 ? (
           <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] overflow-hidden">
             <div className="px-5 py-3 border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f9f9f9] dark:bg-[#161616]">
-              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">
                 Existing Invoices ({invoices.length} found)
               </p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
                     <th className="px-4 py-3">Invoice #</th>
                     <th className="px-4 py-3">Type</th>
                     <th className="px-4 py-3 text-right">Amount</th>
@@ -232,7 +232,7 @@ export default function InvoicesPage() {
                       <td className="px-4 py-3 font-mono text-xs font-bold text-gray-900 dark:text-white">
                         {inv.invoiceNumber}
                       </td>
-                      <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                      <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0]">
                         {INVOICE_TYPES.find((t) => t.value === inv.type)
                           ?.label ?? inv.type}
                       </td>
@@ -243,12 +243,12 @@ export default function InvoicesPage() {
                         {inv.gstAmount ? (
                           `₹${Number(inv.gstAmount).toLocaleString("en-IN")}`
                         ) : (
-                          <span className="text-[#aaa] dark:text-[#555]">
+                          <span className="text-[#888] dark:text-[#999]">
                             N/A
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                      <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0]">
                         {new Date(inv.createdAt).toLocaleDateString("en-IN", {
                           day: "2-digit",
                           month: "short",
@@ -272,7 +272,7 @@ export default function InvoicesPage() {
             </div>
           </div>
         ) : (
-          <p className="text-sm text-[#aaa] dark:text-[#555]">
+          <p className="text-sm text-[#888] dark:text-[#999]">
             No invoices for this booking yet.
           </p>
         ))}

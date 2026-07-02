@@ -55,7 +55,7 @@ function ContactForm() {
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">
             Name
           </label>
           <input
@@ -67,7 +67,7 @@ function ContactForm() {
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">
             Phone
           </label>
           <input
@@ -79,7 +79,7 @@ function ContactForm() {
         </div>
       </div>
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">
           Email
         </label>
         <input
@@ -92,7 +92,7 @@ function ContactForm() {
       </div>
       {/* Message grows to fill remaining space */}
       <div className="flex flex-col flex-1 min-h-0">
-        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">
           Message
         </label>
         <textarea
@@ -131,7 +131,7 @@ export default function ContactPage() {
                   <div className="w-8 h-8 bg-[#E5312A]/10 flex items-center justify-center mb-3">
                     <Phone size={14} className="text-[#E5312A]" />
                   </div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1">
                     Phone
                   </p>
                   <a
@@ -146,7 +146,7 @@ export default function ContactPage() {
                   <div className="w-8 h-8 bg-[#E5312A]/10 flex items-center justify-center mb-3">
                     <Mail size={14} className="text-[#E5312A]" />
                   </div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1">
                     Email
                   </p>
                   <a
@@ -161,7 +161,7 @@ export default function ContactPage() {
                   <div className="w-8 h-8 bg-[#E5312A]/10 flex items-center justify-center mb-3">
                     <MapPin size={14} className="text-[#E5312A]" />
                   </div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1">
                     Address
                   </p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">
@@ -175,13 +175,13 @@ export default function ContactPage() {
                   <div className="w-8 h-8 bg-white/15 flex items-center justify-center mb-3">
                     <Clock size={14} className="text-white" />
                   </div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/75 mb-1">
                     Studio Hours
                   </p>
                   <p className="text-sm font-bold text-white">
                     6:00 AM – 2:00 AM
                   </p>
-                  <p className="text-white/60 text-xs mt-0.5">
+                  <p className="text-white/75 text-xs mt-0.5">
                     Open 7 days a week
                   </p>
                 </div>

@@ -30,6 +30,13 @@ export default function EmployeesPage() {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [canCreate, setCanCreate] = useState(false);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("user");
+    const role = raw ? JSON.parse(raw)?.role : null;
+    setCanCreate(role === "SUPER_ADMIN");
+  }, []);
 
   const {
     register,
@@ -86,16 +93,18 @@ export default function EmployeesPage() {
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">
             Employees
           </h1>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-1">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mt-1">
             {employees.length} employee{employees.length !== 1 ? "s" : ""} total
           </p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="btn-primary flex items-center gap-2 w-auto"
-        >
-          <Plus size={15} /> Add Employee
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn-primary flex items-center gap-2 w-auto"
+          >
+            <Plus size={15} /> Add Employee
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -112,7 +121,7 @@ export default function EmployeesPage() {
           <p className="font-bold text-gray-900 dark:text-white mb-1">
             No employees yet
           </p>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
             Click "Add Employee" to get started.
           </p>
         </div>
@@ -120,7 +129,7 @@ export default function EmployeesPage() {
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+              <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
                 <th className="px-4 py-3">Name</th>
                 <th className="px-4 py-3 hidden sm:table-cell">Email</th>
                 <th className="px-4 py-3">Role / Title</th>
@@ -139,13 +148,13 @@ export default function EmployeesPage() {
                       {emp.user?.name ?? ""}
                     </p>
                   </td>
-                  <td className="px-4 py-3 hidden sm:table-cell text-[#6b6b6b] dark:text-[#8a8a8a]">
+                  <td className="px-4 py-3 hidden sm:table-cell text-[#6b6b6b] dark:text-[#b0b0b0]">
                     {emp.user?.email ?? ""}
                   </td>
-                  <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                  <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0]">
                     {emp.jobTitle ?? ""}
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell text-[#6b6b6b] dark:text-[#8a8a8a]">
+                  <td className="px-4 py-3 hidden md:table-cell text-[#6b6b6b] dark:text-[#b0b0b0]">
                     {emp.shiftStart} – {emp.shiftEnd}
                   </td>
                   <td className="px-4 py-3">
@@ -179,14 +188,14 @@ export default function EmployeesPage() {
                   setShowModal(false);
                   reset();
                 }}
-                className="text-[#aaa] hover:text-gray-700 dark:hover:text-white"
+                className="text-[#888] hover:text-gray-700 dark:hover:text-white"
               >
                 <X size={18} />
               </button>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-4">
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Full Name *
                 </label>
                 <input
@@ -202,7 +211,7 @@ export default function EmployeesPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Email *
                 </label>
                 <input
@@ -219,7 +228,7 @@ export default function EmployeesPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Password *
                 </label>
                 <div className="relative">
@@ -232,7 +241,7 @@ export default function EmployeesPage() {
                   <button
                     type="button"
                     onClick={() => setShowPass((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888]"
                   >
                     {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -245,7 +254,7 @@ export default function EmployeesPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Mobile Number
                 </label>
                 <input
@@ -262,7 +271,7 @@ export default function EmployeesPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Job Title *
                 </label>
                 <input
@@ -279,7 +288,7 @@ export default function EmployeesPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                  <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                     Shift Start *
                   </label>
                   <input
@@ -294,7 +303,7 @@ export default function EmployeesPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                  <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                     Shift End *
                   </label>
                   <input
@@ -324,7 +333,7 @@ export default function EmployeesPage() {
                     setShowModal(false);
                     reset();
                   }}
-                  className="px-5 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-semibold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#aaa] transition-colors"
+                  className="px-5 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-semibold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#aaa] transition-colors"
                 >
                   Cancel
                 </button>

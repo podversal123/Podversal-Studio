@@ -172,7 +172,7 @@ export default function BlogsAdminPage() {
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">
             Blog Posts
           </h1>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-1">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mt-1">
             {posts.filter((p) => p.isPublished).length} published ·{" "}
             {posts.filter((p) => !p.isPublished).length} drafts
           </p>
@@ -200,7 +200,7 @@ export default function BlogsAdminPage() {
           <p className="font-bold text-gray-900 dark:text-white mb-1">
             No blog posts yet
           </p>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
             Click &quot;New Post&quot; to create your first article
           </p>
         </div>
@@ -209,7 +209,7 @@ export default function BlogsAdminPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+                <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
                   <th className="px-4 py-3">Title</th>
                   <th className="px-4 py-3 hidden sm:table-cell">Category</th>
                   <th className="px-4 py-3 hidden md:table-cell">Author</th>
@@ -228,7 +228,7 @@ export default function BlogsAdminPage() {
                       <p className="font-bold text-gray-900 dark:text-white line-clamp-1">
                         {post.title}
                       </p>
-                      <p className="text-[10px] text-[#aaa] dark:text-[#555] font-mono mt-0.5">
+                      <p className="text-[10px] text-[#888] dark:text-[#999] font-mono mt-0.5">
                         {post.slug}
                       </p>
                     </td>
@@ -237,10 +237,10 @@ export default function BlogsAdminPage() {
                         {post.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+                    <td className="px-4 py-3 hidden md:table-cell text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
                       {post.author?.name}
                     </td>
-                    <td className="px-4 py-3 hidden lg:table-cell text-xs text-[#6b6b6b] dark:text-[#8a8a8a]">
+                    <td className="px-4 py-3 hidden lg:table-cell text-xs text-[#6b6b6b] dark:text-[#b0b0b0]">
                       {post.publishedAt
                         ? new Date(post.publishedAt).toLocaleDateString(
                             "en-IN",
@@ -264,7 +264,7 @@ export default function BlogsAdminPage() {
                         <button
                           onClick={() => handleTogglePublish(post)}
                           title={post.isPublished ? "Unpublish" : "Publish"}
-                          className="p-1.5 hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#8a8a8a] transition-colors"
+                          className="p-1.5 hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#b0b0b0] transition-colors"
                         >
                           {post.isPublished ? (
                             <EyeOff size={14} />
@@ -277,7 +277,7 @@ export default function BlogsAdminPage() {
                           target="_blank"
                           rel="noreferrer"
                           title="View live post"
-                          className="p-1.5 hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#8a8a8a] transition-colors"
+                          className="p-1.5 hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#b0b0b0] transition-colors"
                         >
                           <ExternalLink size={14} />
                         </a>
@@ -316,7 +316,7 @@ export default function BlogsAdminPage() {
               </h2>
               <button
                 onClick={() => setModal(null)}
-                className="text-[#aaa] hover:text-gray-900 dark:hover:text-white text-lg leading-none transition-colors"
+                className="text-[#888] hover:text-gray-900 dark:hover:text-white text-lg leading-none transition-colors"
               >
                 ✕
               </button>
@@ -325,7 +325,7 @@ export default function BlogsAdminPage() {
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                     Title *
                   </label>
                   <input
@@ -336,7 +336,7 @@ export default function BlogsAdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                     Slug *
                   </label>
                   <input
@@ -352,7 +352,7 @@ export default function BlogsAdminPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                     Category
                   </label>
                   <input
@@ -365,7 +365,7 @@ export default function BlogsAdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                     Cover Image
                   </label>
                   <div className="flex gap-2">
@@ -402,7 +402,7 @@ export default function BlogsAdminPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Tags{" "}
                   <span className="font-normal normal-case">
                     (comma separated)
@@ -425,7 +425,7 @@ export default function BlogsAdminPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Excerpt *{" "}
                   <span className="font-normal normal-case">
                     (shown in listing)
@@ -443,7 +443,7 @@ export default function BlogsAdminPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Content *{" "}
                   <span className="font-normal normal-case">
                     (full article)
@@ -473,7 +473,7 @@ export default function BlogsAdminPage() {
                   <div className="w-9 h-5 bg-gray-200 dark:bg-[#2a2a2a] peer-checked:bg-[#E5312A] rounded-full peer transition-colors" />
                   <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4" />
                 </label>
-                <span className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+                <span className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
                   {form.isPublished
                     ? "Publish immediately (visible on site)"
                     : "Save as draft (hidden)"}
@@ -495,7 +495,7 @@ export default function BlogsAdminPage() {
               </button>
               <button
                 onClick={() => setModal(null)}
-                className="px-5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#aaa] transition-colors"
+                className="px-5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#aaa] transition-colors"
               >
                 Cancel
               </button>

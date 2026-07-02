@@ -76,7 +76,7 @@ export default function AdminLoginPage() {
           <div className="card">
             <button
               onClick={() => { setShowForgot(false); setForgotSent(false); forgotForm.reset(); }}
-              className="flex items-center gap-1.5 text-sm text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white transition-colors mb-6"
+              className="flex items-center gap-1.5 text-sm text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white transition-colors mb-6"
             >
               Back to sign in
             </button>
@@ -86,17 +86,17 @@ export default function AdminLoginPage() {
                   <span className="text-white text-xl font-black">✓</span>
                 </div>
                 <h2 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Check your inbox</h2>
-                <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] leading-relaxed">
+                <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] leading-relaxed">
                   Reset link sent. Check your inbox, and check spam if you don&apos;t see it.
                 </p>
               </div>
             ) : (
               <>
                 <h2 className="font-black text-gray-900 dark:text-white text-xl mb-1">Reset your password</h2>
-                <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-6">Enter your registered email address.</p>
+                <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mb-6">Enter your registered email address.</p>
                 <form onSubmit={forgotForm.handleSubmit(handleForgotPassword)} className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Email Address</label>
+                    <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-2">Email Address</label>
                     <input {...forgotForm.register('email')} type="email" placeholder="E-mail" className="input-field" autoComplete="email" />
                     {forgotForm.formState.errors.email && <p className="text-[#E5312A] text-xs mt-1">{forgotForm.formState.errors.email.message}</p>}
                   </div>
@@ -120,23 +120,23 @@ export default function AdminLoginPage() {
           <Logo height={76} />
         </div>
 
-        <p className="text-center text-xs font-bold tracking-widest uppercase text-white dark:text-white mb-3">Admin Portal</p>
+        <p className="text-center text-xs font-bold tracking-widest uppercase text-gray-500 dark:text-white mb-3">Admin Portal</p>
 
         <div className="card">
           <form onSubmit={loginForm.handleSubmit(handleEmailLogin)} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Email</label>
+              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-2">Email</label>
               <input {...loginForm.register('email')} type="email" placeholder="E-mail" className="input-field" autoComplete="email" />
               {loginForm.formState.errors.email && <p className="text-[#E5312A] text-xs mt-1">{loginForm.formState.errors.email.message}</p>}
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">Password</label>
+                <label className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">Password</label>
                 <button type="button" onClick={() => setShowForgot(true)} className="text-xs text-[#E5312A] hover:text-[#CC2A24] font-medium transition-colors">Forgot password?</button>
               </div>
               <div className="relative">
                 <input {...loginForm.register('password')} type={showPass ? 'text' : 'password'} placeholder="Password" className="input-field pr-11" autoComplete="current-password" />
-                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-gray-600 dark:hover:text-[#a0a0a0] transition-colors" tabIndex={-1}>
+                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-gray-600 dark:hover:text-[#a0a0a0] transition-colors" tabIndex={-1}>
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -149,14 +149,14 @@ export default function AdminLoginPage() {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-[#e5e5e5] dark:border-[#2a2a2a]" />
             </div>
-            <div className="relative flex justify-center text-xs text-[#aaa] dark:text-[#555]">
+            <div className="relative flex justify-center text-xs text-[#888] dark:text-[#999]">
               <span className="bg-white dark:bg-[#181818] px-3">or</span>
             </div>
           </div>
 
           <button
             onClick={() => { window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`; }}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-[#e5e5e5] dark:border-[#2a2a2a] hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] transition-colors font-medium text-gray-700 dark:text-[#a0a0a0] text-sm"
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-[#e5e5e5] dark:border-[#2a2a2a] hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] transition-colors font-medium text-gray-700 dark:text-[#b0b0b0] text-sm"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

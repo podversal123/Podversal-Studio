@@ -59,7 +59,7 @@ function ResetPasswordForm() {
           {!token ? (
             <div className="text-center py-4">
               <h2 className="font-black text-gray-900 dark:text-white text-xl mb-3">Invalid reset link</h2>
-              <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-6">
+              <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mb-6">
                 This link is missing a reset token. Go back to the login page and request a new one.
               </p>
               <a href="/login" className="inline-block btn-primary !w-auto px-6">Back to Sign In</a>
@@ -70,7 +70,7 @@ function ResetPasswordForm() {
                 <span className="text-white text-xl font-black">✓</span>
               </div>
               <h2 className="font-black text-gray-900 dark:text-white text-xl mb-3">Password updated</h2>
-              <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-6">
+              <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mb-6">
                 Your password has been changed. You can now sign in with your new password.
               </p>
               <button onClick={() => router.push('/login')} className="btn-primary">
@@ -80,12 +80,12 @@ function ResetPasswordForm() {
           ) : (
             <>
               <h2 className="font-black text-gray-900 dark:text-white text-xl mb-1">Set a new password</h2>
-              <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-6">
+              <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mb-6">
                 Choose a strong password of at least 8 characters.
               </p>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">New Password</label>
+                  <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-2">New Password</label>
                   <div className="relative">
                     <input
                       {...register('password')}
@@ -97,7 +97,7 @@ function ResetPasswordForm() {
                     <button
                       type="button"
                       onClick={() => setShowPass(!showPass)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-gray-600 dark:hover:text-[#a0a0a0] transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-gray-600 dark:hover:text-[#a0a0a0] transition-colors"
                       tabIndex={-1}
                     >
                       {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -107,7 +107,7 @@ function ResetPasswordForm() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Confirm Password</label>
+                  <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-2">Confirm Password</label>
                   <input
                     {...register('confirm')}
                     type="password"

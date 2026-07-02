@@ -108,7 +108,7 @@ export default function ProfilePage() {
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-2xl font-black text-gray-400 dark:text-[#555]">{initials}</span>
+                    <span className="text-2xl font-black text-gray-500 dark:text-[#999]">{initials}</span>
                   )}
                 </div>
                 <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
@@ -127,14 +127,14 @@ export default function ProfilePage() {
               >
                 {uploadingAvatar ? 'Uploading…' : 'Change Photo'}
               </button>
-              <p className="text-[10px] text-[#6b6b6b] dark:text-[#888]">Max 5 MB</p>
+              <p className="text-[10px] text-[#6b6b6b] dark:text-[#999]">Max 5 MB</p>
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
             </div>
 
             {/* Fields */}
             <div className="flex-1 space-y-4">
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">Full Name</label>
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">Full Name</label>
                 <input {...profileForm.register('name')} type="text" className="input-field" placeholder="Your full name" />
                 {profileForm.formState.errors.name && (
                   <p className="text-[#E5312A] text-xs mt-1">{profileForm.formState.errors.name.message}</p>
@@ -142,17 +142,17 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">Email</label>
-                <div className="input-field flex items-center gap-2 bg-gray-50 dark:bg-[#181818] text-gray-400 dark:text-[#555] cursor-not-allowed select-none">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">Email</label>
+                <div className="input-field flex items-center gap-2 bg-gray-50 dark:bg-[#181818] text-gray-500 dark:text-[#999] cursor-not-allowed select-none">
                   <Mail size={14} className="flex-shrink-0" />
                   <span className="truncate">{profileData?.email ?? '…'}</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+                <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
                   Mobile Number
-                  <span className="normal-case font-normal tracking-normal text-[#ccc] dark:text-[#444] ml-1">(optional)</span>
+                  <span className="normal-case font-normal tracking-normal text-[#999] dark:text-[#999] ml-1">(optional)</span>
                 </label>
                 <input {...profileForm.register('phone')} type="tel" className="input-field" placeholder="98xxxxxxxx" />
                 {profileForm.formState.errors.phone && (
@@ -161,7 +161,7 @@ export default function ProfilePage() {
               </div>
 
               {profileData?.createdAt && (
-                <p className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-[#555]">
+                <p className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-[#999]">
                   <CalendarDays size={12} />
                   Member since {new Date(profileData.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
@@ -180,7 +180,7 @@ export default function ProfilePage() {
         {profileData && !profileData.hasPassword ? (
           <div className="flex items-start gap-3 p-4">
             <CheckCircle2 size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-gray-600 dark:text-[#8a8a8a]">
+            <p className="text-sm text-gray-600 dark:text-[#b0b0b0]">
               Your account is signed in with Google. Password changes are not available for OAuth accounts.
             </p>
           </div>
@@ -190,7 +190,7 @@ export default function ProfilePage() {
             className="flex items-center justify-between px-4 py-3.5 hover:bg-[#f9f9f9] dark:hover:bg-[#181818] transition-colors group"
           >
             <div className="flex items-center gap-3">
-              <Lock size={15} className="text-[#aaa]" />
+              <Lock size={15} className="text-[#888]" />
               <span className="text-sm font-bold text-gray-900 dark:text-white">Change Password</span>
             </div>
           </Link>

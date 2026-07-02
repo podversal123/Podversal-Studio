@@ -109,7 +109,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={(e) => { handleAnchorClick(e, link.section); setMenuOpen(false); }}
-                className="block px-3 py-2.5 text-sm font-medium text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white hover:bg-[#f5f5f5] dark:hover:bg-[#181818] transition-colors"
+                className="block px-3 py-2.5 text-sm font-medium text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white hover:bg-[#f5f5f5] dark:hover:bg-[#181818] transition-colors"
               >
                 {link.label}
               </Link>

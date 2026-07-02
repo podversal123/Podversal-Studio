@@ -158,7 +158,7 @@ export default function GalleryPage() {
                 className={`px-4 py-1.5 text-sm font-bold transition-colors border ${
                   category === cat
                     ? "bg-[#E5312A] text-white border-[#E5312A]"
-                    : "bg-transparent text-[#6b6b6b] dark:text-[#8a8a8a] border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#E5312A] hover:text-[#E5312A]"
+                    : "bg-transparent text-[#6b6b6b] dark:text-[#b0b0b0] border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#E5312A] hover:text-[#E5312A]"
                 }`}
               >
                 {cat}
@@ -198,7 +198,7 @@ export default function GalleryPage() {
                         <p className="text-white text-xs font-bold truncate">
                           {img.title}
                         </p>
-                        <p className="text-white/60 text-[10px] uppercase tracking-wide">
+                        <p className="text-white/75 text-[10px] uppercase tracking-wide">
                           {img.category}
                         </p>
                       </div>
@@ -207,7 +207,7 @@ export default function GalleryPage() {
                   {!img.title && (
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                       <div className="p-3 w-full">
-                        <p className="text-white/60 text-[10px] uppercase tracking-wide">
+                        <p className="text-white/75 text-[10px] uppercase tracking-wide">
                           {img.category}
                         </p>
                       </div>
@@ -222,7 +222,7 @@ export default function GalleryPage() {
               <div className="flex justify-center mt-6 sm:mt-8 lg:mt-10">
                 <button
                   onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                  className="px-8 py-3 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#E5312A] hover:text-[#E5312A] transition-colors"
+                  className="px-8 py-3 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#E5312A] hover:text-[#E5312A] transition-colors"
                 >
                   See More ({filtered.length - visible} remaining)
                 </button>
@@ -292,7 +292,7 @@ export default function GalleryPage() {
                 {filtered[lightbox].title}
               </p>
             )}
-            <p className="text-white/50 text-xs uppercase tracking-widest mt-1">
+            <p className="text-white/70 text-xs uppercase tracking-widest mt-1">
               {filtered[lightbox].category} &nbsp;·&nbsp; {lightbox + 1} /{" "}
               {filtered.length}
             </p>

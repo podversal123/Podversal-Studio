@@ -95,7 +95,7 @@ function FormLabel({
   required?: boolean;
 }) {
   return (
-    <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">
+    <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">
       {children}
       {required && <span className="text-[#E5312A] ml-1">*</span>}
     </label>
@@ -235,7 +235,7 @@ export default function NewBookingPage() {
         <h1 className="text-2xl font-black text-gray-900 dark:text-white">
           Book a Studio Slot
         </h1>
-        <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm mt-1">
+        <p className="text-[#6b6b6b] dark:text-[#b0b0b0] text-sm mt-1">
           Select your date, time, and service. Pay online to instantly confirm
           your slot.
         </p>
@@ -245,7 +245,7 @@ export default function NewBookingPage() {
         {/* Customer Details */}
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] p-6 space-y-4">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888]">
+            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999]">
               Customer Details
             </p>
           </div>
@@ -308,7 +308,7 @@ export default function NewBookingPage() {
 
         {/* Booking Details */}
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] p-6 space-y-4">
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-1">
             Booking Details
           </p>
 
@@ -389,14 +389,14 @@ export default function NewBookingPage() {
           {/* Duration + availability */}
           {startTime && endTime && (
             <div className="flex flex-wrap items-center gap-5 border border-[#e5e5e5] dark:border-[#2a2a2a] px-4 py-3 bg-[#f5f5f5] dark:bg-[#181818]">
-              <span className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+              <span className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
                 Duration:{" "}
                 <strong className="text-gray-900 dark:text-white">
                   {(toMin(endTime) - toMin(startTime)) / 60} hrs
                 </strong>
               </span>
               {checking ? (
-                <span className="flex items-center gap-1.5 text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+                <span className="flex items-center gap-1.5 text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
                   <Loader2 size={13} className="animate-spin" /> Checking
                   availability…
                 </span>
@@ -418,7 +418,7 @@ export default function NewBookingPage() {
             </div>
           )}
 
-          <p className="text-xs text-[#888] dark:text-[#666]">
+          <p className="text-xs text-[#888] dark:text-[#999]">
             Studio hours: 6:00 AM to 2:00 AM. Minimum 2 hours per booking, in
             2-hour increments.
           </p>
@@ -426,7 +426,7 @@ export default function NewBookingPage() {
 
         {/* Requirements */}
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] p-6 space-y-4">
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-1">
             Requirements
           </p>
           <div>
@@ -462,14 +462,14 @@ export default function NewBookingPage() {
         {totalAmount && (
           <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818] px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
             <div>
-              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-1">
+              <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-1">
                 Total Payable
               </p>
               <p className="text-xl font-black text-gray-900 dark:text-white">
                 ₹{totalAmount.toLocaleString("en-IN")}
               </p>
             </div>
-            <p className="text-xs text-[#888] dark:text-[#666]">
+            <p className="text-xs text-[#888] dark:text-[#999]">
               Pay this amount to lock your slot.
             </p>
           </div>
@@ -499,7 +499,7 @@ export default function NewBookingPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-3 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#aaa] dark:hover:border-[#555] transition-colors"
+            className="px-6 py-3 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#aaa] dark:hover:border-[#555] transition-colors"
           >
             Cancel
           </button>

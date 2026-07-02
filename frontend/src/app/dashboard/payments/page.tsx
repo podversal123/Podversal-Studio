@@ -107,13 +107,13 @@ export default function PaymentsPage() {
       <div className="flex border border-[#e5e5e5] dark:border-[#2a2a2a] w-fit">
         <button
           onClick={() => setTab("record")}
-          className={`px-5 py-2.5 text-sm font-bold transition-colors ${tab === "record" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white"}`}
+          className={`px-5 py-2.5 text-sm font-bold transition-colors ${tab === "record" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white"}`}
         >
           Record Offline Payment
         </button>
         <button
           onClick={() => setTab("search")}
-          className={`px-5 py-2.5 text-sm font-bold transition-colors ${tab === "search" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white"}`}
+          className={`px-5 py-2.5 text-sm font-bold transition-colors ${tab === "search" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white"}`}
         >
           Search by Booking
         </button>
@@ -123,7 +123,7 @@ export default function PaymentsPage() {
       {tab === "record" && (
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a]">
           <div className="px-5 py-4 border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f9f9f9] dark:bg-[#161616]">
-            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">
               Record Cash / Bank Transfer
             </p>
           </div>
@@ -131,7 +131,7 @@ export default function PaymentsPage() {
           <form onSubmit={handleSubmit(onRecord)} className="p-5 space-y-4">
             {/* Booking */}
             <div>
-              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                 Booking
               </label>
               <select {...register("bookingId")} className="input-field">
@@ -157,7 +157,7 @@ export default function PaymentsPage() {
             {/* Type + Mode */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Payment Type
                 </label>
                 <select {...register("type")} className="input-field">
@@ -168,7 +168,7 @@ export default function PaymentsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Mode
                 </label>
                 <select {...register("mode")} className="input-field">
@@ -183,7 +183,7 @@ export default function PaymentsPage() {
             {/* Amount + Reference */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Amount (₹)
                 </label>
                 <input
@@ -199,7 +199,7 @@ export default function PaymentsPage() {
                 )}
               </div>
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Reference No.{" "}
                   <span className="font-normal normal-case">(optional)</span>
                 </label>
@@ -213,7 +213,7 @@ export default function PaymentsPage() {
 
             {/* Collected By */}
             <div>
-              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+              <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                 Collected By{" "}
                 <span className="font-normal normal-case">(optional)</span>
               </label>
@@ -239,7 +239,7 @@ export default function PaymentsPage() {
       {tab === "search" && (
         <div className="space-y-4">
           <div>
-            <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+            <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
               Booking Code
             </label>
             <div className="flex gap-2">
@@ -262,7 +262,7 @@ export default function PaymentsPage() {
           </div>
 
           {searched && payments.length === 0 && (
-            <p className="text-sm text-[#aaa] dark:text-[#555]">
+            <p className="text-sm text-[#888] dark:text-[#999]">
               No payments found for this booking.
             </p>
           )}
@@ -272,7 +272,7 @@ export default function PaymentsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+                    <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
                       <th className="px-4 py-3">Type</th>
                       <th className="px-4 py-3">Mode</th>
                       <th className="px-4 py-3 text-right">Amount</th>
@@ -290,11 +290,11 @@ export default function PaymentsPage() {
                         className="hover:bg-[#fafafa] dark:hover:bg-[#161616] transition-colors"
                       >
                         <td className="px-4 py-3">
-                          <span className="text-[10px] font-black tracking-[0.06em] uppercase bg-[#f5f5f5] dark:bg-[#2a2a2a] text-gray-600 dark:text-[#8a8a8a] px-2 py-1">
+                          <span className="text-[10px] font-black tracking-[0.06em] uppercase bg-[#f5f5f5] dark:bg-[#2a2a2a] text-gray-600 dark:text-[#b0b0b0] px-2 py-1">
                             {p.type}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {p.mode}
                         </td>
                         <td className="px-4 py-3 text-right font-black text-gray-900 dark:text-white">
@@ -307,7 +307,7 @@ export default function PaymentsPage() {
                             {p.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {p.paidAt
                             ? new Date(p.paidAt).toLocaleDateString("en-IN", {
                                 day: "2-digit",
@@ -316,7 +316,7 @@ export default function PaymentsPage() {
                               })
                             : ""}
                         </td>
-                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a] hidden md:table-cell">
+                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0] hidden md:table-cell">
                           {p.referenceNumber ?? ""}
                         </td>
                       </tr>

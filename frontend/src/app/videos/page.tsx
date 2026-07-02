@@ -99,7 +99,7 @@ export default function VideosPage() {
                 className={`px-4 py-1.5 text-sm font-bold transition-colors border ${
                   category === cat
                     ? "bg-[#E5312A] text-white border-[#E5312A]"
-                    : "bg-transparent text-[#6b6b6b] dark:text-[#8a8a8a] border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#E5312A] hover:text-[#E5312A]"
+                    : "bg-transparent text-[#6b6b6b] dark:text-[#b0b0b0] border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#E5312A] hover:text-[#E5312A]"
                 }`}
               >
                 {cat}
@@ -218,7 +218,7 @@ export default function VideosPage() {
                         {video.title}
                       </h2>
                       {video.description && (
-                        <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm leading-relaxed line-clamp-2">
+                        <p className="text-[#6b6b6b] dark:text-[#b0b0b0] text-sm leading-relaxed line-clamp-2">
                           {video.description}
                         </p>
                       )}
@@ -233,7 +233,7 @@ export default function VideosPage() {
               <div className="flex justify-center mt-6 sm:mt-8 lg:mt-10">
                 <button
                   onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                  className="px-8 py-3 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#E5312A] hover:text-[#E5312A] transition-colors"
+                  className="px-8 py-3 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#E5312A] hover:text-[#E5312A] transition-colors"
                 >
                   See More ({filtered.length - visible} remaining)
                 </button>

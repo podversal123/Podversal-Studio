@@ -61,23 +61,23 @@ export default function RegisterPage() {
 
         <div className="card">
           <h1 className="font-black text-gray-900 dark:text-white text-xl mb-1">Create your account</h1>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-6">Get started with Podversal Studio, it only takes a minute.</p>
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mb-6">Get started with Podversal Studio, it only takes a minute.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Full Name</label>
+              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-2">Full Name</label>
               <input {...register('name')} type="text" placeholder="Full Name" className="input-field" autoComplete="name" />
               {errors.name && <p className="text-[#E5312A] text-xs mt-1">{errors.name.message}</p>}
             </div>
 
             <div>
-              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Email</label>
+              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-2">Email</label>
               <input {...register('email')} type="email" placeholder="E-mail" className="input-field" autoComplete="email" />
               {errors.email && <p className="text-[#E5312A] text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">Password</label>
+              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-2">Password</label>
               <div className="relative">
                 <input
                   {...register('password')}
@@ -89,7 +89,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-gray-600 dark:hover:text-[#a0a0a0] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-gray-600 dark:hover:text-[#a0a0a0] transition-colors"
                   tabIndex={-1}
                 >
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -99,8 +99,8 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-2">
-                Mobile Number <span className="text-[#ccc] dark:text-[#444] font-normal normal-case tracking-normal">(optional)</span>
+              <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-2">
+                Mobile Number <span className="text-[#999] dark:text-[#999] font-normal normal-case tracking-normal">(optional)</span>
               </label>
               <input {...register('phone')} type="tel" placeholder="98xxxxxxxx" className="input-field" />
               {errors.phone && <p className="text-[#E5312A] text-xs mt-1">{errors.phone.message}</p>}
@@ -111,7 +111,7 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-6">
+          <p className="text-center text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mt-6">
             Already have an account?{' '}
             <a href="/login" className="text-[#E5312A] font-bold hover:underline">Sign in</a>
           </p>

@@ -126,7 +126,7 @@ export default function OurWorkPage() {
                   <div className="py-4 bg-white dark:bg-[#111111]">
                     <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{video.title}</h3>
                     {video.description && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{video.description}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-300 mt-1 line-clamp-1">{video.description}</p>
                     )}
                   </div>
                 </div>
@@ -137,12 +137,12 @@ export default function OurWorkPage() {
       </section>
 
       {/* ── Studio Gallery ── */}
-      <section className="py-10 sm:py-14 lg:py-20 bg-[#f8f8f8] dark:bg-[#0a0a0a]">
+      <section className="pt-6 sm:pt-8 lg:pt-10 pb-10 sm:pb-14 lg:pb-20 bg-[#f8f8f8] dark:bg-[#0a0a0a]">
         <div className="site-wrap">
           <div ref={galleryAnim.ref}>
             <div className="mb-6 sm:mb-8 lg:mb-12" style={anim(galleryAnim.visible)}>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Studio Gallery</h2>
-              <p className="text-gray-400 dark:text-white/40 text-sm mt-2">Click any image to view full size</p>
+              <p className="text-gray-500 dark:text-white/60 text-sm mt-2">Click any image to view full size</p>
             </div>
 
             <div
@@ -216,7 +216,7 @@ export default function OurWorkPage() {
           </button>
 
           {/* Counter */}
-          <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/40 text-xs">
+          <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/60 text-xs">
             {lightbox + 1} / {GALLERY.length}
           </p>
         </div>

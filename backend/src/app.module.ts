@@ -23,6 +23,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { SseModule } from './sse/sse.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { BackupModule } from './backup/backup.module';
 
 @Module({
   controllers: [HealthController],
@@ -57,6 +58,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     BlogsModule,
     StudioVideosModule,
     GalleryModule,
+    BackupModule,
   ],
 })
 export class AppModule {}

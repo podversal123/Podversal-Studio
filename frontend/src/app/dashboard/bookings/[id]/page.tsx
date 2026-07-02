@@ -78,7 +78,7 @@ interface Booking {
 const STATUS_META: Record<BookingStatus, { label: string; cls: string }> = {
   REQUEST: {
     label: "Request",
-    cls: "bg-[#f5f5f5] dark:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#8a8a8a]",
+    cls: "bg-[#f5f5f5] dark:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#b0b0b0]",
   },
   CHECKING: {
     label: "Checking",
@@ -136,7 +136,7 @@ function SectionCard({
   return (
     <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111]">
       <div className="px-4 py-2 border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818]">
-        <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+        <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">
           {title}
         </p>
       </div>
@@ -154,11 +154,11 @@ function DetailRow({
 }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-start gap-0.5 sm:gap-4 py-1.5 border-b border-[#f5f5f5] dark:border-[#1a1a1a] last:border-0">
-      <dt className="text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] sm:w-32 flex-shrink-0">
+      <dt className="text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] sm:w-32 flex-shrink-0">
         {label}
       </dt>
       <dd className="text-sm font-medium text-gray-900 dark:text-white">
-        {value || <span className="text-[#aaa] dark:text-[#555]"></span>}
+        {value || <span className="text-[#888] dark:text-[#999]"></span>}
       </dd>
     </div>
   );
@@ -315,7 +315,7 @@ export default function BookingDetailPage() {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 size={20} className="animate-spin text-[#E5312A]" />
-        <span className="ml-3 text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+        <span className="ml-3 text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
           Loading booking…
         </span>
       </div>
@@ -348,7 +348,7 @@ export default function BookingDetailPage() {
         <div>
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-1.5 text-xs text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white transition-colors mb-3"
+            className="flex items-center gap-1.5 text-xs text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white transition-colors mb-3"
           >
             All Bookings
           </button>
@@ -358,7 +358,7 @@ export default function BookingDetailPage() {
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">
             {booking.bookingCode}
           </h1>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-1">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mt-1">
             {booking.service?.name}
           </p>
         </div>
@@ -382,7 +382,7 @@ export default function BookingDetailPage() {
                 <h3 className="font-black text-gray-900 dark:text-white mb-1">
                   Complete payment to lock your slot
                 </h3>
-                <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mb-4">
+                <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mb-4">
                   Pay{" "}
                   <span className="font-black text-gray-900 dark:text-white">
                     ₹
@@ -440,7 +440,7 @@ export default function BookingDetailPage() {
             <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">
               Cancel this booking?
             </p>
-            <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a] mb-3">
+            <p className="text-xs text-[#6b6b6b] dark:text-[#b0b0b0] mb-3">
               This action cannot be undone.
             </p>
             <div className="flex gap-2">
@@ -460,7 +460,7 @@ export default function BookingDetailPage() {
               </button>
               <button
                 onClick={() => setConfirmCancel(false)}
-                className="px-4 py-2 border border-[#e5e5e5] dark:border-[#2a2a2a] text-xs font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#aaa] transition-colors"
+                className="px-4 py-2 border border-[#e5e5e5] dark:border-[#2a2a2a] text-xs font-bold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#aaa] transition-colors"
               >
                 Keep booking
               </button>
@@ -584,7 +584,7 @@ export default function BookingDetailPage() {
                       {["Type", "Mode", "Amount", "Status", "Date"].map((h) => (
                         <th
                           key={h}
-                          className="text-left px-4 py-2.5 text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555]"
+                          className="text-left px-4 py-2.5 text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999]"
                         >
                           {h}
                         </th>
@@ -597,7 +597,7 @@ export default function BookingDetailPage() {
                         <td className="px-4 py-3 text-gray-900 dark:text-white text-sm">
                           {p.type}
                         </td>
-                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a] text-sm">
+                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0] text-sm">
                           {p.mode}
                         </td>
                         <td className="px-4 py-3 font-bold text-gray-900 dark:text-white text-sm">
@@ -610,7 +610,7 @@ export default function BookingDetailPage() {
                             {p.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a] text-sm">
+                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0] text-sm">
                           {p.paidAt
                             ? new Date(p.paidAt).toLocaleDateString("en-IN")
                             : ""}
@@ -636,7 +636,7 @@ export default function BookingDetailPage() {
                       <p className="font-bold text-gray-900 dark:text-white text-sm">
                         {inv.invoiceNumber}
                       </p>
-                      <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a]">
+                      <p className="text-xs text-[#6b6b6b] dark:text-[#b0b0b0]">
                         ₹{Number(inv.totalAmount).toLocaleString("en-IN")}
                       </p>
                     </div>
@@ -690,7 +690,7 @@ export default function BookingDetailPage() {
                     className="space-y-3"
                   >
                     <div>
-                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                         Total Amount (₹)
                       </label>
                       <input
@@ -706,7 +706,7 @@ export default function BookingDetailPage() {
                       )}
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                         Discount (₹)
                       </label>
                       <input
@@ -727,7 +727,7 @@ export default function BookingDetailPage() {
                       <button
                         type="button"
                         onClick={() => setShowQuote(false)}
-                        className="flex-1 border border-[#e5e5e5] dark:border-[#2a2a2a] text-xs font-bold text-[#6b6b6b] dark:text-[#8a8a8a] py-2.5 hover:border-[#aaa] transition-colors"
+                        className="flex-1 border border-[#e5e5e5] dark:border-[#2a2a2a] text-xs font-bold text-[#6b6b6b] dark:text-[#b0b0b0] py-2.5 hover:border-[#aaa] transition-colors"
                       >
                         Cancel
                       </button>
@@ -747,7 +747,7 @@ export default function BookingDetailPage() {
             {/* Approve */}
             {status === "QUOTED" && (
               <SectionCard title="Approve Booking">
-                <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a] mb-3">
+                <p className="text-xs text-[#6b6b6b] dark:text-[#b0b0b0] mb-3">
                   Customer will be notified and asked to pay the advance.
                 </p>
                 <button
@@ -798,7 +798,7 @@ export default function BookingDetailPage() {
                   {booking.employee ? "Reassign" : "Assign"}
                 </button>
                 {booking.employee && (
-                  <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a] mt-2">
+                  <p className="text-xs text-[#6b6b6b] dark:text-[#b0b0b0] mt-2">
                     Currently assigned:{" "}
                     <strong className="text-gray-900 dark:text-white">
                       {booking.employee.user?.name}
@@ -874,7 +874,7 @@ export default function BookingDetailPage() {
                 </p>
                 {confirmCancel ? (
                   <div className="space-y-2">
-                    <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a]">
+                    <p className="text-xs text-[#6b6b6b] dark:text-[#b0b0b0]">
                       This will cancel the booking and release the slot.
                     </p>
                     <div className="flex gap-2">
@@ -894,7 +894,7 @@ export default function BookingDetailPage() {
                       </button>
                       <button
                         onClick={() => setConfirmCancel(false)}
-                        className="flex-1 border border-[#e5e5e5] dark:border-[#2a2a2a] text-xs font-bold text-[#6b6b6b] dark:text-[#8a8a8a] py-2"
+                        className="flex-1 border border-[#e5e5e5] dark:border-[#2a2a2a] text-xs font-bold text-[#6b6b6b] dark:text-[#b0b0b0] py-2"
                       >
                         Keep
                       </button>

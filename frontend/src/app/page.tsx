@@ -239,7 +239,7 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           HERO
       ════════════════════════════════════════════════════ */}
-      <section className="relative h-screen min-h-[560px] xl:min-h-[640px] overflow-hidden bg-black">
+      <section className="relative h-screen min-h-[560px] fine:min-h-[640px] overflow-hidden bg-black">
         {/* Slideshow images */}
         {HERO_SLIDES.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
@@ -252,8 +252,8 @@ export default function HomePage() {
             loading={i === 0 ? "eager" : "lazy"}
           />
         ))}
-        <div className="absolute inset-0 bg-black/70 xl:bg-black/60" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent xl:from-black/80 xl:via-black/40 xl:to-transparent" />
+        <div className="absolute inset-0 bg-black/70 fine:bg-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent fine:from-black/80 fine:via-black/40 fine:to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/60 to-transparent" />
 
         {/* Slide dots */}
@@ -267,10 +267,12 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div className="relative z-10 h-full flex flex-col justify-center xl:justify-end pb-24 xl:pb-[90px] site-wrap pt-24 xl:pt-[80px]">
-          <div className="max-w-3xl xl:max-w-2xl">
+        {/* Touch devices (phone/tablet, any width) get a bold, centered layout.
+            Mouse-driven desktops (any window width) get the compact original layout. */}
+        <div className="relative z-10 h-full flex flex-col justify-center fine:justify-end pb-16 fine:pb-[90px] site-wrap pt-24 fine:pt-[80px]">
+          <div className="max-w-2xl">
             <h1
-              className="font-black leading-[0.97] tracking-tight mb-6 text-white text-[clamp(52px,11vw,100px)] xl:text-[clamp(36px,6.5vw,108px)]"
+              className="font-black leading-[0.97] tracking-tight mb-6 text-white text-[clamp(52px,11vw,100px)] fine:text-[clamp(36px,6.5vw,108px)]"
             >
               Where Ideas
               <br />
@@ -278,21 +280,21 @@ export default function HomePage() {
               <br />
               Content
             </h1>
-            <p className="text-[clamp(18px,3.4vw,28px)] xl:text-[15px] text-white/60 leading-relaxed mb-9 max-w-lg">
+            <p className="text-[clamp(18px,3.4vw,28px)] fine:text-[15px] text-white/75 leading-relaxed mb-9 max-w-lg">
               Six studio services under one roof: podcasts, VFX, news shoots,
               online classes, monologues, and product photography. Book online
               in minutes.
             </p>
-            <div className="flex flex-col items-start gap-3 xl:flex-row xl:gap-3">
+            <div className="flex flex-col items-start gap-3 fine:flex-row fine:gap-3">
               <Link
                 href={bookHref}
-                className="inline-flex items-center justify-center bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-7 py-4 xl:px-8 xl:py-3.5 text-[clamp(16px,2.6vw,22px)] xl:text-sm tracking-wide transition-colors w-[clamp(210px,32vw,320px)] xl:w-auto xl:min-w-[180px]"
+                className="inline-flex items-center justify-center bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-7 py-4 fine:px-8 fine:py-3.5 text-[clamp(16px,2.6vw,22px)] fine:text-sm tracking-wide transition-colors w-[clamp(210px,32vw,320px)] fine:w-auto fine:min-w-[180px]"
               >
                 Book a Studio
               </Link>
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center border-2 xl:border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-semibold px-7 py-4 xl:px-8 xl:py-3.5 text-[clamp(16px,2.6vw,22px)] xl:text-sm transition-colors w-[clamp(210px,32vw,320px)] xl:w-auto xl:min-w-[180px]"
+                className="inline-flex items-center justify-center border-2 fine:border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-semibold px-7 py-4 fine:px-8 fine:py-3.5 text-[clamp(16px,2.6vw,22px)] fine:text-sm transition-colors w-[clamp(210px,32vw,320px)] fine:w-auto fine:min-w-[180px]"
               >
                 View Pricing
               </Link>
@@ -498,7 +500,7 @@ export default function HomePage() {
                           {video.title}
                         </h3>
                         {video.description && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-300 mt-1 line-clamp-1">
                             {video.description}
                           </p>
                         )}
@@ -515,7 +517,7 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           TESTIMONIALS  large photo top, quote below, red name
       ════════════════════════════════════════════════════ */}
-      <section className="py-10 sm:py-14 lg:py-20 bg-[#f8f8f8] dark:bg-[#0a0a0a]">
+      <section className="pt-6 sm:pt-8 lg:pt-10 pb-10 sm:pb-14 lg:pb-20 bg-[#f8f8f8] dark:bg-[#0a0a0a]">
         <div className="site-wrap">
           <div
             ref={testAnim.ref}
@@ -548,7 +550,7 @@ export default function HomePage() {
                   </p>
                   <div className="mt-5 pt-4 border-t border-gray-100 dark:border-white/10">
                     <p className="font-bold text-[#E5312A] text-sm">{t.name}</p>
-                    <p className="text-gray-400 dark:text-white/40 text-xs mt-0.5">
+                    <p className="text-gray-500 dark:text-white/60 text-xs mt-0.5">
                       {t.role}
                     </p>
                   </div>
@@ -613,7 +615,7 @@ export default function HomePage() {
                   <p className="text-2xl font-bold text-white mb-1">
                     {stat.value}
                   </p>
-                  <p className="text-white/60 text-sm">{stat.label}</p>
+                  <p className="text-white/75 text-sm">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -666,7 +668,7 @@ export default function HomePage() {
                   <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1.5">
                     {item.name}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  <p className="text-xs text-gray-500 dark:text-gray-300 leading-relaxed">
                     {item.spec}
                   </p>
                 </div>
@@ -679,7 +681,7 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           BLOG
       ════════════════════════════════════════════════════ */}
-      <section className="py-10 sm:py-14 lg:py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+      <section className="pt-6 sm:pt-8 lg:pt-10 pb-10 sm:pb-14 lg:pb-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
         <div className="site-wrap">
           <div ref={blogAnim.ref}>
             <div
@@ -704,7 +706,7 @@ export default function HomePage() {
                 className="text-center py-16 border border-[#e5e5e5] dark:border-[#2a2a2a]"
                 style={anim(blogAnim.visible, 0.1)}
               >
-                <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm">
+                <p className="text-[#6b6b6b] dark:text-[#b0b0b0] text-sm">
                   Blog posts coming soon.
                 </p>
               </div>
@@ -740,7 +742,7 @@ export default function HomePage() {
                             {post.category}
                           </span>
                           {post.publishedAt && (
-                            <span className="flex items-center gap-1 text-xs text-[#aaa] dark:text-[#555]">
+                            <span className="flex items-center gap-1 text-xs text-[#888] dark:text-[#999]">
                               <Calendar size={10} />
                               {new Date(post.publishedAt).toLocaleDateString(
                                 "en-IN",
@@ -759,7 +761,7 @@ export default function HomePage() {
                         </h3>
 
                         <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#f0f0f0] dark:border-[#222]">
-                          <span className="text-xs text-[#aaa] dark:text-[#555]">
+                          <span className="text-xs text-[#888] dark:text-[#999]">
                             By {post.author?.name}
                           </span>
                           <span className="text-xs font-bold text-[#E5312A] group-hover:underline">

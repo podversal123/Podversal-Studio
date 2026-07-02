@@ -40,8 +40,30 @@ export class NotificationsService {
 
     const { subject, html } = this.buildEmail(event, { booking, name });
 
-    // Send to customer
-    await this.send(email, subject, html);
+    // Send to customer  never let a delivery failure silently disappear:
+    // record it and (best-effort) alert the admin so it doesn't go unnoticed.
+    let deliveryError: string | null = null;
+    try {
+      await this.send(email, subject, html);
+    } catch (err: any) {
+      deliveryError = err?.message ?? 'Unknown email delivery error';
+      const criticalEvents: NotificationEvent[] = ['BOOKING_CREATED', 'BOOKING_APPROVED', 'PAYMENT_RECEIVED'];
+      if (criticalEvents.includes(event)) {
+        const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+        if (adminEmail) {
+          this.send(
+            adminEmail,
+            `[ALERT] Customer email failed to send (${booking.bookingCode})`,
+            this.wrapEmail(`
+              <p>Hi Studio Team,</p>
+              <p>The <strong>${event.replace(/_/g, ' ')}</strong> email to <strong>${name} &lt;${email}&gt;</strong> for booking <strong>${booking.bookingCode}</strong> failed to send.</p>
+              <p style="color:#888;font-size:12px;">Error: ${deliveryError}</p>
+              <p>Please follow up with the customer directly.</p>
+            `),
+          ).catch(() => {}); // this alert is itself best-effort  don't throw if it also fails
+        }
+      }
+    }
 
     // Notify admin on new booking, payment received, and shoot reminder
     const notifyAdmin = event === 'BOOKING_CREATED' || event === 'PAYMENT_RECEIVED' || event === 'SHOOT_REMINDER';
@@ -117,14 +139,18 @@ export class NotificationsService {
       );
     }
 
-    // Persist notification record
+    // Persist notification record  always, so failures are visible in the
+    // database even if nobody is watching the server logs at that moment.
     await this.prisma.notification.create({
       data: {
         userId:  booking.createdById,
         channel: 'EMAIL',
         subject,
-        message: `Booking ${booking.bookingCode}: ${event.replace(/_/g, ' ')}`,
-        isSent:  true,
+        message: deliveryError
+          ? `Booking ${booking.bookingCode}: ${event.replace(/_/g, ' ')}  FAILED: ${deliveryError}`
+          : `Booking ${booking.bookingCode}: ${event.replace(/_/g, ' ')}`,
+        isSent:  !deliveryError,
+        sentAt:  deliveryError ? null : new Date(),
       },
     });
   }
@@ -156,8 +182,8 @@ Log in to your dashboard to approve and pay.`,
 Pay the advance amount to confirm your slot.`,
       },
       PAYMENT_RECEIVED: {
-        subject: `Payment confirmed. See you on ${date} (${code})`,
-        body: `Thank you, your payment has been received and your studio slot is confirmed.<br><br>
+        subject: `Booking confirmed! See you on ${date} (${code})`,
+        body: `Great news  your booking is confirmed. We've received your payment and your studio slot is locked in.<br><br>
 <strong>Booking:</strong> ${code}<br>
 <strong>Service:</strong> ${service}<br>
 <strong>Date:</strong> ${date}<br>
@@ -286,7 +312,24 @@ Booking reference: <strong>${code}</strong>`,
     return this.send(to, subject, html);
   }
 
-  private async send(to: string, subject: string, html: string): Promise<void> {
+  // Daily data backup, emailed as a JSON attachment so it survives a server/DB crash
+  async sendBackupEmail(to: string, fileName: string, base64Content: string, sizeKB: number): Promise<void> {
+    const html = this.wrapEmail(`
+      <p>Hi Studio Team,</p>
+      <p>Attached is today's automated backup of all business data (customers, bookings, payments, invoices, and more) as a JSON file (~${sizeKB} KB).</p>
+      <p style="color:#888;font-size:12px;">This backup is also stored on Cloudinary. Keep this email safe  it can be used to restore data if anything is ever lost.</p>
+    `);
+    return this.send(to, `Podversal Studio  Daily Backup (${fileName})`, html, [
+      { content: base64Content, name: fileName },
+    ]);
+  }
+
+  private async send(
+    to: string,
+    subject: string,
+    html: string,
+    attachment?: { content: string; name: string }[],
+  ): Promise<void> {
     const apiKey = process.env.BREVO_API_KEY;
     if (!apiKey) {
       console.log(`[Email DEV] To: ${to} | Subject: ${subject}`);
@@ -307,6 +350,7 @@ Booking reference: <strong>${code}</strong>`,
           to:          [{ email: to }],
           subject,
           htmlContent: html,
+          ...(attachment ? { attachment } : {}),
         }),
       });
 

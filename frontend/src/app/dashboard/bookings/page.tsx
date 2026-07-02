@@ -39,7 +39,7 @@ interface BookingListItem {
 const STATUS_META: Record<BookingStatus, { label: string; cls: string }> = {
   REQUEST: {
     label: "Request",
-    cls: "bg-[#f5f5f5] dark:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#8a8a8a]",
+    cls: "bg-[#f5f5f5] dark:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#b0b0b0]",
   },
   CHECKING: {
     label: "Checking",
@@ -138,7 +138,7 @@ export default function BookingsPage() {
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">
             Bookings
           </h1>
-          <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm mt-1">
+          <p className="text-[#6b6b6b] dark:text-[#b0b0b0] text-sm mt-1">
             {loading
               ? "Loading…"
               : `${filtered.length} booking${filtered.length !== 1 ? "s" : ""}`}
@@ -165,7 +165,7 @@ export default function BookingsPage() {
                   ? "Your booking has been approved. Advance payment required."
                   : `${approvedPending.length} bookings approved. Advance payment required.`}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-300 mt-0.5">
                 Pay the advance online to lock your studio slot. Accepted: UPI,
                 card, net banking.
               </p>
@@ -183,7 +183,7 @@ export default function BookingsPage() {
               </Link>
             ))}
             {approvedPending.length > 2 && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 self-center">
+              <span className="text-xs text-gray-500 dark:text-gray-300 self-center">
                 +{approvedPending.length - 2} more
               </span>
             )}
@@ -196,7 +196,7 @@ export default function BookingsPage() {
         <div className="relative flex-1">
           <Search
             size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#aaa] dark:text-[#555]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#888] dark:text-[#999]"
           />
           <input
             type="text"
@@ -209,7 +209,7 @@ export default function BookingsPage() {
         <div className="flex items-center gap-2">
           <Filter
             size={14}
-            className="text-[#aaa] dark:text-[#555] flex-shrink-0"
+            className="text-[#888] dark:text-[#999] flex-shrink-0"
           />
           <select
             value={statusFilter}
@@ -244,7 +244,7 @@ export default function BookingsPage() {
                 ].map((h) => (
                   <th
                     key={h.label}
-                    className={`text-left px-5 py-3.5 text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] whitespace-nowrap ${h.cls}`}
+                    className={`text-left px-5 py-3.5 text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] whitespace-nowrap ${h.cls}`}
                   >
                     {h.label}
                   </th>
@@ -275,7 +275,7 @@ export default function BookingsPage() {
               {!loading && error && (
                 <tr>
                   <td colSpan={6} className="text-center py-12">
-                    <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm">
+                    <p className="text-[#6b6b6b] dark:text-[#b0b0b0] text-sm">
                       Failed to load bookings.
                     </p>
                     <button
@@ -293,7 +293,7 @@ export default function BookingsPage() {
                     <p className="font-bold text-gray-900 dark:text-white mb-1">
                       No bookings found
                     </p>
-                    <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+                    <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
                       {search || statusFilter
                         ? "Try adjusting your filters."
                         : "Submit a new booking to get started."}
@@ -312,21 +312,21 @@ export default function BookingsPage() {
                       <p className="font-bold text-gray-900 dark:text-white text-xs tracking-wide">
                         {b.bookingCode}
                       </p>
-                      <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-xs mt-0.5">
+                      <p className="text-[#6b6b6b] dark:text-[#b0b0b0] text-xs mt-0.5">
                         {b.customerName}
                       </p>
-                      <p className="text-[#aaa] dark:text-[#555] text-xs">
+                      <p className="text-[#888] dark:text-[#999] text-xs">
                         {b.customerPhone}
                       </p>
                     </td>
-                    <td className="hidden sm:table-cell px-5 py-4 text-gray-700 dark:text-[#a0a0a0] text-sm">
+                    <td className="hidden sm:table-cell px-5 py-4 text-gray-700 dark:text-[#b0b0b0] text-sm">
                       {b.service?.name ?? ""}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5 text-gray-900 dark:text-white text-sm">
                         <Calendar
                           size={12}
-                          className="text-[#aaa] dark:text-[#555]"
+                          className="text-[#888] dark:text-[#999]"
                         />
                         {new Date(b.shootDate).toLocaleDateString("en-IN", {
                           day: "2-digit",
@@ -334,10 +334,10 @@ export default function BookingsPage() {
                           year: "numeric",
                         })}
                       </div>
-                      <div className="flex items-center gap-1.5 text-[#6b6b6b] dark:text-[#8a8a8a] text-xs mt-0.5">
+                      <div className="flex items-center gap-1.5 text-[#6b6b6b] dark:text-[#b0b0b0] text-xs mt-0.5">
                         <Clock
                           size={10}
-                          className="text-[#aaa] dark:text-[#555]"
+                          className="text-[#888] dark:text-[#999]"
                         />
                         {b.startTime} – {b.endTime}
                       </div>
@@ -346,7 +346,7 @@ export default function BookingsPage() {
                       {b.totalAmount ? (
                         `₹${Number(b.totalAmount).toLocaleString("en-IN")}`
                       ) : (
-                        <span className="text-[#aaa] dark:text-[#555]"></span>
+                        <span className="text-[#888] dark:text-[#999]"></span>
                       )}
                     </td>
                     <td className="px-5 py-4">

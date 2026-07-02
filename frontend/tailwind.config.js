@@ -26,5 +26,13 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Lets us style touch devices (phone/tablet) differently from mouse-driven
+    // desktops regardless of viewport width  a resized desktop browser window
+    // and a same-width tablet report identical widths but different pointer types.
+    function ({ addVariant }) {
+      addVariant('coarse', '@media (pointer: coarse)');
+      addVariant('fine', '@media (pointer: fine)');
+    },
+  ],
 };

@@ -76,7 +76,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: BlogPos
                     className={`px-4 py-1.5 text-sm font-bold transition-colors border ${
                       category === cat
                         ? "bg-[#E5312A] text-white border-[#E5312A]"
-                        : "bg-transparent text-[#6b6b6b] dark:text-[#8a8a8a] border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#E5312A] hover:text-[#E5312A]"
+                        : "bg-transparent text-[#6b6b6b] dark:text-[#b0b0b0] border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#E5312A] hover:text-[#E5312A]"
                     }`}
                   >
                     {cat}
@@ -93,7 +93,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: BlogPos
                 <p className="text-gray-900 dark:text-white font-bold mb-2">
                   No posts published yet
                 </p>
-                <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm">
+                <p className="text-[#6b6b6b] dark:text-[#b0b0b0] text-sm">
                   Check back soon, studio stories are on the way.
                 </p>
               </div>
@@ -132,7 +132,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: BlogPos
                           {post.category}
                         </span>
                         {post.publishedAt && (
-                          <span className="flex items-center gap-1 text-xs text-[#aaa] dark:text-[#555]">
+                          <span className="flex items-center gap-1 text-xs text-[#888] dark:text-[#999]">
                             <Calendar size={10} />
                             {new Date(post.publishedAt).toLocaleDateString(
                               "en-IN",
@@ -151,7 +151,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: BlogPos
                       </h2>
 
                       <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#f0f0f0] dark:border-[#222]">
-                        <span className="text-xs text-[#aaa] dark:text-[#555]">
+                        <span className="text-xs text-[#888] dark:text-[#999]">
                           By {post.author?.name}
                         </span>
                         <span className="text-xs font-bold text-[#E5312A] group-hover:underline">
@@ -169,7 +169,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: BlogPos
 
       {/* Footer CTA  matches theme */}
       <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#E5312A] py-10 sm:py-12 lg:py-14 px-4 text-center">
-        <p className="text-[11px] font-black tracking-[0.2em] uppercase text-white/50 mb-4">
+        <p className="text-[11px] font-black tracking-[0.2em] uppercase text-white/70 mb-4">
           Ready to record?
         </p>
         <h2 className="text-2xl font-black text-white mb-3">

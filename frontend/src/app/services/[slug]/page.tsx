@@ -196,7 +196,7 @@ export default async function ServicePage({
             <div>
               <div className="bg-[#f8f8f8] dark:bg-[#161616] p-6 sticky top-[100px]">
                 <div className="mb-5 pb-5 border-b border-gray-200 dark:border-[#2a2a2a]">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-2">
                     Rate
                   </p>
                   <p className="text-2xl font-black text-gray-900 dark:text-white">
@@ -204,7 +204,7 @@ export default async function ServicePage({
                   </p>
                 </div>
                 <div className="mb-6 pb-5 border-b border-gray-200 dark:border-[#2a2a2a]">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-2">
                     Duration
                   </p>
                   <p className="text-sm text-gray-700 dark:text-gray-200">
@@ -223,7 +223,7 @@ export default async function ServicePage({
                 >
                   Ask a Question
                 </Link>
-                <p className="text-xs text-gray-400 dark:text-gray-600 text-center mt-4">
+                <p className="text-xs text-gray-500 dark:text-gray-300 text-center mt-4">
                   18% GST applicable · Invoice sent by email
                 </p>
               </div>
@@ -233,7 +233,7 @@ export default async function ServicePage({
       </section>
 
       {/* ── Other services ── */}
-      <section className="py-8 sm:py-10 lg:py-12 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+      <section className="pt-4 sm:pt-6 lg:pt-8 pb-8 sm:pb-10 lg:pb-12 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
         <div className="site-wrap">
           <div className="flex flex-wrap gap-3">
             {Object.entries(SERVICES)

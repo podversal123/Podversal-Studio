@@ -43,7 +43,7 @@ const STATUS_COLORS: Record<string, string> = {
   APPROVED:
     "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400",
   CANCELLED: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
-  REQUEST: "bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-400",
+  REQUEST: "bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300",
   CHECKING:
     "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400",
   QUOTED:
@@ -133,11 +133,11 @@ export default function ReportsPage() {
                 className={
                   type === key
                     ? "text-[#E5312A]"
-                    : "text-[#aaa] dark:text-[#555]"
+                    : "text-[#888] dark:text-[#999]"
                 }
               />
               <span
-                className={`text-sm font-black ${type === key ? "text-gray-900 dark:text-white" : "text-[#6b6b6b] dark:text-[#8a8a8a]"}`}
+                className={`text-sm font-black ${type === key ? "text-gray-900 dark:text-white" : "text-[#6b6b6b] dark:text-[#b0b0b0]"}`}
               >
                 {label}
               </span>
@@ -150,7 +150,7 @@ export default function ReportsPage() {
       <div className="flex flex-col sm:flex-row gap-3 items-end">
         <div className="flex items-center gap-2 flex-1">
           <div className="flex-1">
-            <label className="block text-[10px] text-[#aaa] dark:text-[#555] mb-1.5">
+            <label className="block text-[10px] text-[#888] dark:text-[#999] mb-1.5">
               From
             </label>
             <input
@@ -160,9 +160,9 @@ export default function ReportsPage() {
               className="input-field w-full"
             />
           </div>
-          <span className="text-[#aaa] dark:text-[#555] mt-5"></span>
+          <span className="text-[#888] dark:text-[#999] mt-5"></span>
           <div className="flex-1">
-            <label className="block text-[10px] text-[#aaa] dark:text-[#555] mb-1.5">
+            <label className="block text-[10px] text-[#888] dark:text-[#999] mb-1.5">
               To
             </label>
             <input
@@ -184,7 +184,7 @@ export default function ReportsPage() {
           <button
             onClick={exportPdf}
             disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-gray-700 dark:text-[#a0a0a0] hover:border-gray-400 dark:hover:border-[#444] transition-colors whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-gray-700 dark:text-[#b0b0b0] hover:border-gray-400 dark:hover:border-[#444] transition-colors whitespace-nowrap"
           >
             <Download size={14} />
             {exporting ? "Exporting…" : "Export PDF"}
@@ -200,7 +200,7 @@ export default function ReportsPage() {
               <span className="text-2xl font-black text-gray-900 dark:text-white">
                 {data.summary.total}
               </span>
-              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] ml-2">
+              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] ml-2">
                 Total
               </span>
             </div>
@@ -208,7 +208,7 @@ export default function ReportsPage() {
               <span className="text-2xl font-black text-green-600 dark:text-green-400">
                 {data.summary.completed}
               </span>
-              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] ml-2">
+              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] ml-2">
                 Completed
               </span>
             </div>
@@ -216,7 +216,7 @@ export default function ReportsPage() {
               <span className="text-2xl font-black text-orange-600 dark:text-orange-400">
                 {data.summary.inProgress}
               </span>
-              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] ml-2">
+              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] ml-2">
                 In Progress
               </span>
             </div>
@@ -224,7 +224,7 @@ export default function ReportsPage() {
               <span className="text-2xl font-black text-[#E5312A]">
                 {data.summary.cancelled}
               </span>
-              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] ml-2">
+              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] ml-2">
                 Cancelled
               </span>
             </div>
@@ -233,7 +233,7 @@ export default function ReportsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
                     <th className="px-4 py-3">Code</th>
                     <th className="px-4 py-3">Service</th>
                     <th className="px-4 py-3 hidden sm:table-cell">Customer</th>
@@ -249,7 +249,7 @@ export default function ReportsPage() {
                     <tr>
                       <td
                         colSpan={6}
-                        className="text-center text-[#aaa] dark:text-[#555] py-10"
+                        className="text-center text-[#888] dark:text-[#999] py-10"
                       >
                         No bookings in this range
                       </td>
@@ -263,13 +263,13 @@ export default function ReportsPage() {
                         <td className="px-4 py-3 font-mono text-xs font-bold text-gray-900 dark:text-white">
                           {b.bookingCode}
                         </td>
-                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {b.service?.name ?? ""}
                         </td>
-                        <td className="px-4 py-3 hidden sm:table-cell text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 hidden sm:table-cell text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {b.customer?.user?.name ?? b.customerName ?? ""}
                         </td>
-                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {new Date(b.shootDate).toLocaleDateString("en-IN", {
                             day: "2-digit",
                             month: "short",
@@ -278,7 +278,7 @@ export default function ReportsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <span
-                            className={`text-[10px] font-black tracking-[0.06em] uppercase px-2 py-1 ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-400"}`}
+                            className={`text-[10px] font-black tracking-[0.06em] uppercase px-2 py-1 ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300"}`}
                           >
                             {b.status.replace(/_/g, " ")}
                           </span>
@@ -304,7 +304,7 @@ export default function ReportsPage() {
               <span className="text-2xl font-black text-gray-900 dark:text-white">
                 {fmt(data.totalRevenue)}
               </span>
-              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] ml-2">
+              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] ml-2">
                 Collected
               </span>
             </div>
@@ -313,7 +313,7 @@ export default function ReportsPage() {
                 <span className="text-2xl font-black text-gray-900 dark:text-white">
                   {fmt(amt as number)}
                 </span>
-                <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] ml-2">
+                <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] ml-2">
                   {mode}
                 </span>
               </div>
@@ -323,7 +323,7 @@ export default function ReportsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
                     <th className="px-4 py-3">Booking</th>
                     <th className="px-4 py-3 hidden sm:table-cell">Customer</th>
                     <th className="px-4 py-3">Type</th>
@@ -337,7 +337,7 @@ export default function ReportsPage() {
                     <tr>
                       <td
                         colSpan={6}
-                        className="text-center text-[#aaa] dark:text-[#555] py-10"
+                        className="text-center text-[#888] dark:text-[#999] py-10"
                       >
                         No payments in this range
                       </td>
@@ -351,21 +351,21 @@ export default function ReportsPage() {
                         <td className="px-4 py-3 font-mono text-xs font-bold text-gray-900 dark:text-white">
                           {p.booking.bookingCode}
                         </td>
-                        <td className="px-4 py-3 hidden sm:table-cell text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 hidden sm:table-cell text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {p.booking.customer?.user?.name ?? ""}
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-[10px] font-black tracking-[0.06em] uppercase bg-[#f5f5f5] dark:bg-[#2a2a2a] text-gray-600 dark:text-[#8a8a8a] px-2 py-1">
+                          <span className="text-[10px] font-black tracking-[0.06em] uppercase bg-[#f5f5f5] dark:bg-[#2a2a2a] text-gray-600 dark:text-[#b0b0b0] px-2 py-1">
                             {p.type}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {p.mode}
                         </td>
                         <td className="px-4 py-3 text-right font-black text-gray-900 dark:text-white">
                           {fmt(p.amount)}
                         </td>
-                        <td className="px-4 py-3 hidden md:table-cell text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 hidden md:table-cell text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {p.paidAt
                             ? new Date(p.paidAt).toLocaleDateString("en-IN", {
                                 day: "2-digit",
@@ -392,7 +392,7 @@ export default function ReportsPage() {
               <span className="text-2xl font-black text-gray-900 dark:text-white">
                 {fmt(data.totalTaxable)}
               </span>
-              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] ml-2">
+              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] ml-2">
                 Taxable
               </span>
             </div>
@@ -400,7 +400,7 @@ export default function ReportsPage() {
               <span className="text-2xl font-black text-orange-600 dark:text-orange-400">
                 {fmt(data.totalGst)}
               </span>
-              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] ml-2">
+              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] ml-2">
                 GST 18%
               </span>
             </div>
@@ -408,7 +408,7 @@ export default function ReportsPage() {
               <span className="text-2xl font-black text-green-600 dark:text-green-400">
                 {fmt(data.totalAmount)}
               </span>
-              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] ml-2">
+              <span className="text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] ml-2">
                 Total
               </span>
             </div>
@@ -417,7 +417,7 @@ export default function ReportsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#aaa] dark:text-[#555] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+                  <tr className="text-left text-[10px] font-black tracking-[0.1em] uppercase text-[#888] dark:text-[#999] bg-[#f9f9f9] dark:bg-[#161616] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
                     <th className="px-4 py-3">Invoice #</th>
                     <th className="px-4 py-3 hidden sm:table-cell">Customer</th>
                     <th className="px-4 py-3 hidden md:table-cell">Service</th>
@@ -431,7 +431,7 @@ export default function ReportsPage() {
                     <tr>
                       <td
                         colSpan={6}
-                        className="text-center text-[#aaa] dark:text-[#555] py-10"
+                        className="text-center text-[#888] dark:text-[#999] py-10"
                       >
                         No GST invoices in this range
                       </td>
@@ -445,13 +445,13 @@ export default function ReportsPage() {
                         <td className="px-4 py-3 font-mono text-xs font-bold text-gray-900 dark:text-white">
                           {inv.invoiceNumber}
                         </td>
-                        <td className="px-4 py-3 hidden sm:table-cell text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 hidden sm:table-cell text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {inv.booking.customer?.user?.name ?? ""}
                         </td>
-                        <td className="px-4 py-3 hidden md:table-cell text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 hidden md:table-cell text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {inv.booking.service?.name ?? ""}
                         </td>
-                        <td className="px-4 py-3 text-right text-[#6b6b6b] dark:text-[#8a8a8a]">
+                        <td className="px-4 py-3 text-right text-[#6b6b6b] dark:text-[#b0b0b0]">
                           {fmt(inv.amount)}
                         </td>
                         <td className="px-4 py-3 text-right font-bold text-orange-600 dark:text-orange-400">
@@ -472,7 +472,7 @@ export default function ReportsPage() {
 
       {!data && !loading && (
         <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] text-center py-16">
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
             Select a report type and date range, then click Generate Report
           </p>
         </div>

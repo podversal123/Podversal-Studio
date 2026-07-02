@@ -20,7 +20,7 @@ import { AuthUser, Role } from "@/types";
 import api from "@/lib/api";
 
 const STATUS_COLORS: Record<string, string> = {
-  REQUEST: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400",
+  REQUEST: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300",
   CHECKING:
     "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400",
   QUOTED: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
@@ -97,7 +97,7 @@ export default function DashboardPage() {
       <div className="space-y-5">
         {/* Greeting */}
         <div>
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">
             {greeting} &middot;{" "}
             {new Date().toLocaleDateString("en-IN", {
               weekday: "long",
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                 color:
                   needsPayment > 0
                     ? "text-[#E5312A]"
-                    : "text-gray-400 dark:text-[#555]",
+                    : "text-gray-500 dark:text-[#999]",
                 bg:
                   needsPayment > 0
                     ? "bg-[#E5312A]/10 dark:bg-[#E5312A]/15"
@@ -166,7 +166,7 @@ export default function DashboardPage() {
                   <p className="text-xl font-bold text-gray-900 dark:text-white leading-none">
                     {card.value}
                   </p>
-                  <p className="text-[11px] text-gray-400 dark:text-[#666] mt-0.5 truncate">
+                  <p className="text-[11px] text-gray-500 dark:text-[#999] mt-0.5 truncate">
                     {card.label}
                   </p>
                 </div>
@@ -191,12 +191,12 @@ export default function DashboardPage() {
               </Link>
             </div>
             {myBookings === null ? (
-              <div className="p-8 text-center text-sm text-gray-400 dark:text-[#555]">
+              <div className="p-8 text-center text-sm text-gray-500 dark:text-[#999]">
                 Loading…
               </div>
             ) : recent.length === 0 ? (
               <div className="p-8 text-center space-y-2">
-                <p className="text-sm text-gray-500 dark:text-[#555]">
+                <p className="text-sm text-gray-500 dark:text-[#999]">
                   No bookings yet.
                 </p>
                 <Link
@@ -216,11 +216,11 @@ export default function DashboardPage() {
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs text-gray-400 dark:text-[#555]">
+                        <span className="font-mono text-xs text-gray-500 dark:text-[#999]">
                           {b.bookingCode}
                         </span>
                         <span
-                          className={`px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"}`}
+                          className={`px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"}`}
                         >
                           {b.status.replace(/_/g, " ")}
                         </span>
@@ -229,7 +229,7 @@ export default function DashboardPage() {
                         {b.service?.name}
                       </p>
                     </div>
-                    <span className="text-xs text-gray-400 dark:text-[#555] flex-shrink-0">
+                    <span className="text-xs text-gray-500 dark:text-[#999] flex-shrink-0">
                       {new Date(b.shootDate).toLocaleDateString("en-IN", {
                         day: "2-digit",
                         month: "short",
@@ -243,29 +243,29 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <div className="card">
-            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-3">
+            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-3">
               Actions
             </p>
             <div className="space-y-2">
               <Link
                 href="/dashboard/bookings/new"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
                 <BookOpen size={15} className="text-[#E5312A] flex-shrink-0" />
                 Book Studio Session
               </Link>
               <Link
                 href="/dashboard/invoices"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
-                <FileText size={15} className="text-gray-400 flex-shrink-0" />
+                <FileText size={15} className="text-gray-500 flex-shrink-0" />
                 My Invoices
               </Link>
               <Link
                 href="/dashboard/profile"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
-                <UserCircle size={15} className="text-gray-400 flex-shrink-0" />
+                <UserCircle size={15} className="text-gray-500 flex-shrink-0" />
                 My Profile
               </Link>
               {needsPayment > 0 && (
@@ -311,7 +311,7 @@ export default function DashboardPage() {
     return (
       <div className="space-y-5">
         <div>
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">
             {greeting} &middot;{" "}
             {new Date().toLocaleDateString("en-IN", {
               weekday: "long",
@@ -356,7 +356,7 @@ export default function DashboardPage() {
                 color:
                   todayShoots > 0
                     ? "text-[#E5312A]"
-                    : "text-gray-400 dark:text-[#555]",
+                    : "text-gray-500 dark:text-[#999]",
                 bg:
                   todayShoots > 0
                     ? "bg-[#E5312A]/10 dark:bg-[#E5312A]/15"
@@ -379,7 +379,7 @@ export default function DashboardPage() {
                   <p className="text-xl font-bold text-gray-900 dark:text-white leading-none">
                     {card.value}
                   </p>
-                  <p className="text-[11px] text-gray-400 dark:text-[#666] mt-0.5 truncate">
+                  <p className="text-[11px] text-gray-500 dark:text-[#999] mt-0.5 truncate">
                     {card.label}
                   </p>
                 </div>
@@ -402,12 +402,12 @@ export default function DashboardPage() {
               </Link>
             </div>
             {myBookings === null ? (
-              <div className="p-8 text-center text-sm text-gray-400 dark:text-[#555]">
+              <div className="p-8 text-center text-sm text-gray-500 dark:text-[#999]">
                 Loading…
               </div>
             ) : recent.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-sm text-gray-500 dark:text-[#555]">
+                <p className="text-sm text-gray-500 dark:text-[#999]">
                   No assigned bookings yet.
                 </p>
               </div>
@@ -421,11 +421,11 @@ export default function DashboardPage() {
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs text-gray-400 dark:text-[#555]">
+                        <span className="font-mono text-xs text-gray-500 dark:text-[#999]">
                           {b.bookingCode}
                         </span>
                         <span
-                          className={`px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"}`}
+                          className={`px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"}`}
                         >
                           {b.status.replace(/_/g, " ")}
                         </span>
@@ -434,7 +434,7 @@ export default function DashboardPage() {
                         {b.service?.name}
                       </p>
                     </div>
-                    <span className="text-xs text-gray-400 dark:text-[#555] flex-shrink-0">
+                    <span className="text-xs text-gray-500 dark:text-[#999] flex-shrink-0">
                       {new Date(b.shootDate).toLocaleDateString("en-IN", {
                         day: "2-digit",
                         month: "short",
@@ -447,22 +447,22 @@ export default function DashboardPage() {
           </div>
 
           <div className="card">
-            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-3">
+            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-3">
               Actions
             </p>
             <div className="space-y-2">
               <Link
                 href="/dashboard/calendar"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
                 <Calendar size={15} className="text-[#E5312A] flex-shrink-0" />
                 View Schedule
               </Link>
               <Link
                 href="/dashboard/bookings"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
-                <BookOpen size={15} className="text-gray-400 flex-shrink-0" />
+                <BookOpen size={15} className="text-gray-500 flex-shrink-0" />
                 My Bookings
               </Link>
             </div>
@@ -495,7 +495,7 @@ export default function DashboardPage() {
     return (
       <div className="space-y-5">
         <div>
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">
             {greeting} &middot;{" "}
             {new Date().toLocaleDateString("en-IN", {
               weekday: "long",
@@ -540,7 +540,7 @@ export default function DashboardPage() {
                 color:
                   pending > 0
                     ? "text-orange-600 dark:text-orange-400"
-                    : "text-gray-400 dark:text-[#555]",
+                    : "text-gray-500 dark:text-[#999]",
                 bg:
                   pending > 0
                     ? "bg-orange-50 dark:bg-orange-900/20"
@@ -563,7 +563,7 @@ export default function DashboardPage() {
                   <p className="text-xl font-bold text-gray-900 dark:text-white leading-none">
                     {card.value}
                   </p>
-                  <p className="text-[11px] text-gray-400 dark:text-[#666] mt-0.5 truncate">
+                  <p className="text-[11px] text-gray-500 dark:text-[#999] mt-0.5 truncate">
                     {card.label}
                   </p>
                 </div>
@@ -586,12 +586,12 @@ export default function DashboardPage() {
               </Link>
             </div>
             {myBookings === null ? (
-              <div className="p-8 text-center text-sm text-gray-400 dark:text-[#555]">
+              <div className="p-8 text-center text-sm text-gray-500 dark:text-[#999]">
                 Loading…
               </div>
             ) : recent.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-sm text-gray-500 dark:text-[#555]">
+                <p className="text-sm text-gray-500 dark:text-[#999]">
                   No referred bookings yet.
                 </p>
               </div>
@@ -605,11 +605,11 @@ export default function DashboardPage() {
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs text-gray-400 dark:text-[#555]">
+                        <span className="font-mono text-xs text-gray-500 dark:text-[#999]">
                           {b.bookingCode}
                         </span>
                         <span
-                          className={`px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"}`}
+                          className={`px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"}`}
                         >
                           {b.status.replace(/_/g, " ")}
                         </span>
@@ -618,7 +618,7 @@ export default function DashboardPage() {
                         {b.service?.name}
                       </p>
                     </div>
-                    <span className="text-xs text-gray-400 dark:text-[#555] flex-shrink-0">
+                    <span className="text-xs text-gray-500 dark:text-[#999] flex-shrink-0">
                       {new Date(b.shootDate).toLocaleDateString("en-IN", {
                         day: "2-digit",
                         month: "short",
@@ -631,13 +631,13 @@ export default function DashboardPage() {
           </div>
 
           <div className="card">
-            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555] mb-3">
+            <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999] mb-3">
               Actions
             </p>
             <div className="space-y-2">
               <Link
                 href="/dashboard/commissions"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
                 <CreditCard
                   size={15}
@@ -647,9 +647,9 @@ export default function DashboardPage() {
               </Link>
               <Link
                 href="/dashboard/bookings"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
-                <BookOpen size={15} className="text-gray-400 flex-shrink-0" />
+                <BookOpen size={15} className="text-gray-500 flex-shrink-0" />
                 My Bookings
               </Link>
             </div>
@@ -669,7 +669,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* ─── GREETING HEADER ──────────────────────────────────────────── */}
       <div>
-        <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+        <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">
           {greeting} &middot;{" "}
           {new Date().toLocaleDateString("en-IN", {
             weekday: "long",
@@ -681,7 +681,7 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-black text-gray-900 dark:text-white mt-1">
           {user.name}
         </h1>
-        <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-0.5">
+        <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mt-0.5">
           Studio Overview
         </p>
       </div>
@@ -717,7 +717,7 @@ export default function DashboardPage() {
               label: "Customers",
               value: stats?.totalCustomers ?? "",
               icon: Users,
-              color: "text-gray-600 dark:text-[#a0a0a0]",
+              color: "text-gray-600 dark:text-[#b0b0b0]",
               bg: "bg-gray-100 dark:bg-[#2a2a2a]",
             },
             {
@@ -733,7 +733,7 @@ export default function DashboardPage() {
               label: "Occupancy Today",
               value: stats ? `${stats.occupancyRate}%` : "",
               icon: UserCheck,
-              color: "text-gray-600 dark:text-[#a0a0a0]",
+              color: "text-gray-600 dark:text-[#b0b0b0]",
               bg: "bg-gray-100 dark:bg-[#2a2a2a]",
             },
           ].map((card) => {
@@ -748,7 +748,7 @@ export default function DashboardPage() {
                 <p className="text-2xl font-black text-gray-900 dark:text-white">
                   {card.value}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-[#a0a0a0] mt-0.5">
+                <p className="text-xs text-gray-500 dark:text-[#b0b0b0] mt-0.5">
                   {card.label}
                 </p>
               </div>
@@ -780,7 +780,7 @@ export default function DashboardPage() {
               if (bookingList === null) {
                 return (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="text-sm text-gray-400 dark:text-[#555]">
+                    <p className="text-sm text-gray-500 dark:text-[#999]">
                       Loading...
                     </p>
                   </div>
@@ -797,11 +797,11 @@ export default function DashboardPage() {
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-mono text-xs text-gray-500 dark:text-[#666]">
+                            <span className="font-mono text-xs text-gray-500 dark:text-[#999]">
                               {b.bookingCode}
                             </span>
                             <span
-                              className={`px-2 py-0.5 text-xs font-bold ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"}`}
+                              className={`px-2 py-0.5 text-xs font-bold ${STATUS_COLORS[b.status] ?? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"}`}
                             >
                               {b.status.replace(/_/g, " ")}
                             </span>
@@ -810,7 +810,7 @@ export default function DashboardPage() {
                             {b.service?.name}
                           </p>
                         </div>
-                        <span className="text-xs text-gray-400 dark:text-[#555] flex-shrink-0">
+                        <span className="text-xs text-gray-500 dark:text-[#999] flex-shrink-0">
                           {new Date(b.shootDate).toLocaleDateString("en-IN", {
                             day: "2-digit",
                             month: "short",
@@ -827,7 +827,7 @@ export default function DashboardPage() {
                     size={36}
                     className="text-gray-200 dark:text-[#333] mb-2"
                   />
-                  <p className="text-sm text-gray-400 dark:text-[#555]">
+                  <p className="text-sm text-gray-500 dark:text-[#999]">
                     No bookings yet
                   </p>
                 </div>
@@ -844,11 +844,11 @@ export default function DashboardPage() {
               </h3>
             </div>
             {notifications === null ? (
-              <div className="p-6 text-center text-sm text-gray-400 dark:text-[#555]">
+              <div className="p-6 text-center text-sm text-gray-500 dark:text-[#999]">
                 Loading…
               </div>
             ) : notifications.length === 0 ? (
-              <div className="p-6 text-center text-sm text-gray-400 dark:text-[#555]">
+              <div className="p-6 text-center text-sm text-gray-500 dark:text-[#999]">
                 No activity yet
               </div>
             ) : (
@@ -858,10 +858,10 @@ export default function DashboardPage() {
                     <p className="text-xs font-bold text-gray-800 dark:text-white">
                       {n.subject}
                     </p>
-                    <p className="text-xs text-gray-400 dark:text-[#666] mt-0.5">
+                    <p className="text-xs text-gray-500 dark:text-[#999] mt-0.5">
                       {n.message}
                     </p>
-                    <p className="text-[10px] text-gray-300 dark:text-[#444] mt-1">
+                    <p className="text-[10px] text-gray-500 dark:text-[#999] mt-1">
                       {new Date(n.createdAt).toLocaleString("en-IN", {
                         day: "2-digit",
                         month: "short",
@@ -885,21 +885,21 @@ export default function DashboardPage() {
             <div className="space-y-2">
               <Link
                 href="/dashboard/bookings/new"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
                 <BookOpen size={16} className="text-[#E5312A]/70" />
                 New Booking
               </Link>
               <Link
                 href="/dashboard/payments"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
                 <CreditCard size={16} className="text-green-500" />
                 Record Payment
               </Link>
               <Link
                 href="/dashboard/reports"
-                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#a0a0a0]"
+                className="flex items-center gap-3 p-3 border border-gray-100 dark:border-[#3a3a3a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium text-gray-700 dark:text-[#b0b0b0]"
               >
                 <TrendingUp size={16} className="text-purple-500" />
                 Generate Report
@@ -921,7 +921,7 @@ export default function DashboardPage() {
                   const pct = Math.round((m.revenue / max) * 100);
                   return (
                     <div key={m.month}>
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-[#a0a0a0] mb-1">
+                      <div className="flex justify-between text-xs text-gray-500 dark:text-[#b0b0b0] mb-1">
                         <span>{m.month}</span>
                         <span className="font-bold text-gray-700 dark:text-white">
                           ₹{Number(m.revenue).toLocaleString("en-IN")}
@@ -956,10 +956,10 @@ export default function DashboardPage() {
                         i === 0
                           ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
                           : i === 1
-                            ? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-[#a0a0a0]"
+                            ? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-[#b0b0b0]"
                             : i === 2
                               ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
-                              : "bg-gray-50 dark:bg-[#1a1a1a] text-gray-400 dark:text-[#666]"
+                              : "bg-gray-50 dark:bg-[#1a1a1a] text-gray-500 dark:text-[#999]"
                       }`}
                     >
                       {i + 1}

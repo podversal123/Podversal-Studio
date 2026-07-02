@@ -104,7 +104,7 @@ export default function CalendarPage() {
                 className="w-2.5 h-2.5 flex-shrink-0"
                 style={{ backgroundColor: SERVICE_COLORS[type] }}
               />
-              <span className="text-[11px] font-bold text-[#6b6b6b] dark:text-[#8a8a8a]">
+              <span className="text-[11px] font-bold text-[#6b6b6b] dark:text-[#b0b0b0]">
                 {label}
               </span>
             </div>

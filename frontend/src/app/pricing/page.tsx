@@ -71,7 +71,7 @@ export default function PricingPage() {
       </section>
 
       {/* ── Pricing cards ── */}
-      <section className="pb-14 sm:pb-20 lg:pb-24 bg-white dark:bg-[#0a0a0a]">
+      <section className="pb-10 sm:pb-14 lg:pb-20 bg-white dark:bg-[#0a0a0a]">
         <div className="site-wrap">
           <div ref={cardsAnim.ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {ALL_PLANS.map((plan, i) => (
@@ -87,7 +87,7 @@ export default function PricingPage() {
                     <span className="text-base font-semibold text-[#E5312A]/70">{plan.unit}</span>
                   </p>
                   <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-1">{plan.name}</h3>
-                  <p className="text-gray-400 dark:text-white/35 text-xs mb-7 tracking-wide">{plan.min}</p>
+                  <p className="text-gray-500 dark:text-white/55 text-xs mb-7 tracking-wide">{plan.min}</p>
 
                   <div className="border-t border-dashed border-gray-200 dark:border-white/10 mb-7" />
 
@@ -96,7 +96,7 @@ export default function PricingPage() {
                     {plan.features.map(f => (
                       <li key={f} className="flex items-start gap-3">
                         <span className="text-[#E5312A] font-bold text-base mt-0.5 flex-shrink-0">•</span>
-                        <span className="text-gray-600 dark:text-white/65 text-sm leading-relaxed">{f}</span>
+                        <span className="text-gray-600 dark:text-white/75 text-sm leading-relaxed">{f}</span>
                       </li>
                     ))}
                   </ul>
@@ -112,7 +112,7 @@ export default function PricingPage() {
                   </Link>
                   <Link
                     href={`/services/${plan.slug}`}
-                    className="block w-full text-center text-gray-400 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/70 text-xs py-2 transition-colors"
+                    className="block w-full text-center text-gray-500 dark:text-white/55 hover:text-gray-700 dark:hover:text-white/70 text-xs py-2 transition-colors"
                   >
                     About this service
                   </Link>
@@ -122,14 +122,14 @@ export default function PricingPage() {
           </div>
 
           {/* GST note */}
-          <p className="mt-6 sm:mt-8 lg:mt-10 text-gray-400 dark:text-white/25 text-xs text-center" style={anim(cardsAnim.visible, 0.35)}>
+          <p className="mt-6 sm:mt-8 lg:mt-10 text-gray-500 dark:text-white/55 text-xs text-center" style={anim(cardsAnim.visible, 0.35)}>
             All rates are per hour · 18% GST applicable · Tax-compliant invoice sent by email after every session
           </p>
         </div>
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-10 sm:py-14 lg:py-20 bg-[#f4f4f4] dark:bg-[#111111]">
+      <section className="pt-6 sm:pt-8 lg:pt-10 pb-10 sm:pb-14 lg:pb-20 bg-[#f4f4f4] dark:bg-[#111111]">
         <div className="site-wrap">
           <div ref={faqAnim.ref}>
             <div className="mb-6 sm:mb-8 lg:mb-12" style={anim(faqAnim.visible)}>
@@ -150,12 +150,12 @@ export default function PricingPage() {
                     <span className="font-semibold text-gray-900 dark:text-white text-base pr-4">{faq.q}</span>
                     {openFaq === i
                       ? <Minus size={16} className="text-[#E5312A] flex-shrink-0" />
-                      : <Plus  size={16} className="text-gray-400 dark:text-white/30 flex-shrink-0" />
+                      : <Plus  size={16} className="text-gray-500 dark:text-white/55 flex-shrink-0" />
                     }
                   </button>
                   {openFaq === i && (
                     <div className="px-6 pb-6">
-                      <p className="text-sm text-gray-600 dark:text-white/55 leading-relaxed">{faq.a}</p>
+                      <p className="text-sm text-gray-600 dark:text-white/70 leading-relaxed">{faq.a}</p>
                     </div>
                   )}
                 </div>

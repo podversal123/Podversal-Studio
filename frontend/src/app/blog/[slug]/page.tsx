@@ -77,7 +77,7 @@ export default async function BlogPostPage({
         {/* Back */}
         <Link
           href="/blog"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-[#a0a0a0] hover:text-gray-900 dark:hover:text-white mb-5 sm:mb-6 lg:mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white mb-5 sm:mb-6 lg:mb-8 transition-colors"
         >
           Back to Blog
         </Link>
@@ -87,11 +87,11 @@ export default async function BlogPostPage({
           <span className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E5312A] bg-[#E5312A]/8 dark:bg-[#E5312A]/15 px-3 py-1">
             {post.category}
           </span>
-          <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-[#a0a0a0]">
+          <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-[#b0b0b0]">
             <User size={13} /> {post.author?.name}
           </span>
           {post.publishedAt && (
-            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-[#a0a0a0]">
+            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-[#b0b0b0]">
               <Calendar size={13} />
               {new Date(post.publishedAt).toLocaleDateString("en-IN", {
                 day: "2-digit",
@@ -112,7 +112,7 @@ export default async function BlogPostPage({
           className="prose prose-gray dark:prose-invert max-w-none
             prose-p:text-base prose-p:leading-[1.8] prose-p:my-3
             prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white
-            prose-em:text-gray-600 dark:prose-em:text-[#aaa]
+            prose-em:text-gray-600 dark:prose-em:text-[#888]
             [&_h2]:text-2xl [&_h2]:font-black [&_h2]:mt-10 [&_h2]:mb-3
             [&_h2]:text-gray-900 dark:[&_h2]:text-white [&_h2]:tracking-tight [&_h2]:border-l-4
             [&_h2]:border-[#E5312A] [&_h2]:pl-4

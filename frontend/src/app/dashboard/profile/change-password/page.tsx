@@ -53,7 +53,7 @@ export default function ChangePasswordPage() {
 
       {/* Header */}
       <div>
-        <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888]">Security</p>
+        <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999]">Security</p>
         <h1 className="text-2xl font-black text-gray-900 dark:text-white mt-0.5">Change Password</h1>
       </div>
 
@@ -62,7 +62,7 @@ export default function ChangePasswordPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
           <div>
-            <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">Current Password</label>
+            <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">Current Password</label>
             <div className="relative">
               <input
                 {...register('currentPassword')}
@@ -71,7 +71,7 @@ export default function ChangePasswordPage() {
                 autoComplete="current-password"
               />
               <button type="button" onClick={() => setShowCurrent(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-gray-600 dark:hover:text-[#a0a0a0]">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-gray-600 dark:hover:text-[#a0a0a0]">
                 {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
@@ -79,7 +79,7 @@ export default function ChangePasswordPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">New Password</label>
+            <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">New Password</label>
             <div className="relative">
               <input
                 {...register('newPassword')}
@@ -88,7 +88,7 @@ export default function ChangePasswordPage() {
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowNew(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-gray-600 dark:hover:text-[#a0a0a0]">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-gray-600 dark:hover:text-[#a0a0a0]">
                 {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
@@ -96,7 +96,7 @@ export default function ChangePasswordPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#888] mb-2">Confirm New Password</label>
+            <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-[#6b6b6b] dark:text-[#999] mb-2">Confirm New Password</label>
             <div className="relative">
               <input
                 {...register('confirmPassword')}
@@ -105,7 +105,7 @@ export default function ChangePasswordPage() {
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowConfirm(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-gray-600 dark:hover:text-[#a0a0a0]">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-gray-600 dark:hover:text-[#a0a0a0]">
                 {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
@@ -119,7 +119,7 @@ export default function ChangePasswordPage() {
             <button
               type="button"
               onClick={() => router.push('/dashboard/profile')}
-              className="px-5 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-semibold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#aaa] transition-colors"
+              className="px-5 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-semibold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#aaa] transition-colors"
             >
               Cancel
             </button>

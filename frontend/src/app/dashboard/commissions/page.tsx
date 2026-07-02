@@ -86,7 +86,7 @@ export default function CommissionsPage() {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 size={20} className="animate-spin text-[#E5312A]" />
-        <span className="ml-3 text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+        <span className="ml-3 text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
           Loading commissions…
         </span>
       </div>
@@ -164,7 +164,7 @@ export default function CommissionsPage() {
                 <p className="text-2xl font-black text-gray-900 dark:text-white">
                   ₹{Number(card.value).toLocaleString("en-IN")}
                 </p>
-                <p className="text-xs text-[#6b6b6b] dark:text-[#8a8a8a] mt-0.5">
+                <p className="text-xs text-[#6b6b6b] dark:text-[#b0b0b0] mt-0.5">
                   {card.label}
                 </p>
               </div>
@@ -176,13 +176,13 @@ export default function CommissionsPage() {
       {/* Commission History */}
       <div className="border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] overflow-hidden">
         <div className="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818]">
-          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#aaa] dark:text-[#555]">
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase text-[#888] dark:text-[#999]">
             Commission History
           </p>
         </div>
 
         {commissions.length === 0 ? (
-          <div className="py-16 text-center text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+          <div className="py-16 text-center text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
             No commissions yet
           </div>
         ) : (
@@ -200,7 +200,7 @@ export default function CommissionsPage() {
                   ].map((h) => (
                     <th
                       key={h}
-                      className="text-left px-4 py-2.5 text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] bg-[#f5f5f5] dark:bg-[#181818]"
+                      className="text-left px-4 py-2.5 text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] bg-[#f5f5f5] dark:bg-[#181818]"
                     >
                       {h}
                     </th>
@@ -210,13 +210,13 @@ export default function CommissionsPage() {
               <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1a1a1a]">
                 {commissions.map((c) => (
                   <tr key={c.id}>
-                    <td className="px-4 py-3 font-mono text-xs text-[#6b6b6b] dark:text-[#8a8a8a]">
+                    <td className="px-4 py-3 font-mono text-xs text-[#6b6b6b] dark:text-[#b0b0b0]">
                       {c.booking?.bookingCode}
                     </td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">
                       {c.booking?.service?.name}
                     </td>
-                    <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a] text-xs">
+                    <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0] text-xs">
                       {c.booking?.shootDate
                         ? new Date(c.booking.shootDate).toLocaleDateString(
                             "en-IN",
@@ -234,7 +234,7 @@ export default function CommissionsPage() {
                         {c.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#8a8a8a] text-xs">
+                    <td className="px-4 py-3 text-[#6b6b6b] dark:text-[#b0b0b0] text-xs">
                       {c.releasedAt
                         ? new Date(c.releasedAt).toLocaleDateString("en-IN", {
                             day: "2-digit",

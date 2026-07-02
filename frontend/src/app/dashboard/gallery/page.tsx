@@ -121,7 +121,7 @@ export default function DashboardGalleryPage() {
         <div>
           <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#E5312A] mb-1">Content</p>
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">Studio Gallery</h1>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-1">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mt-1">
             {images.length} photo{images.length !== 1 ? 's' : ''} total
           </p>
         </div>
@@ -139,7 +139,7 @@ export default function DashboardGalleryPage() {
         <div className="text-center py-20 border border-[#e5e5e5] dark:border-[#2a2a2a]">
           <ImageIcon size={32} className="mx-auto mb-3 text-[#e5e5e5] dark:text-[#3a3a3a]" />
           <p className="font-bold text-gray-900 dark:text-white mb-1">No photos yet</p>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">Click Add Photo to upload your first studio photo.</p>
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">Click Add Photo to upload your first studio photo.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -155,12 +155,12 @@ export default function DashboardGalleryPage() {
               </div>
               <div className="px-2.5 pt-2 pb-1">
                 {img.title && <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{img.title}</p>}
-                <p className="text-[10px] text-[#aaa] dark:text-[#555] uppercase tracking-wide">{img.category}</p>
+                <p className="text-[10px] text-[#888] dark:text-[#999] uppercase tracking-wide">{img.category}</p>
               </div>
               <div className="flex items-center gap-1 px-2 pb-2">
                 <button
                   onClick={() => togglePublish(img)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-bold uppercase tracking-wide border border-[#e5e5e5] dark:border-[#2a2a2a] text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#E5312A] hover:text-[#E5312A] transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-bold uppercase tracking-wide border border-[#e5e5e5] dark:border-[#2a2a2a] text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#E5312A] hover:text-[#E5312A] transition-colors"
                 >
                   {img.isPublished ? <><EyeOff size={11} /> Hide</> : <><Eye size={11} /> Show</>}
                 </button>
@@ -184,7 +184,7 @@ export default function DashboardGalleryPage() {
             {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
               <h2 className="font-black text-gray-900 dark:text-white">Add Photo</h2>
-              <button onClick={() => setModal(false)} className="text-[#aaa] hover:text-gray-900 dark:hover:text-white transition-colors">
+              <button onClick={() => setModal(false)} className="text-[#888] hover:text-gray-900 dark:hover:text-white transition-colors">
                 <X size={18} />
               </button>
             </div>
@@ -194,7 +194,7 @@ export default function DashboardGalleryPage() {
               <button
                 onClick={() => setTab('cloudinary')}
                 className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 transition-colors ${
-                  tab === 'cloudinary' ? 'border-[#E5312A] text-[#E5312A]' : 'border-transparent text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white'
+                  tab === 'cloudinary' ? 'border-[#E5312A] text-[#E5312A]' : 'border-transparent text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <Upload size={14} /> Upload
@@ -202,7 +202,7 @@ export default function DashboardGalleryPage() {
               <button
                 onClick={() => setTab('url')}
                 className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 transition-colors ${
-                  tab === 'url' ? 'border-[#E5312A] text-[#E5312A]' : 'border-transparent text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white'
+                  tab === 'url' ? 'border-[#E5312A] text-[#E5312A]' : 'border-transparent text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <LinkIcon size={14} /> Add via URL
@@ -213,7 +213,7 @@ export default function DashboardGalleryPage() {
               {tab === 'cloudinary' ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Category</label>
+                    <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">Category</label>
                     <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="input-field">
                       {CATEGORIES.map(c => <option key={c}>{c}</option>)}
                     </select>
@@ -228,7 +228,7 @@ export default function DashboardGalleryPage() {
                     </div>
                     <div className="text-center">
                       <p className="font-bold text-gray-900 dark:text-white text-sm">{uploading ? 'Opening…' : 'Click to Upload Photos'}</p>
-                      <p className="text-xs text-[#aaa] dark:text-[#555] mt-1">JPG, PNG, WebP · Multiple files supported</p>
+                      <p className="text-xs text-[#888] dark:text-[#999] mt-1">JPG, PNG, WebP · Multiple files supported</p>
                     </div>
                   </button>
                 </div>
@@ -236,18 +236,18 @@ export default function DashboardGalleryPage() {
                 <form onSubmit={handleUrlSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Title <span className="font-normal normal-case">(optional)</span></label>
+                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">Title <span className="font-normal normal-case">(optional)</span></label>
                       <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Podcast setup" className="input-field" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Category</label>
+                      <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">Category</label>
                       <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="input-field">
                         {CATEGORIES.map(c => <option key={c}>{c}</option>)}
                       </select>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">Image URL *</label>
+                    <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">Image URL *</label>
                     <input type="url" value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." required className="input-field" />
                   </div>
                   <div className="flex items-center gap-3">
@@ -256,13 +256,13 @@ export default function DashboardGalleryPage() {
                       <div className="w-9 h-5 bg-gray-200 dark:bg-[#2a2a2a] peer-checked:bg-[#E5312A] rounded-full peer transition-colors" />
                       <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4" />
                     </label>
-                    <span className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">{form.isPublished ? 'Published' : 'Hidden'}</span>
+                    <span className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">{form.isPublished ? 'Published' : 'Hidden'}</span>
                   </div>
                   <div className="flex gap-3">
                     <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
                       {saving ? 'Adding…' : 'Add Image'}
                     </button>
-                    <button type="button" onClick={() => setModal(false)} className="px-4 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-gray-400 transition-colors">
+                    <button type="button" onClick={() => setModal(false)} className="px-4 py-2.5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-gray-400 transition-colors">
                       Cancel
                     </button>
                   </div>

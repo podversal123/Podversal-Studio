@@ -17,7 +17,7 @@ export default function MobileHeader({ onOpen }: Props) {
         className="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] transition-colors"
         aria-label="Open menu"
       >
-        <Menu size={20} className="text-gray-600 dark:text-[#a0a0a0]" />
+        <Menu size={20} className="text-gray-600 dark:text-[#b0b0b0]" />
       </button>
       <div className="flex-1">
         <Logo height={52} />

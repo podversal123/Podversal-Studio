@@ -208,7 +208,7 @@ export default function VideosAdminPage() {
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">
             Studio Videos
           </h1>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a] mt-1">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0] mt-1">
             {videos.filter((v) => v.isPublished).length} visible ·{" "}
             {videos.filter((v) => !v.isPublished).length} hidden
           </p>
@@ -239,7 +239,7 @@ export default function VideosAdminPage() {
           <p className="font-bold text-gray-900 dark:text-white mb-1">
             No videos yet
           </p>
-          <p className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+          <p className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
             Add YouTube IDs or upload videos from Cloudinary
           </p>
         </div>
@@ -281,7 +281,7 @@ export default function VideosAdminPage() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Play size={28} className="text-[#aaa]" />
+                      <Play size={28} className="text-[#888]" />
                     </div>
                   );
                 })()}
@@ -299,14 +299,14 @@ export default function VideosAdminPage() {
                 <h3 className="font-bold text-gray-900 dark:text-white text-sm line-clamp-1">
                   {v.title}
                 </h3>
-                <p className="text-[10px] text-[#aaa] dark:text-[#555] mt-0.5">
+                <p className="text-[10px] text-[#888] dark:text-[#999] mt-0.5">
                   {v.category}
                 </p>
                 <div className="flex items-center gap-1.5 mt-3">
                   <button
                     onClick={() => handleToggle(v)}
                     title={v.isPublished ? "Hide" : "Show"}
-                    className="p-1.5 hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#8a8a8a] transition-colors"
+                    className="p-1.5 hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] text-[#6b6b6b] dark:text-[#b0b0b0] transition-colors"
                   >
                     {v.isPublished ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
@@ -353,7 +353,7 @@ export default function VideosAdminPage() {
               </h2>
               <button
                 onClick={() => setModal(null)}
-                className="text-[#aaa] hover:text-gray-900 dark:hover:text-white text-lg leading-none"
+                className="text-[#888] hover:text-gray-900 dark:hover:text-white text-lg leading-none"
               >
                 ✕
               </button>
@@ -362,7 +362,7 @@ export default function VideosAdminPage() {
             <div className="p-5 space-y-4 overflow-y-auto flex-1">
               {/* Title */}
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Title *
                 </label>
                 <input
@@ -377,21 +377,21 @@ export default function VideosAdminPage() {
 
               {/* Video source toggle */}
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Video Source
                 </label>
                 <div className="flex border border-[#e5e5e5] dark:border-[#2a2a2a]">
                   <button
                     type="button"
                     onClick={() => setVideoSource("youtube")}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-colors ${videoSource === "youtube" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white"}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-colors ${videoSource === "youtube" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white"}`}
                   >
                     <Youtube size={14} /> YouTube
                   </button>
                   <button
                     type="button"
                     onClick={() => setVideoSource("cloudinary")}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-colors ${videoSource === "cloudinary" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "text-[#6b6b6b] dark:text-[#8a8a8a] hover:text-gray-900 dark:hover:text-white"}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-colors ${videoSource === "cloudinary" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-white"}`}
                   >
                     <Upload size={14} /> Cloudinary
                   </button>
@@ -401,7 +401,7 @@ export default function VideosAdminPage() {
               {/* YouTube ID */}
               {videoSource === "youtube" && (
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                     YouTube Video ID *
                   </label>
                   <input
@@ -415,7 +415,7 @@ export default function VideosAdminPage() {
                     className="input-field font-mono"
                     placeholder="dQw4w9WgXcQ"
                   />
-                  <p className="text-[10px] text-[#aaa] dark:text-[#555] mt-1">
+                  <p className="text-[10px] text-[#888] dark:text-[#999] mt-1">
                     youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong>, copy only
                     the ID part
                   </p>
@@ -425,7 +425,7 @@ export default function VideosAdminPage() {
               {/* Cloudinary upload */}
               {videoSource === "cloudinary" && (
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                     Video File *
                   </label>
                   {form.cloudinaryUrl ? (
@@ -457,11 +457,11 @@ export default function VideosAdminPage() {
                       disabled={uploadingVideo}
                       className="w-full border border-dashed border-[#e5e5e5] dark:border-[#2a2a2a] py-8 flex flex-col items-center gap-2 hover:border-[#E5312A] hover:bg-[#E5312A]/5 transition-colors disabled:opacity-50"
                     >
-                      <Upload size={20} className="text-[#aaa]" />
+                      <Upload size={20} className="text-[#888]" />
                       <span className="text-sm font-bold text-gray-900 dark:text-white">
                         {uploadingVideo ? "Opening widget…" : "Upload Video"}
                       </span>
-                      <span className="text-xs text-[#aaa]">
+                      <span className="text-xs text-[#888]">
                         MP4, MOV, AVI supported
                       </span>
                     </button>
@@ -472,7 +472,7 @@ export default function VideosAdminPage() {
               {/* Category & Sort Order */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                     Category
                   </label>
                   <select
@@ -496,7 +496,7 @@ export default function VideosAdminPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                  <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                     Sort Order
                   </label>
                   <input
@@ -516,7 +516,7 @@ export default function VideosAdminPage() {
 
               {/* Thumbnail */}
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Custom Thumbnail URL{" "}
                   <span className="font-normal normal-case">(optional)</span>
                 </label>
@@ -532,7 +532,7 @@ export default function VideosAdminPage() {
 
               {/* Description */}
               <div>
-                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] mb-1.5">
+                <label className="block text-[10px] font-black tracking-[0.12em] uppercase text-[#888] dark:text-[#999] mb-1.5">
                   Description{" "}
                   <span className="font-normal normal-case">(optional)</span>
                 </label>
@@ -561,7 +561,7 @@ export default function VideosAdminPage() {
                   <div className="w-9 h-5 bg-gray-200 dark:bg-[#2a2a2a] peer-checked:bg-[#E5312A] rounded-full peer transition-colors" />
                   <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4" />
                 </label>
-                <span className="text-sm text-[#6b6b6b] dark:text-[#8a8a8a]">
+                <span className="text-sm text-[#6b6b6b] dark:text-[#b0b0b0]">
                   {form.isPublished
                     ? "Published (visible on site)"
                     : "Draft (hidden)"}
@@ -583,7 +583,7 @@ export default function VideosAdminPage() {
               </button>
               <button
                 onClick={() => setModal(null)}
-                className="px-5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#aaa] transition-colors"
+                className="px-5 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#b0b0b0] hover:border-[#aaa] transition-colors"
               >
                 Cancel
               </button>
