@@ -106,7 +106,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: BlogPos
                   <Link
                     key={post.id}
                     href={`/blog/${post.slug}`}
-                    className="group flex flex-col overflow-hidden bg-white dark:bg-[#161616] border border-[#e8e8e8] dark:border-[#222] transition-all duration-300"
+                    className="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-[#161616] border border-[#e8e8e8] dark:border-[#222] transition-all duration-300"
                     style={anim(gridAnim.visible, 0.12 + i * 0.06)}
                   >
                     {/* Cover */}
