@@ -59,14 +59,6 @@ services:
       - key: GOOGLE_CALLBACK_URL
         sync: false
 
-      # ── OTP / MSG91 ──────────────────────────────────────────────────────────
-      - key: MSG91_AUTH_KEY
-        sync: false
-      - key: MSG91_TEMPLATE_ID
-        sync: false
-      - key: MSG91_SENDER_ID
-        sync: false
-
       # ── Email (SMTP) ─────────────────────────────────────────────────────────
       # Gmail: use App Password (not account password)  myaccount.google.com → Security → App Passwords
       - key: SMTP_HOST

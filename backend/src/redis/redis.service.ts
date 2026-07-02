@@ -117,24 +117,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ─────────────────────────────────────────
-  // OTP STORAGE
-  // Store OTP for 5 minutes, auto-expire
-  // ─────────────────────────────────────────
-
-  async saveOtp(phone: string, otp: string): Promise<void> {
-    // OTP expires in 5 minutes (300 seconds)
-    await this.client.set(`otp:${phone}`, otp, "EX", 300);
-  }
-
-  async getOtp(phone: string): Promise<string | null> {
-    return this.client.get(`otp:${phone}`);
-  }
-
-  async deleteOtp(phone: string): Promise<void> {
-    await this.client.del(`otp:${phone}`);
-  }
-
-  // ─────────────────────────────────────────
   // GENERAL PURPOSE
   // ─────────────────────────────────────────
 

@@ -34,7 +34,7 @@ export class NotificationsService {
     });
     if (!booking) return;
 
-    // Always use the email/name submitted on the booking form (avoids otp_PHONE@otp.internal for OTP users)
+    // Always use the email/name submitted on the booking form
     const email = booking.customerEmail || booking.customer?.user?.email || booking.createdBy.email;
     const name  = booking.customerName  || booking.customer?.user?.name  || booking.createdBy.name;
 

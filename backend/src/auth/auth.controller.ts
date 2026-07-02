@@ -15,8 +15,6 @@ import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
 import { SetupAdminDto } from "./dto/setup-admin.dto";
 import { LoginDto } from "./dto/login.dto";
-import { SendOtpDto } from "./dto/send-otp.dto";
-import { VerifyOtpDto } from "./dto/verify-otp.dto";
 import { JwtAuthGuard } from "../common/guards/jwt.guard";
 import { RolesGuard } from "../common/guards/roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
@@ -75,18 +73,6 @@ export class AuthController {
   @Post("refresh")
   refresh(@Body() body: { refreshToken: string }) {
     return this.auth.refreshTokens(body.refreshToken);
-  }
-
-  // POST /api/auth/otp/send
-  @Post("otp/send")
-  sendOtp(@Body() dto: SendOtpDto) {
-    return this.auth.sendOtp(dto.phone);
-  }
-
-  // POST /api/auth/otp/verify
-  @Post("otp/verify")
-  verifyOtp(@Body() dto: VerifyOtpDto) {
-    return this.auth.verifyOtp(dto.phone, dto.otp);
   }
 
   // POST /api/auth/create-staff  SUPER_ADMIN only, creates STUDIO_MANAGER accounts

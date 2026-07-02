@@ -90,36 +90,6 @@ export class AuthService {
     return this.generateTokens(user);
   }
 
-  async sendOtp(phone: string) {
-    const otp = crypto.randomInt(100000, 1000000).toString();
-    await this.redis.saveOtp(phone, otp);
-    await this.dispatchSms(phone, otp);
-    return { message: "OTP sent successfully" };
-  }
-
-  async verifyOtp(phone: string, otp: string) {
-    const stored = await this.redis.getOtp(phone);
-
-    if (!stored || stored !== otp) {
-      throw new BadRequestException("Invalid or expired OTP");
-    }
-
-    await this.redis.deleteOtp(phone);
-
-    let user = await this.users.findByPhone(phone);
-    if (!user) {
-      // New customer via OTP  placeholder email updated when they complete profile
-      user = await this.users.create({
-        name: phone,
-        email: `otp_${phone}@otp.internal`,
-        phone,
-        role: Role.CUSTOMER,
-      });
-    }
-
-    return this.generateTokens(user);
-  }
-
   private async generateTokens(user: {
     id: string;
     email: string;
@@ -339,26 +309,5 @@ export class AuthService {
       data: { password: hashed },
     });
     await this.redis.del(`reset:${token}`);
-  }
-
-  private async dispatchSms(phone: string, otp: string) {
-    if (this.config.get<string>("NODE_ENV") !== "production") {
-      console.log(`[DEV OTP] Phone: ${phone} → OTP: ${otp}`);
-      return;
-    }
-
-    const apiKey = this.config.get<string>("TWO_FACTOR_API_KEY");
-
-    try {
-      const res = await fetch(
-        `https://2factor.in/API/V1/${apiKey}/SMS/91${phone}/${otp}`,
-      );
-      const data = (await res.json()) as { Status: string; Details: string };
-      if (data.Status !== "Success") {
-        console.error(`[SMS FAILED] Phone: ${phone} | ${data.Details}`);
-      }
-    } catch (err: any) {
-      console.error(`[SMS FAILED] Phone: ${phone} | ${err?.message ?? err}`);
-    }
   }
 }

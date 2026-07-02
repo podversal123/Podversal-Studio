@@ -31,10 +31,6 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  findByPhone(phone: string) {
-    return this.prisma.user.findUnique({ where: { phone } });
-  }
-
   findByGoogleId(googleId: string) {
     return this.prisma.user.findUnique({ where: { googleId } });
   }

@@ -239,7 +239,7 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           HERO
       ════════════════════════════════════════════════════ */}
-      <section className="relative h-screen min-h-[560px] sm:min-h-[640px] overflow-hidden bg-black">
+      <section className="relative h-screen min-h-[560px] xl:min-h-[640px] overflow-hidden bg-black">
         {/* Slideshow images */}
         {HERO_SLIDES.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
@@ -252,8 +252,8 @@ export default function HomePage() {
             loading={i === 0 ? "eager" : "lazy"}
           />
         ))}
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-black/70 xl:bg-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent xl:from-black/80 xl:via-black/40 xl:to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/60 to-transparent" />
 
         {/* Slide dots */}
@@ -267,11 +267,10 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div className="relative z-10 h-full flex flex-col justify-center sm:justify-end pb-14 sm:pb-[90px] site-wrap pt-24 sm:pt-[80px]">
-          <div className="max-w-2xl">
+        <div className="relative z-10 h-full flex flex-col justify-center xl:justify-end pb-24 xl:pb-[90px] site-wrap pt-24 xl:pt-[80px]">
+          <div className="max-w-3xl xl:max-w-2xl">
             <h1
-              className="font-black leading-[0.97] tracking-tight mb-6 text-white"
-              style={{ fontSize: "clamp(36px, 6.5vw, 108px)" }}
+              className="font-black leading-[0.97] tracking-tight mb-6 text-white text-[clamp(52px,11vw,100px)] xl:text-[clamp(36px,6.5vw,108px)]"
             >
               Where Ideas
               <br />
@@ -279,21 +278,21 @@ export default function HomePage() {
               <br />
               Content
             </h1>
-            <p className="text-sm sm:text-[15px] text-white/55 leading-relaxed mb-9 max-w-lg">
+            <p className="text-[clamp(18px,3.4vw,28px)] xl:text-[15px] text-white/60 leading-relaxed mb-9 max-w-lg">
               Six studio services under one roof: podcasts, VFX, news shoots,
               online classes, monologues, and product photography. Book online
               in minutes.
             </p>
-            <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:gap-3">
+            <div className="flex flex-col items-start gap-3 xl:flex-row xl:gap-3">
               <Link
                 href={bookHref}
-                className="inline-flex items-center justify-center bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-7 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm tracking-wide transition-colors min-w-[160px] sm:min-w-[180px]"
+                className="inline-flex items-center justify-center bg-[#E5312A] hover:bg-[#c9261f] text-white font-bold px-7 py-4 xl:px-8 xl:py-3.5 text-[clamp(16px,2.6vw,22px)] xl:text-sm tracking-wide transition-colors w-[clamp(210px,32vw,320px)] xl:w-auto xl:min-w-[180px]"
               >
                 Book a Studio
               </Link>
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-semibold px-7 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm transition-colors min-w-[160px] sm:min-w-[180px]"
+                className="inline-flex items-center justify-center border-2 xl:border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-semibold px-7 py-4 xl:px-8 xl:py-3.5 text-[clamp(16px,2.6vw,22px)] xl:text-sm transition-colors w-[clamp(210px,32vw,320px)] xl:w-auto xl:min-w-[180px]"
               >
                 View Pricing
               </Link>

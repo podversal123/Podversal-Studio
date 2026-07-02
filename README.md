@@ -6,7 +6,7 @@
 podversal/
 ├── backend/         # NestJS API (Port 3001)
 │   ├── src/
-│   │   ├── auth/           # Login - JWT, Google, OTP
+│   │   ├── auth/           # Login - JWT, Google
 │   │   ├── users/          # All 5 user types
 │   │   ├── bookings/       # Core booking system
 │   │   ├── services/       # 6 studio services
@@ -65,4 +65,4 @@ npm run dev
 - Cache: Redis (slot locking)
 - Storage: Cloudinary
 - Payments: Razorpay
-- Auth: JWT + Google OAuth + OTP
+- Auth: JWT + Google OAuth
