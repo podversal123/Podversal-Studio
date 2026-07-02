@@ -150,7 +150,7 @@ export default function MarketingFooter() {
           {/* ── Bottom bar ── */}
           <div className="flex flex-col sm:flex-row items-center justify-between py-5 gap-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              © {new Date().getFullYear()} Podversal Studio · Krishiyug Content Pvt. Ltd. All rights reserved.
+              © {new Date().getFullYear()} Podversal Studio · A Unit Krishiyug Technologies Pvt. Ltd. All rights reserved.
             </p>
 
             {/* Social icons */}

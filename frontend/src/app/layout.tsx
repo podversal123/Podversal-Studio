@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     'NX One Greater Noida West',
   ],
   creator: 'Podversal Studio',
-  publisher: 'Krishiyug Digital Private Limited',
+  publisher: 'A Unit of Krishiyug Technologies Pvt Ltd.',
   robots: { index: true, follow: true },
   alternates: { canonical: SITE_URL },
   openGraph: {
