@@ -172,9 +172,16 @@ export default function BookingsPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f5f5f5] dark:bg-[#181818]">
               <tr>
-                {['Booking', 'Service', 'Date & Time', 'Amount', 'Status', ''].map(h => (
-                  <th key={h} className="text-left px-5 py-3.5 text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] whitespace-nowrap">
-                    {h}
+                {[
+                  { label: 'Booking',      cls: '' },
+                  { label: 'Service',      cls: 'hidden sm:table-cell' },
+                  { label: 'Date & Time',  cls: '' },
+                  { label: 'Amount',       cls: 'hidden md:table-cell' },
+                  { label: 'Status',       cls: '' },
+                  { label: '',             cls: '' },
+                ].map(h => (
+                  <th key={h.label} className={`text-left px-5 py-3.5 text-[10px] font-black tracking-[0.12em] uppercase text-[#aaa] dark:text-[#555] whitespace-nowrap ${h.cls}`}>
+                    {h.label}
                   </th>
                 ))}
               </tr>
@@ -184,8 +191,10 @@ export default function BookingsPage() {
                 <>
                   {[1, 2, 3, 4].map(i => (
                     <tr key={i}>
-                      {[1,2,3,4,5,6].map(j => (
-                        <td key={j} className="px-5 py-4">
+                      {[
+                        '', 'hidden sm:table-cell', '', 'hidden md:table-cell', '', '',
+                      ].map((cls, j) => (
+                        <td key={j} className={`px-5 py-4 ${cls}`}>
                           <div className="h-3.5 bg-[#f5f5f5] dark:bg-[#1a1a1a] animate-pulse w-full" />
                         </td>
                       ))}
@@ -220,7 +229,7 @@ export default function BookingsPage() {
                     <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-xs mt-0.5">{b.customerName}</p>
                     <p className="text-[#aaa] dark:text-[#555] text-xs">{b.customerPhone}</p>
                   </td>
-                  <td className="px-5 py-4 text-gray-700 dark:text-[#a0a0a0] text-sm">{b.service?.name ?? '—'}</td>
+                  <td className="hidden sm:table-cell px-5 py-4 text-gray-700 dark:text-[#a0a0a0] text-sm">{b.service?.name ?? '—'}</td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5 text-gray-900 dark:text-white text-sm">
                       <Calendar size={12} className="text-[#aaa] dark:text-[#555]" />
@@ -231,7 +240,7 @@ export default function BookingsPage() {
                       {b.startTime} – {b.endTime}
                     </div>
                   </td>
-                  <td className="px-5 py-4 font-medium text-gray-900 dark:text-white text-sm">
+                  <td className="hidden md:table-cell px-5 py-4 font-medium text-gray-900 dark:text-white text-sm">
                     {b.totalAmount ? `₹${Number(b.totalAmount).toLocaleString('en-IN')}` : <span className="text-[#aaa] dark:text-[#555]">—</span>}
                   </td>
                   <td className="px-5 py-4">

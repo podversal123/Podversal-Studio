@@ -2,30 +2,33 @@
 
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import api from '@/lib/api';
 
 function CallbackHandler() {
   const router       = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const accessToken  = searchParams.get('accessToken');
-    const refreshToken = searchParams.get('refreshToken');
-    const userStr      = searchParams.get('user');
+    const code = searchParams.get('code');
 
-    if (!accessToken || !userStr) {
+    if (!code) {
       router.replace('/login?error=google_failed');
       return;
     }
 
-    try {
-      const user = JSON.parse(userStr);
-      localStorage.setItem('access_token',  accessToken);
-      localStorage.setItem('refresh_token', refreshToken ?? '');
-      localStorage.setItem('user',          JSON.stringify(user));
-      window.location.href = '/dashboard';
-    } catch {
-      window.location.href = '/login?error=google_failed';
-    }
+    // The callback URL only ever carries an opaque one-time code — the
+    // actual tokens are fetched here over a normal POST body, so they
+    // never sit in the URL, browser history, or server logs.
+    api.post('/auth/exchange', { code })
+      .then(({ data }) => {
+        localStorage.setItem('access_token',  data.accessToken);
+        localStorage.setItem('refresh_token', data.refreshToken ?? '');
+        localStorage.setItem('user',          JSON.stringify(data.user));
+        window.location.href = '/dashboard';
+      })
+      .catch(() => {
+        window.location.href = '/login?error=google_failed';
+      });
   }, [router, searchParams]);
 
   return (

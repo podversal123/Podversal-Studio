@@ -62,8 +62,8 @@ export default function VideosPage() {
       <Navbar />
 
       {/* Banner */}
-      <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
-        <div className="site-wrap py-16">
+      <section className="pt-14 sm:pt-16 lg:pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+        <div className="site-wrap py-8 sm:py-12 lg:py-16">
           <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
               Studio Videos
@@ -72,10 +72,10 @@ export default function VideosPage() {
         </div>
       </section>
 
-      <div className="site-wrap py-16">
+      <div className="site-wrap py-8 sm:py-12 lg:py-16">
         {/* Category filter */}
         {categories.length > 1 && (
-          <div className="flex flex-wrap gap-2 mb-10">
+          <div className="flex flex-wrap gap-2 mb-6 sm:mb-8 lg:mb-10">
             {categories.map(cat => (
               <button
                 key={cat}
@@ -164,7 +164,7 @@ export default function VideosPage() {
 
             {/* See More */}
             {visible < filtered.length && (
-              <div className="flex justify-center mt-10">
+              <div className="flex justify-center mt-6 sm:mt-8 lg:mt-10">
                 <button
                   onClick={() => setVisible(v => v + PAGE_SIZE)}
                   className="px-8 py-3 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#E5312A] hover:text-[#E5312A] transition-colors"
@@ -178,7 +178,7 @@ export default function VideosPage() {
       </div>
 
       {/* Footer CTA */}
-      <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#E5312A] py-14 px-4 text-center">
+      <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#E5312A] py-10 sm:py-12 lg:py-14 px-4 text-center">
         <h2 className="text-2xl font-black text-white mb-6">Book your studio session today</h2>
         <Link href="/register" className="inline-flex items-center bg-white text-[#E5312A] font-bold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
           Book Now

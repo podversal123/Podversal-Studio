@@ -145,7 +145,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/20" />
-        <div className="relative z-10 site-wrap pb-14">
+        <div className="relative z-10 site-wrap pb-8 sm:pb-10 lg:pb-14">
           <h1
             className="font-black text-white leading-tight"
             style={{ fontSize: 'clamp(36px, 5.5vw, 80px)' }}
@@ -156,9 +156,9 @@ export default async function ServicePage({ params }: { params: { slug: string }
       </section>
 
       {/* ── Content ── */}
-      <section className="py-16 bg-white dark:bg-[#111111]">
+      <section className="py-10 sm:py-12 lg:py-16 bg-white dark:bg-[#111111]">
         <div className="site-wrap">
-          <div className="grid lg:grid-cols-3 gap-12">
+          <div className="grid lg:grid-cols-3 gap-8 sm:gap-10 lg:gap-12">
 
             {/* Main */}
             <div className="lg:col-span-2">
@@ -203,7 +203,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
       </section>
 
       {/* ── Other services ── */}
-      <section className="py-12 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+      <section className="py-8 sm:py-10 lg:py-12 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
         <div className="site-wrap">
           <div className="flex flex-wrap gap-3">
             {Object.entries(SERVICES)

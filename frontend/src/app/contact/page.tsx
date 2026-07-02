@@ -150,8 +150,8 @@ export default function ContactPage() {
 
             {/* ── Right: form starts below heading, button aligns with map bottom ── */}
             <div className="flex flex-col" style={slide(ready, 0.15)}>
-              {/* Spacer matches heading height so form fields start at boxes level */}
-              <div className="h-[72px] flex-shrink-0" />
+              {/* Spacer matches heading height so form fields start at boxes level — desktop 2-col layout only */}
+              <div className="hidden lg:block lg:h-[72px] flex-shrink-0" />
               <ContactForm />
             </div>
           </div>

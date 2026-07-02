@@ -1,6 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
@@ -81,6 +82,27 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   // Release a slot lock (when booking is cancelled or completed)
   async releaseSlot(slotKey: string): Promise<void> {
     await this.client.del(slotKey);
+  }
+
+  // ─────────────────────────────────────────
+  // DATE-LEVEL MUTEX — serializes the check-then-insert
+  // critical section in BookingsService.create() so two
+  // overlapping-but-different time ranges on the same date
+  // can't both pass the overlap check before either commits.
+  // Short-lived (10s) — only held for the duration of one create() call.
+  // ─────────────────────────────────────────
+
+  async acquireDateLock(date: string): Promise<string | null> {
+    const token  = crypto.randomUUID();
+    const result = await this.client.set(`booking-lock:${date}`, token, 'EX', 10, 'NX');
+    return result === 'OK' ? token : null;
+  }
+
+  async releaseDateLock(date: string, token: string): Promise<void> {
+    // Only release if we still hold it — avoids deleting a newer holder's
+    // lock if ours already expired.
+    const script = `if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end`;
+    await this.client.eval(script, 1, `booking-lock:${date}`, token);
   }
 
   // ─────────────────────────────────────────

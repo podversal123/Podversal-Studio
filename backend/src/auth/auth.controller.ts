@@ -4,6 +4,7 @@ import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
+import { SetupAdminDto } from './dto/setup-admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -40,18 +41,23 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   googleAuth() {}
 
-  // GET /api/auth/google/callback  — Google redirects here after login
+  // GET /api/auth/google/callback  — Google redirects here after login.
+  // Tokens are never put in the URL — a short-lived one-time code is
+  // exchanged for them via POST /api/auth/exchange, so nothing sensitive
+  // lands in browser history, server access logs, or a leaked Referer.
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: any, @Res() res: Response) {
     const result = await this.auth.googleLogin(req.user);
+    const code = await this.auth.createExchangeCode(result);
     const frontendUrl = (process.env.FRONTEND_URL ?? 'http://localhost:3002').split(',')[0].trim();
-    const params = new URLSearchParams({
-      accessToken:  result.accessToken,
-      refreshToken: result.refreshToken,
-      user:         JSON.stringify(result.user),
-    });
-    return res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    return res.redirect(`${frontendUrl}/auth/callback?code=${code}`);
+  }
+
+  // POST /api/auth/exchange — one-time exchange of an OAuth callback code for tokens
+  @Post('exchange')
+  exchange(@Body() body: { code: string }) {
+    return this.auth.exchangeCode(body.code);
   }
 
   // POST /api/auth/refresh — exchange refresh token for new access token
@@ -90,9 +96,10 @@ export class AuthController {
     return this.users.findManagers();
   }
 
-  // POST /api/auth/setup-admin — one-time only, creates first SUPER_ADMIN if none exists
+  // POST /api/auth/setup-admin — one-time only, creates first SUPER_ADMIN if none exists.
+  // Requires SETUP_SECRET (set in server env) so a random visitor can't claim it first.
   @Post('setup-admin')
-  setupAdmin(@Body() dto: RegisterDto) {
+  setupAdmin(@Body() dto: SetupAdminDto) {
     return this.auth.setupAdmin(dto);
   }
 

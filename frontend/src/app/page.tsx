@@ -128,7 +128,7 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           HERO
       ════════════════════════════════════════════════════ */}
-      <section className="relative h-screen min-h-[640px] overflow-hidden bg-black">
+      <section className="relative h-screen min-h-[560px] sm:min-h-[640px] overflow-hidden bg-black">
         {/* Slideshow images */}
         {HERO_SLIDES.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
@@ -156,7 +156,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div className="relative z-10 h-full flex flex-col justify-end pb-[90px] site-wrap pt-[80px]">
+        <div className="relative z-10 h-full flex flex-col justify-center sm:justify-end pb-14 sm:pb-[90px] site-wrap pt-24 sm:pt-[80px]">
           <div className="max-w-2xl">
             <h1
               className="font-black leading-[0.97] tracking-tight mb-6 text-white"
@@ -167,7 +167,7 @@ export default function HomePage() {
               Content
             </h1>
             <p className="text-sm sm:text-[15px] text-white/55 leading-relaxed mb-9 max-w-lg">
-              Six studio services under one roof — podcasts, VFX, news shoots, online classes, monologues, and product photography. Book online in minutes.
+              Six studio services under one roof: podcasts, VFX, news shoots, online classes, monologues, and product photography. Book online in minutes.
             </p>
             <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:gap-3">
               <Link
@@ -190,10 +190,10 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           SERVICES
       ════════════════════════════════════════════════════ */}
-      <section id="services" className="pt-14 pb-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+      <section id="services" className="pt-8 sm:pt-10 lg:pt-14 pb-10 sm:pb-14 lg:pb-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
         <div className="site-wrap">
           <div ref={svcAnim.ref}>
-            <div style={anim(svcAnim.visible)} className="mb-12">
+            <div style={anim(svcAnim.visible)} className="mb-6 sm:mb-8 lg:mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Our Studio Services</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -225,9 +225,9 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           FEATURED PRODUCTIONS
       ════════════════════════════════════════════════════ */}
-      <section id="videos" ref={videosRef} className="pt-6 pb-14 bg-white dark:bg-[#111111] overflow-hidden">
+      <section id="videos" ref={videosRef} className="pt-6 pb-8 sm:pb-10 lg:pb-14 bg-white dark:bg-[#111111] overflow-hidden">
         <div className="site-wrap">
-          <div ref={prodAnim.ref} className="mb-10" style={anim(prodAnim.visible)}>
+          <div ref={prodAnim.ref} className="mb-6 sm:mb-8 lg:mb-10" style={anim(prodAnim.visible)}>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Featured Productions</h2>
           </div>
         </div>
@@ -315,9 +315,9 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           TESTIMONIALS — large photo top, quote below, red name
       ════════════════════════════════════════════════════ */}
-      <section className="py-20 bg-[#f8f8f8] dark:bg-[#0a0a0a]">
+      <section className="py-10 sm:py-14 lg:py-20 bg-[#f8f8f8] dark:bg-[#0a0a0a]">
         <div className="site-wrap">
-          <div ref={testAnim.ref} className="mb-12" style={anim(testAnim.visible)}>
+          <div ref={testAnim.ref} className="mb-6 sm:mb-8 lg:mb-12" style={anim(testAnim.visible)}>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Testimonials</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -354,11 +354,11 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           WHY PODVERSAL — original red section (exact)
       ════════════════════════════════════════════════════ */}
-      <section className="py-20 bg-[#E5312A]">
+      <section className="py-10 sm:py-14 lg:py-20 bg-[#E5312A]">
         <div className="site-wrap">
           <div ref={whyAnim.ref} className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             <div style={anim(whyAnim.visible)}>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-8">Why teams choose us</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5 sm:mb-6 lg:mb-8">Why teams choose us</h2>
               <div className="space-y-4">
                 {[
                   'Slot locking prevents double bookings — what you see is available',
@@ -374,7 +374,7 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-              <Link href={bookHref} className="inline-flex items-center gap-2 mt-8 bg-white text-[#E5312A] font-semibold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
+              <Link href={bookHref} className="inline-flex items-center gap-2 mt-5 sm:mt-6 lg:mt-8 bg-white text-[#E5312A] font-semibold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
                 Get Started
               </Link>
             </div>
@@ -398,9 +398,9 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           INVENTORY — CSS auto-scroll horizontal
       ════════════════════════════════════════════════════ */}
-      <section className="pt-14 pb-14 bg-white dark:bg-[#111111] overflow-hidden">
+      <section className="pt-8 sm:pt-10 lg:pt-14 pb-8 sm:pb-10 lg:pb-14 bg-white dark:bg-[#111111] overflow-hidden">
         <div className="site-wrap">
-          <div ref={invAnim.ref} className="mb-10" style={anim(invAnim.visible)}>
+          <div ref={invAnim.ref} className="mb-6 sm:mb-8 lg:mb-10" style={anim(invAnim.visible)}>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Our Studio</h2>
           </div>
         </div>
@@ -441,10 +441,10 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════
           BLOG
       ════════════════════════════════════════════════════ */}
-      <section className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+      <section className="py-10 sm:py-14 lg:py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
         <div className="site-wrap">
           <div ref={blogAnim.ref}>
-            <div className="flex items-end justify-between mb-10" style={anim(blogAnim.visible)}>
+            <div className="flex items-end justify-between mb-6 sm:mb-8 lg:mb-10" style={anim(blogAnim.visible)}>
               <div>
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Blog</h2>
               </div>
@@ -459,12 +459,12 @@ export default function HomePage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
                   {posts.slice(0, 3).map((post, i) => (
                     <Link
                       key={post.id}
                       href={`/blog/${post.slug}`}
-                      className="group flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-[#161616] border border-[#e8e8e8] dark:border-[#222] transition-all duration-300"
+                      className="group flex flex-col overflow-hidden bg-white dark:bg-[#161616] border border-[#e8e8e8] dark:border-[#222] transition-all duration-300"
                       style={anim(blogAnim.visible, 0.1 + i * 0.1)}
                     >
                       <div className="aspect-[16/9] overflow-hidden bg-[#f5f5f5] dark:bg-[#1a1a1a]">

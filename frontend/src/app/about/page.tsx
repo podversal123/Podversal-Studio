@@ -30,7 +30,7 @@ export default function AboutPage() {
 
       {/* ── Hero ── */}
       <section className="pt-[80px] bg-white dark:bg-[#111111]">
-        <div className="site-wrap pt-12 pb-4">
+        <div className="site-wrap pt-6 sm:pt-9 lg:pt-12 pb-4">
           <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white leading-tight">
               We Are Podversal Studio
@@ -40,7 +40,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Story ── */}
-      <section className="pt-10 pb-20 bg-white dark:bg-[#111111]">
+      <section className="pt-6 sm:pt-8 lg:pt-10 pb-10 sm:pb-14 lg:pb-20 bg-white dark:bg-[#111111]">
         <div className="site-wrap">
           <div ref={storyAnim.ref} className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
@@ -80,10 +80,10 @@ export default function AboutPage() {
       </section>
 
       {/* ── Values ── */}
-      <section className="py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
+      <section className="py-10 sm:py-14 lg:py-20 bg-[#f8f8f8] dark:bg-[#0e0e0e]">
         <div className="site-wrap">
           <div ref={valAnim.ref}>
-            <div className="mb-12" style={anim(valAnim.visible)}>
+            <div className="mb-6 sm:mb-8 lg:mb-12" style={anim(valAnim.visible)}>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Our values</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

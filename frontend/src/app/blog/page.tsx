@@ -38,8 +38,8 @@ export default function BlogPage() {
       <Navbar />
 
       {/* Banner — theme-aware, no dark gradient */}
-      <section className="pt-20 bg-white dark:bg-[#111111]">
-        <div className="site-wrap py-16">
+      <section className="pt-14 sm:pt-16 lg:pt-20 bg-white dark:bg-[#111111]">
+        <div className="site-wrap py-8 sm:py-12 lg:py-16">
           <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
               Blog
@@ -48,10 +48,10 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <div ref={gridAnim.ref} className="site-wrap py-16" style={anim(gridAnim.visible)}>
+      <div ref={gridAnim.ref} className="site-wrap py-8 sm:py-12 lg:py-16" style={anim(gridAnim.visible)}>
         {/* Category filter */}
         {categories.length > 1 && (
-          <div className="flex flex-wrap gap-2 mb-10">
+          <div className="flex flex-wrap gap-2 mb-6 sm:mb-8 lg:mb-10">
             {categories.map(cat => (
               <button
                 key={cat}
@@ -69,9 +69,9 @@ export default function BlogPage() {
         )}
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
             {[1,2,3].map(i => (
-              <div key={i} className="rounded-2xl overflow-hidden bg-[#f5f5f5] dark:bg-[#181818] animate-pulse">
+              <div key={i} className="overflow-hidden bg-[#f5f5f5] dark:bg-[#181818] animate-pulse">
                 <div className="aspect-[16/9]" />
                 <div className="p-6 space-y-3">
                   <div className="h-3 bg-[#e5e5e5] dark:bg-[#222] rounded w-1/4" />
@@ -87,12 +87,12 @@ export default function BlogPage() {
             <p className="text-[#6b6b6b] dark:text-[#8a8a8a] text-sm">Check back soon — studio stories are on the way.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
             {filtered.map(post => (
               <Link
                 key={post.id}
                 href={`/blog/${post.slug}`}
-                className="group flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-[#161616] border border-[#e8e8e8] dark:border-[#222] transition-all duration-300"
+                className="group flex flex-col overflow-hidden bg-white dark:bg-[#161616] border border-[#e8e8e8] dark:border-[#222] transition-all duration-300"
               >
                 {/* Cover */}
                 <div className="aspect-[16/9] overflow-hidden bg-[#f5f5f5] dark:bg-[#1a1a1a]">
@@ -138,7 +138,7 @@ export default function BlogPage() {
       </div>
 
       {/* Footer CTA — matches theme */}
-      <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#E5312A] py-14 px-4 text-center">
+      <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#E5312A] py-10 sm:py-12 lg:py-14 px-4 text-center">
         <p className="text-[11px] font-black tracking-[0.2em] uppercase text-white/50 mb-4">Ready to record?</p>
         <h2 className="text-2xl font-black text-white mb-3">Book your studio session today</h2>
         <p className="text-white/70 text-sm mb-6">Professional studio. Seamless online booking. GST invoice included.</p>

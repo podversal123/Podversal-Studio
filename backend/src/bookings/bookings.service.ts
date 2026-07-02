@@ -27,60 +27,85 @@ export class BookingsService {
 
   async create(dto: CreateBookingDto, createdById: string, userRole: Role) {
     this.validateSlot(dto.startTime, dto.endTime);
-    await this.checkNoOverlap(dto.shootDate, dto.startTime, dto.endTime);
 
-    const key = slotKey(dto.shootDate, dto.startTime, dto.endTime);
-    const locked = await this.redis.lockSlot(key, createdById);
-    if (!locked) {
+    // Serialize the check-then-insert critical section per date so two
+    // overlapping-but-different time ranges (e.g. 6-10 and 8-10) can't both
+    // pass checkNoOverlap before either commits — the per-exact-slot Redis
+    // lock below doesn't catch that case since its key includes the times.
+    const dateLockToken = await this.acquireDateLockWithRetry(dto.shootDate);
+    if (!dateLockToken) {
       throw new BadRequestException(
-        'This slot is currently being booked by someone else. Please try again in a few minutes.',
+        'This date is currently being booked by someone else. Please try again in a few seconds.',
       );
     }
 
-    // Auto-price from service rate — no manual quote needed
-    const service = await this.prisma.service.findUnique({ where: { id: dto.serviceId } });
-    if (!service) throw new NotFoundException('Service not found');
-    const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-    const durationHours = (toMin(dto.endTime) - toMin(dto.startTime)) / 60;
-    const totalAmount   = Math.round(durationHours * Number(service.pricePerHour));
-    const advanceAmount = totalAmount; // full payment upfront
-
-    let customerId: string | undefined;
-    if (userRole === Role.CUSTOMER) {
-      const customer = await this.prisma.customer.findFirst({ where: { user: { id: createdById } } });
-      if (customer) customerId = customer.id;
-    }
-
-    const today = new Date();
-    const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-    const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const bookingCode = `BK-${dateStr}-${suffix}`;
-
-    let booking: any;
     try {
-      booking = await this.prisma.booking.create({
-        data: {
-          ...dto,
-          bookingCode,
-          shootDate:     new Date(dto.shootDate),
-          createdById,
-          customerId,
-          agentId:       dto.agentId ?? undefined,
-          totalAmount,
-          advanceAmount,
-          discountAmount: 0,
-          status:         BookingStatus.APPROVED,
-        },
-        include: { service: true, createdBy: { select: { id: true, name: true, email: true } } },
-      });
-    } catch (err) {
-      await this.redis.releaseSlot(key);
-      throw err;
-    }
+      await this.checkNoOverlap(dto.shootDate, dto.startTime, dto.endTime);
 
-    this.notifications.sendBookingNotification(booking.id, 'BOOKING_CREATED').catch(() => {});
-    this.sse.emit({ type: 'booking.created', bookingId: booking.id, status: booking.status, userId: createdById });
-    return booking;
+      const key = slotKey(dto.shootDate, dto.startTime, dto.endTime);
+      const locked = await this.redis.lockSlot(key, createdById);
+      if (!locked) {
+        throw new BadRequestException(
+          'This slot is currently being booked by someone else. Please try again in a few minutes.',
+        );
+      }
+
+      // Auto-price from service rate — no manual quote needed
+      const service = await this.prisma.service.findUnique({ where: { id: dto.serviceId } });
+      if (!service) throw new NotFoundException('Service not found');
+      const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+      const durationHours = (toMin(dto.endTime) - toMin(dto.startTime)) / 60;
+      const totalAmount   = Math.round(durationHours * Number(service.pricePerHour));
+      const advanceAmount = totalAmount; // full payment upfront
+
+      let customerId: string | undefined;
+      if (userRole === Role.CUSTOMER) {
+        const customer = await this.prisma.customer.findFirst({ where: { user: { id: createdById } } });
+        if (customer) customerId = customer.id;
+      }
+
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+      const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const bookingCode = `BK-${dateStr}-${suffix}`;
+
+      let booking: any;
+      try {
+        booking = await this.prisma.booking.create({
+          data: {
+            ...dto,
+            bookingCode,
+            shootDate:     new Date(dto.shootDate),
+            createdById,
+            customerId,
+            agentId:       dto.agentId ?? undefined,
+            totalAmount,
+            advanceAmount,
+            discountAmount: 0,
+            status:         BookingStatus.APPROVED,
+          },
+          include: { service: true, createdBy: { select: { id: true, name: true, email: true } } },
+        });
+      } catch (err) {
+        await this.redis.releaseSlot(key);
+        throw err;
+      }
+
+      this.notifications.sendBookingNotification(booking.id, 'BOOKING_CREATED').catch(() => {});
+      this.sse.emit({ type: 'booking.created', bookingId: booking.id, status: booking.status, userId: createdById });
+      return booking;
+    } finally {
+      await this.redis.releaseDateLock(dto.shootDate, dateLockToken);
+    }
+  }
+
+  private async acquireDateLockWithRetry(date: string): Promise<string | null> {
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const token = await this.redis.acquireDateLock(date);
+      if (token) return token;
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    return null;
   }
 
   findAll(userId: string, userRole: Role, query: { date?: string; status?: BookingStatus }) {

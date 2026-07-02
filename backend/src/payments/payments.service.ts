@@ -34,8 +34,12 @@ export class PaymentsService {
     const booking = await this.prisma.booking.findUnique({ where: { id: dto.bookingId } });
     if (!booking) throw new NotFoundException('Booking not found');
 
+    // Never trust a client-supplied amount for a real charge — always derive
+    // the amount due from the booking record itself.
+    const amount = this.resolveExpectedAmount(booking, dto.type);
+
     const order = await this.razorpay.orders.create({
-      amount:   Math.round(dto.amount * 100),
+      amount:   Math.round(amount * 100),
       currency: 'INR',
       receipt:  `booking_${dto.bookingId}`,
     });
@@ -43,7 +47,7 @@ export class PaymentsService {
     const payment = await this.prisma.payment.create({
       data: {
         bookingId:       dto.bookingId,
-        amount:          dto.amount,
+        amount,
         type:            dto.type,
         mode:            PaymentMode.UPI,
         status:          PaymentStatus.PENDING,
@@ -53,11 +57,19 @@ export class PaymentsService {
 
     return {
       orderId:   order.id,
-      amount:    dto.amount,
+      amount,
       currency:  'INR',
       paymentId: payment.id,
       keyId:     this.config.get<string>('RAZORPAY_KEY_ID'),
     };
+  }
+
+  // Source of truth for what a payment of a given type should cost —
+  // ignores whatever amount the client asked to be charged.
+  private resolveExpectedAmount(booking: { totalAmount: any; advanceAmount: any }, type: PaymentType): number {
+    if (type === PaymentType.ADVANCE) return Number(booking.advanceAmount);
+    if (type === PaymentType.FULL)    return Number(booking.totalAmount);
+    throw new BadRequestException('Unsupported payment type');
   }
 
   async verifyRazorpay(dto: VerifyRazorpayDto) {
@@ -93,6 +105,14 @@ export class PaymentsService {
   async recordOfflinePayment(dto: CreatePaymentDto) {
     const booking = await this.prisma.booking.findUnique({ where: { id: dto.bookingId } });
     if (!booking) throw new NotFoundException('Booking not found');
+
+    // Mirror the same allow-list the dashboard UI already restricts payment
+    // entry to — otherwise a direct API call could force a REQUEST/CANCELLED
+    // booking straight to COMPLETED, skipping quote/approval entirely.
+    const allowedStatuses: BookingStatus[] = [BookingStatus.APPROVED, BookingStatus.ADVANCE_PAID, BookingStatus.IN_PROGRESS];
+    if (!allowedStatuses.includes(booking.status)) {
+      throw new BadRequestException(`Cannot record a payment for a booking in ${booking.status} status`);
+    }
 
     const payment = await this.prisma.payment.create({
       data: {

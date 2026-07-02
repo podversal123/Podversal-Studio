@@ -96,8 +96,8 @@ export default function GalleryPage() {
       <Navbar />
 
       {/* Banner */}
-      <section className="pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
-        <div className="site-wrap py-16">
+      <section className="pt-14 sm:pt-16 lg:pt-20 bg-white dark:bg-[#111111] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+        <div className="site-wrap py-8 sm:py-12 lg:py-16">
           <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
               Studio Gallery
@@ -106,10 +106,10 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      <div className="site-wrap py-16">
+      <div className="site-wrap py-8 sm:py-12 lg:py-16">
         {/* Category filter */}
         {categories.length > 1 && (
-          <div className="flex flex-wrap gap-2 mb-10">
+          <div className="flex flex-wrap gap-2 mb-6 sm:mb-8 lg:mb-10">
             {categories.map(cat => (
               <button
                 key={cat}
@@ -166,7 +166,7 @@ export default function GalleryPage() {
 
             {/* See More */}
             {visible < filtered.length && (
-              <div className="flex justify-center mt-10">
+              <div className="flex justify-center mt-6 sm:mt-8 lg:mt-10">
                 <button
                   onClick={() => setVisible(v => v + PAGE_SIZE)}
                   className="px-8 py-3 border border-[#e5e5e5] dark:border-[#2a2a2a] text-sm font-bold text-[#6b6b6b] dark:text-[#8a8a8a] hover:border-[#E5312A] hover:text-[#E5312A] transition-colors"
@@ -180,7 +180,7 @@ export default function GalleryPage() {
       </div>
 
       {/* Footer CTA */}
-      <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#E5312A] py-14 px-4 text-center">
+      <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#E5312A] py-10 sm:py-12 lg:py-14 px-4 text-center">
         <h2 className="text-2xl font-black text-white mb-3">Book your studio session today</h2>
         <p className="text-white/70 text-sm mb-6">Professional studio. Seamless online booking. GST invoice included.</p>
         <Link href="/register" className="inline-flex items-center bg-white text-[#E5312A] font-bold px-7 py-3 hover:bg-white/90 transition-colors text-sm">
@@ -208,15 +208,15 @@ export default function GalleryPage() {
           {/* Prev */}
           <button
             onClick={(e) => { e.stopPropagation(); prevImage(); }}
-            className="absolute left-4 text-white/70 hover:text-white p-2 transition-colors z-10"
+            className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors z-10"
             aria-label="Previous image"
           >
-            <ChevronLeft size={32} />
+            <ChevronLeft size={20} />
           </button>
 
           {/* Image */}
           <div
-            className="max-w-5xl max-h-[90vh] mx-12 flex flex-col items-center"
+            className="max-w-5xl max-h-[90vh] mx-16 sm:mx-24 flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
             <img
@@ -235,10 +235,10 @@ export default function GalleryPage() {
           {/* Next */}
           <button
             onClick={(e) => { e.stopPropagation(); nextImage(); }}
-            className="absolute right-4 text-white/70 hover:text-white p-2 transition-colors z-10"
+            className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors z-10"
             aria-label="Next image"
           >
-            <ChevronRight size={32} />
+            <ChevronRight size={20} />
           </button>
         </div>
       )}

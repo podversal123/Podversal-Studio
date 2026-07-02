@@ -56,7 +56,7 @@ export default function OurWorkPage() {
 
       {/* ── Hero ── */}
       <section className="pt-[80px] bg-white dark:bg-[#111111]">
-        <div className="site-wrap pt-12 pb-4">
+        <div className="site-wrap pt-6 sm:pt-9 lg:pt-12 pb-4">
           <div ref={heroAnim.ref} style={anim(heroAnim.visible)}>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white leading-tight">
               Our Work
@@ -66,10 +66,10 @@ export default function OurWorkPage() {
       </section>
 
       {/* ── Productions ── */}
-      <section className="pt-10 pb-20 bg-white dark:bg-[#111111]">
+      <section className="pt-6 sm:pt-8 lg:pt-10 pb-10 sm:pb-14 lg:pb-20 bg-white dark:bg-[#111111]">
         <div className="site-wrap">
           <div ref={videoAnim.ref}>
-            <div className="mb-12" style={anim(videoAnim.visible)}>
+            <div className="mb-6 sm:mb-8 lg:mb-12" style={anim(videoAnim.visible)}>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Featured Productions</h2>
             </div>
 
@@ -137,10 +137,10 @@ export default function OurWorkPage() {
       </section>
 
       {/* ── Studio Gallery ── */}
-      <section className="py-20 bg-[#0a0a0a]">
+      <section className="py-10 sm:py-14 lg:py-20 bg-[#0a0a0a]">
         <div className="site-wrap">
           <div ref={galleryAnim.ref}>
-            <div className="mb-12" style={anim(galleryAnim.visible)}>
+            <div className="mb-6 sm:mb-8 lg:mb-12" style={anim(galleryAnim.visible)}>
               <h2 className="text-3xl sm:text-4xl font-bold text-white">Studio Gallery</h2>
               <p className="text-white/40 text-sm mt-2">Click any image to view full size</p>
             </div>

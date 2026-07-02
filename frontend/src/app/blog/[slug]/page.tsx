@@ -69,9 +69,9 @@ export default function BlogPostPage() {
       )}
 
       {/* Content wrapper */}
-      <div className="px-4 sm:px-10 lg:px-20 xl:px-32 pt-10 pb-24">
+      <div className="px-4 sm:px-10 lg:px-20 xl:px-32 pt-6 sm:pt-8 lg:pt-10 pb-14 sm:pb-20 lg:pb-24">
         {/* Back */}
-        <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-[#a0a0a0] hover:text-gray-900 dark:hover:text-white mb-8 transition-colors">
+        <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-[#a0a0a0] hover:text-gray-900 dark:hover:text-white mb-5 sm:mb-6 lg:mb-8 transition-colors">
           Back to Blog
         </Link>
 
@@ -92,7 +92,7 @@ export default function BlogPostPage() {
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-10">{post.title}</h1>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-6 sm:mb-8 lg:mb-10">{post.title}</h1>
 
         {/* Content */}
         <div

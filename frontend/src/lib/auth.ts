@@ -36,7 +36,10 @@ export function logout(): void {
   localStorage.removeItem('refresh_token');
   localStorage.removeItem('user');
 
-  window.location.replace('/');
+  if (role === 'SUPER_ADMIN')                                 window.location.replace('/admin/login');
+  else if (role === 'REFERRAL_AGENT')                         window.location.replace('/agent/login');
+  else if (role === 'STUDIO_MANAGER' || role === 'EMPLOYEE')  window.location.replace('/staff/login');
+  else                                                         window.location.replace('/');
 }
 
 // Role hierarchy — used to restrict page access

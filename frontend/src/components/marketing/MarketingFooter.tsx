@@ -154,7 +154,7 @@ export default function MarketingFooter() {
             </p>
 
             {/* Social icons */}
-            <div className="flex items-center gap-3 mr-16 sm:mr-20">
+            <div className="flex items-center gap-3 mr-0 sm:mr-16 lg:mr-20">
               {/* YouTube */}
               <a href="https://studio.youtube.com/channel/UCDpE8P1-l7zT8VyqoA3gRpw" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-[#FF0000] hover:opacity-80 transition-opacity">

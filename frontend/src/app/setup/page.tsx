@@ -14,9 +14,10 @@ import Logo from '@/components/Logo';
 const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), { ssr: false });
 
 const schema = z.object({
-  name:     z.string().min(2, 'Full name required'),
-  email:    z.string().email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  name:        z.string().min(2, 'Full name required'),
+  email:       z.string().email('Enter a valid email address'),
+  password:    z.string().min(8, 'Password must be at least 8 characters'),
+  setupSecret: z.string().min(1, 'Setup key required'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -67,7 +68,7 @@ export default function SetupAdminPage() {
             <div>
               <p className="text-sm font-semibold text-gray-900 dark:text-white">First-Time Admin Setup</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                This page only works once — when no Super Admin exists yet.
+                This page only works once — when no Super Admin exists yet, and requires the setup key from the server environment.
               </p>
             </div>
           </div>
@@ -110,6 +111,13 @@ export default function SetupAdminPage() {
                 </button>
               </div>
               {errors.password && <p className="text-[#E5312A] text-xs mt-1">{errors.password.message}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Setup Key</label>
+              <input {...register('setupSecret')} type="password" placeholder="SETUP_SECRET from server .env" className="input-field" autoComplete="off" />
+              {errors.setupSecret && <p className="text-[#E5312A] text-xs mt-1">{errors.setupSecret.message}</p>}
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Value of SETUP_SECRET in the backend environment — only you should know it.</p>
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary">

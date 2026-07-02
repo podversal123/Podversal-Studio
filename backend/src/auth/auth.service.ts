@@ -14,6 +14,7 @@ import { RedisService } from '../redis/redis.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RegisterDto } from './dto/register.dto';
+import { SetupAdminDto } from './dto/setup-admin.dto';
 import { LoginDto } from './dto/login.dto';
 
 @Injectable()
@@ -168,7 +169,35 @@ export class AuthService {
     }
   }
 
-  async setupAdmin(dto: RegisterDto) {
+  // Stores a fully-generated login result under a random one-time code so
+  // the OAuth redirect URL only ever carries an opaque code, never the
+  // actual tokens. 60s TTL and deleted on first read.
+  async createExchangeCode(result: { accessToken: string; refreshToken: string; user: unknown }): Promise<string> {
+    const code = crypto.randomBytes(24).toString('hex');
+    await this.redis.set(`oauth-exchange:${code}`, JSON.stringify(result), 60);
+    return code;
+  }
+
+  async exchangeCode(code: string) {
+    if (!code) throw new BadRequestException('Missing exchange code');
+    const key   = `oauth-exchange:${code}`;
+    const raw   = await this.redis.get(key);
+    if (!raw) throw new UnauthorizedException('This sign-in link has expired. Please try again.');
+    await this.redis.del(key); // one-time use
+    return JSON.parse(raw);
+  }
+
+  async setupAdmin(dto: SetupAdminDto) {
+    const expectedSecret = this.config.get<string>('SETUP_SECRET');
+    if (!expectedSecret) {
+      throw new BadRequestException(
+        'Admin setup is not configured. Set SETUP_SECRET in the server environment first.',
+      );
+    }
+    if (dto.setupSecret !== expectedSecret) {
+      throw new UnauthorizedException('Invalid setup key');
+    }
+
     const adminCount = await this.prisma.user.count({ where: { role: Role.SUPER_ADMIN } });
     if (adminCount > 0) {
       throw new BadRequestException(
