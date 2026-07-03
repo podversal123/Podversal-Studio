@@ -51,7 +51,10 @@ services:
 
       # ── Google OAuth ─────────────────────────────────────────────────────────
       # Google Cloud Console → Credentials → OAuth 2.0 Client ID
-      # Add https://podversal-backend.onrender.com/api/auth/google/callback to Authorized redirect URIs
+      # Redirect URI must be https://podversal.com/api/auth/google/callback
+      # (frontend proxies /api/auth/google* to this backend — see next.config.js
+      # rewrites + BACKEND_ORIGIN — so Google's consent screen shows podversal.com,
+      # not this service's onrender.com URL). GOOGLE_CALLBACK_URL below must match.
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET

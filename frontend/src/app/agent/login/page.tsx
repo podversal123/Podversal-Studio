@@ -153,7 +153,7 @@ export default function AgentLoginPage() {
           </div>
 
           <button
-            onClick={() => { window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`; }}
+            onClick={() => { window.location.href = '/api/auth/google'; }}
             className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-[#e5e5e5] dark:border-[#2a2a2a] hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] transition-colors font-medium text-gray-700 dark:text-[#b0b0b0] text-sm"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
