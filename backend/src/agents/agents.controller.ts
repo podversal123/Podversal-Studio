@@ -25,6 +25,14 @@ import { CurrentUser } from "../common/decorators/current-user.decorator";
 export class AgentsController {
   constructor(private agents: AgentsService) {}
 
+  // A referral agent may only read their own record. The JWT user object has no
+  // profileId (JwtStrategy returns the User row), so resolve it from the database.
+  private async assertOwnAgent(user: any, agentId: string) {
+    if (user.role !== "REFERRAL_AGENT") return;
+    const own = await this.agents.findIdByUserId(user.id);
+    if (!own || own !== agentId) throw new ForbiddenException("Access denied");
+  }
+
   @Get()
   @UseGuards(RolesGuard)
   @Roles("SUPER_ADMIN", "STUDIO_MANAGER")
@@ -35,9 +43,8 @@ export class AgentsController {
   @Get(":id")
   @UseGuards(RolesGuard)
   @Roles("SUPER_ADMIN", "STUDIO_MANAGER", "REFERRAL_AGENT")
-  findOne(@Param("id") id: string, @CurrentUser() user: any) {
-    if (user.role === "REFERRAL_AGENT" && user.profileId !== id)
-      throw new ForbiddenException("Access denied");
+  async findOne(@Param("id") id: string, @CurrentUser() user: any) {
+    await this.assertOwnAgent(user, id);
     return this.agents.findOne(id);
   }
 
@@ -58,9 +65,8 @@ export class AgentsController {
   @Get(":id/commission-summary")
   @UseGuards(RolesGuard)
   @Roles("SUPER_ADMIN", "STUDIO_MANAGER", "REFERRAL_AGENT")
-  commissionSummary(@Param("id") id: string, @CurrentUser() user: any) {
-    if (user.role === "REFERRAL_AGENT" && user.profileId !== id)
-      throw new ForbiddenException("Access denied");
+  async commissionSummary(@Param("id") id: string, @CurrentUser() user: any) {
+    await this.assertOwnAgent(user, id);
     return this.agents.getCommissionSummary(id);
   }
 
@@ -80,8 +86,7 @@ export class AgentsController {
     @CurrentUser() user: any,
     @Res() res: Response,
   ) {
-    if (user.role === "REFERRAL_AGENT" && user.profileId !== id)
-      throw new ForbiddenException("Access denied");
+    await this.assertOwnAgent(user, id);
     const pdf = await this.agents.generateCommissionStatement(id);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(

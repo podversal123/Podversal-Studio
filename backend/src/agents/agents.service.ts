@@ -45,6 +45,15 @@ export class AgentsService {
     });
   }
 
+  // The agent profile id belonging to a login user (null if that user is not an agent)
+  async findIdByUserId(userId: string): Promise<string | null> {
+    const agent = await this.prisma.agent.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    return agent?.id ?? null;
+  }
+
   async findOne(id: string) {
     const agent = await this.prisma.agent.findUnique({
       where: { id },

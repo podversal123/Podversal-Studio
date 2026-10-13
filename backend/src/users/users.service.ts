@@ -56,15 +56,22 @@ export class UsersService {
     id: string,
     data: { name?: string; phone?: string; avatarUrl?: string },
   ) {
-    if (data.phone) {
+    // Defense in depth: never pass a caller-supplied object straight to Prisma.
+    // Only these fields may be changed here, whatever the controller hands in.
+    const safe: { name?: string; phone?: string; avatarUrl?: string } = {};
+    if (data.name !== undefined) safe.name = data.name;
+    if (data.phone !== undefined) safe.phone = data.phone;
+    if (data.avatarUrl !== undefined) safe.avatarUrl = data.avatarUrl;
+
+    if (safe.phone) {
       const conflict = await this.prisma.user.findFirst({
-        where: { phone: data.phone, NOT: { id } },
+        where: { phone: safe.phone, NOT: { id } },
       });
       if (conflict) throw new ConflictException("Phone number already in use");
     }
     return this.prisma.user.update({
       where: { id },
-      data,
+      data: safe,
       select: {
         id: true,
         name: true,

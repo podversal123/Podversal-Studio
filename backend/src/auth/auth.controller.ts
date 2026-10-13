@@ -15,6 +15,7 @@ import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
 import { SetupAdminDto } from "./dto/setup-admin.dto";
 import { LoginDto } from "./dto/login.dto";
+import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { JwtAuthGuard } from "../common/guards/jwt.guard";
 import { RolesGuard } from "../common/guards/roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
@@ -137,10 +138,7 @@ export class AuthController {
   // PATCH /api/auth/profile  update name / phone
   @Patch("profile")
   @UseGuards(JwtAuthGuard)
-  updateProfile(
-    @CurrentUser() user: any,
-    @Body() body: { name?: string; phone?: string },
-  ) {
+  updateProfile(@CurrentUser() user: any, @Body() body: UpdateProfileDto) {
     return this.users.updateProfile(user.id, body);
   }
 
