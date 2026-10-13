@@ -1,3 +1,4 @@
+import { ILLUSTRATION_MARKUP } from "./illustration-markup";
 import {
   ARCH_PATH,
   ILLUSTRATION,
@@ -80,12 +81,9 @@ export default function InviteLetter({ className }: { className?: string }) {
         By Podversal
       </text>
 
-      <image
-        href="/founders/studio-set.svg"
-        x={ILLUSTRATION.x}
-        y={ILLUSTRATION.y}
-        width={ILLUSTRATION.width}
-        height={ILLUSTRATION.height}
+      <g
+        transform={`translate(${ILLUSTRATION.x} ${ILLUSTRATION.y})`}
+        dangerouslySetInnerHTML={{ __html: ILLUSTRATION_MARKUP }}
       />
 
       <text

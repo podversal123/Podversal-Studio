@@ -1,14 +1,13 @@
 import { Newsreader } from "next/font/google";
 
-// Same typeface family as the printed invitation. Shared by the /founders page
-// and the home-page gate. `preload: false` keeps it off the home page's critical
-// path (it loads as soon as the letter text renders, well before the curtain opens).
+// Same typeface family as the printed invitation. Shared by the /founders page and
+// the home-page gate. It is preloaded because the letter is the first thing visitors
+// see; without it the card would first appear in a fallback font and then change.
 export const newsreader = Newsreader({
   subsets: ["latin"],
   style: ["normal", "italic"],
   axes: ["opsz"],
   display: "swap",
   adjustFontFallback: false,
-  preload: false,
   variable: "--font-newsreader",
 });

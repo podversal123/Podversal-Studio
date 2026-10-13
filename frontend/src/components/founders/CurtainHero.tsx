@@ -28,17 +28,23 @@ interface CurtainHeroProps {
   variant?: "page" | "gate";
   onBook?: () => void; // gate only: "Book your slot"
   onEnterSite?: () => void; // gate only: "Enter website"
+  busy?: boolean; // gate only: navigating to the booking page
 }
 
 export default function CurtainHero({
   variant = "page",
   onBook,
   onEnterSite,
+  busy = false,
 }: CurtainHeroProps) {
   const isGate = variant === "gate";
-  // "pending" on both server and first client render, so the HTML always matches
-  const [phase, setPhase] = useState<Phase>("pending");
-  const [mode, setMode] = useState<Mode>("intro");
+  // A fresh page load always starts as "pending" (the server renders that too, so the
+  // HTML matches). Arriving by in-site navigation after the curtain already played
+  // (home gate -> /founders) there is nothing to hydrate, so start directly on the
+  // finished letter: no frame of closed curtain in between.
+  const startsOpen = typeof window !== "undefined" && introPlayed();
+  const [phase, setPhase] = useState<Phase>(startsOpen ? "open" : "pending");
+  const [mode, setMode] = useState<Mode>(startsOpen ? "instant" : "intro");
 
   // Decide once on the client: a freshly opened link gets the full curtain. If the
   // curtain already played during this page load (e.g. the home-page gate), or the
@@ -92,7 +98,7 @@ export default function CurtainHero({
       className={`fp-root ${
         isGate
           ? "fixed inset-0 z-[100] isolate flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-[#1f0406] px-4 pb-10 pt-8"
-          : "relative isolate flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-[#1f0406] px-4 pb-10 pt-8"
+          : "fp-hero-h relative isolate flex w-full flex-col items-center justify-center overflow-hidden bg-[#1f0406] px-4 pb-10 pt-8"
       }`}
       data-phase={phase}
       data-mode={mode}
@@ -124,8 +130,7 @@ export default function CurtainHero({
 
       {/* The invitation */}
       <div
-        className={`fp-letter relative z-10 ${isGate ? "mt-auto" : ""}`}
-        style={{ width: "min(92vw, 640px, calc((100svh - 170px) * 0.7727))" }}
+        className={`fp-letter fp-letter-w relative z-10 ${isGate ? "mt-auto" : ""}`}
       >
         <div className="fp-float relative shadow-[0_28px_60px_-18px_rgba(0,0,0,.7)]">
           <InviteLetter className="block h-auto w-full" />
@@ -150,15 +155,17 @@ export default function CurtainHero({
         <button
           type="button"
           onClick={isGate ? onBook : scrollToForm}
+          disabled={busy}
           className="min-h-[56px] bg-[#faf5dc] px-10 text-[20px] font-semibold text-[#89171a] shadow-[inset_0_0_0_4px_#faf5dc,inset_0_0_0_5px_rgba(137,23,26,.55),0_14px_30px_-10px_rgba(0,0,0,.6)] transition-colors duration-200 hover:bg-white hover:shadow-[inset_0_0_0_4px_#ffffff,inset_0_0_0_5px_rgba(137,23,26,.75),0_14px_30px_-10px_rgba(0,0,0,.6)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
           tabIndex={phase === "open" ? 0 : -1}
         >
-          Book your slot
+          {busy ? "Opening…" : "Book your slot"}
         </button>
         {isGate ? (
           <button
             type="button"
             onClick={onEnterSite}
+            disabled={busy}
             className="min-h-[48px] px-2 py-3 text-[18px] italic text-[#faf5dc]/85 underline decoration-[#faf5dc]/40 underline-offset-[6px] hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
             tabIndex={phase === "open" ? 0 : -1}
           >
@@ -188,7 +195,7 @@ export default function CurtainHero({
       {/* Curtains */}
       {(curtainsUp || phase === "opening") && (
         <div
-          className="absolute inset-0 z-30"
+          className="fp-curtains absolute inset-0 z-30"
           onClick={open}
           aria-hidden={phase === "opening"}
         >
@@ -230,7 +237,7 @@ export default function CurtainHero({
             <p className="text-[clamp(1.6rem,6vw,2.6rem)] italic leading-tight text-[#faf5dc] [text-shadow:0_2px_18px_rgba(0,0,0,.55)]">
               Podversal presents
             </p>
-            <div className="flex w-[min(62vw,260px)] flex-col items-center gap-3">
+            <div className="fp-hint flex w-[min(62vw,260px)] flex-col items-center gap-3">
               <span aria-hidden className="relative block h-px w-full overflow-hidden bg-[#faf5dc]/25">
                 {phase === "closed" && (
                   <span

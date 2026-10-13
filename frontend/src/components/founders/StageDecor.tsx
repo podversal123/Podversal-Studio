@@ -72,8 +72,22 @@ export const FP_STYLES = `
 .fp-root[data-phase="opening"] .fp-panel-r { animation-delay: .12s; }
 
 /* "Podversal presents" + the line that fills while we wait */
+/* "Podversal presents" is visible from the very first paint (before scripts have loaded),
+   so a slow connection never shows an empty curtain. The countdown + tap hint appear
+   once the page is interactive. */
 .fp-closed { opacity: 0; transition: opacity .4s ease; }
-.fp-root[data-phase="closed"] .fp-closed { opacity: 1; transition: opacity .9s ease .3s; }
+.fp-root[data-phase="pending"] .fp-closed, .fp-root[data-phase="closed"] .fp-closed { opacity: 1; }
+.fp-hint { opacity: 0; transition: opacity .6s ease; }
+.fp-root[data-phase="closed"] .fp-hint { opacity: 1; }
+
+/* Sizes. Each has an older-browser fallback first: a declaration the browser does not
+   understand (e.g. svh on iOS before 15.4) is skipped and the line above it is used. */
+.fp-hero-h { min-height: 100vh; min-height: 100svh; }
+.fp-letter-w {
+  width: min(92vw, 640px);
+  /* as tall as fits the screen, but never smaller than 300px (phones held sideways) */
+  width: min(92vw, max(300px, min(640px, calc((100svh - 170px) * 0.7727))));
+}
 .fp-progress { transform: scaleX(0); transform-origin: left; animation: fp-progress linear both; }
 
 /* ───────── the invitation ───────── */
@@ -82,7 +96,7 @@ export const FP_STYLES = `
 .fp-root[data-mode="intro"][data-phase="open"] .fp-letter {
   animation: fp-letter-in var(--fp-letter-ms) cubic-bezier(.2,.7,.2,1) var(--fp-letter-delay) both;
 }
-.fp-root[data-mode="instant"][data-phase="open"] .fp-letter { opacity: 1; transform: none; animation: fp-fade-in .45s ease-out both; }
+.fp-root[data-mode="instant"][data-phase="open"] .fp-letter { opacity: 1; transform: none; }
 
 .fp-root[data-phase="open"] .fp-float { will-change: transform; animation: fp-float 7s ease-in-out infinite; }
 
@@ -101,7 +115,7 @@ export const FP_STYLES = `
 .fp-decor { opacity: 0; }
 .fp-root[data-phase="opening"] .fp-decor, .fp-root[data-phase="open"] .fp-decor { opacity: 1; transition: opacity 3.2s ease 2s; }
 .fp-root[data-mode="instant"][data-phase="open"] .fp-light,
-.fp-root[data-mode="instant"][data-phase="open"] .fp-decor { transition-duration: .5s; transition-delay: 0s; }
+.fp-root[data-mode="instant"][data-phase="open"] .fp-decor { transition: none; }
 
 /* soft spotlight beams: a small pre-rendered alpha texture, rotated */
 .fp-beam {
@@ -136,6 +150,7 @@ export const FP_STYLES = `
   .fp-progress { animation: none; transform: scaleX(1); }
   .fp-letter { animation: none !important; opacity: 1 !important; transform: none !important; }
   .fp-light, .fp-decor { transition: none !important; opacity: 1 !important; }
+  .fp-curtains { display: none; } /* never flash a closed curtain before scripts run */
 }
 `;
 

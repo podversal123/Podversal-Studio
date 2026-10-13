@@ -117,7 +117,7 @@ export default function MonthCalendar({ days, value, onChange }: Props) {
                       : `${label}, ${info.available} ${info.available === 1 ? "time" : "times"} free`
                 }
                 className={[
-                  "relative flex aspect-square w-full max-w-[48px] items-center justify-center rounded-full text-[20px] transition-colors",
+                  "relative flex aspect-square min-h-[40px] w-full max-w-[48px] items-center justify-center rounded-full text-[20px] transition-colors",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#89171a]",
                   selected
                     ? "bg-[#89171a] font-bold text-[#faf5dc]"
