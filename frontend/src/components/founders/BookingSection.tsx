@@ -450,7 +450,7 @@ export default function BookingSection() {
                       id="companyName"
                       autoComplete="organization"
                       className={inputCls}
-                      placeholder="Acme Pvt. Ltd."
+                      placeholder="Enter company name"
                       {...register("companyName")}
                     />
                   </Field>
@@ -459,7 +459,7 @@ export default function BookingSection() {
                       id="name"
                       autoComplete="name"
                       className={inputCls}
-                      placeholder="Full name"
+                      placeholder="Enter your full name"
                       {...register("name")}
                     />
                   </Field>
@@ -471,7 +471,7 @@ export default function BookingSection() {
                         inputMode="email"
                         autoComplete="email"
                         className={inputCls}
-                        placeholder="you@company.com"
+                        placeholder="Enter your email address"
                         {...register("email")}
                       />
                     </Field>
@@ -483,7 +483,7 @@ export default function BookingSection() {
                         autoComplete="tel-national"
                         maxLength={10}
                         className={inputCls}
-                        placeholder="10-digit number"
+                        placeholder="Enter 10-digit mobile number"
                         {...register("phone")}
                       />
                     </Field>

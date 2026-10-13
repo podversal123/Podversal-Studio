@@ -2,32 +2,25 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
 import InviteLetter from "./InviteLetter";
 import { introPlayed, markIntroPlayed } from "./intro-state";
-import StageDecor, { FP_STYLES } from "./StageDecor";
+import StageDecor, { FP_NOSCRIPT, FP_STYLES } from "./StageDecor";
 
 type Phase = "pending" | "closed" | "opening" | "open";
+type Mode = "intro" | "instant";
 
 // Timeline (all in one place so the pace is easy to change):
 //   closed curtain, "Podversal presents" ........ AUTO_OPEN_MS (a tap skips the wait)
 //   curtain parts ............................... OPEN_MS seconds
 //   letter fades up behind it ................... LETTER_DELAY + LETTER_MS seconds into the opening
 //   one sweep of light across the card .......... SHEEN_DELAY seconds into the opening
+// The motion itself lives in CSS (see StageDecor.tsx) so it stays smooth even while
+// the page is busy; this component only moves between phases.
 const AUTO_OPEN_MS = 3200;
-const OPEN_MS = 4.4;
-const LETTER_DELAY = 1.4;
-const LETTER_MS = 2.6;
-const SHEEN_DELAY = 3.7;
-
-// Velvet pleats: two repeating gradients with different periods so the folds
-// never look machine-regular. Compressing the panel (scaleX) bunches them up
-// like real fabric gathering at the wings.
-const PLEATS = [
-  "linear-gradient(180deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 78%, rgba(0,0,0,.5) 100%)",
-  "repeating-linear-gradient(90deg, rgba(0,0,0,.2) 0 13px, rgba(255,235,210,.07) 13px 33px, rgba(0,0,0,0) 33px 127px)",
-  "repeating-linear-gradient(90deg, #4a0a0d 0px, #741317 21px, #9c2126 41px, #741317 60px, #470a0c 82px)",
-].join(",");
+const OPEN_MS = 3.6;
+const LETTER_DELAY = 1.1;
+const LETTER_MS = 2.2;
+const SHEEN_DELAY = 3.2;
 
 interface CurtainHeroProps {
   // "page": the section at the top of /founders.
@@ -43,15 +36,22 @@ export default function CurtainHero({
   onEnterSite,
 }: CurtainHeroProps) {
   const isGate = variant === "gate";
-  const reduceMotion = useReducedMotion();
+  // "pending" on both server and first client render, so the HTML always matches
   const [phase, setPhase] = useState<Phase>("pending");
+  const [mode, setMode] = useState<Mode>("intro");
 
-  // Decide once on the client: a freshly opened link gets the full curtain; if the
+  // Decide once on the client: a freshly opened link gets the full curtain. If the
   // curtain already played during this page load (e.g. the home-page gate), or the
   // visitor prefers reduced motion, show the letter straight away.
   useEffect(() => {
-    setPhase(reduceMotion || introPlayed() ? "open" : "closed");
-  }, [reduceMotion]);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || introPlayed()) {
+      setMode("instant");
+      setPhase("open");
+    } else {
+      setPhase("closed");
+    }
+  }, []);
 
   const open = useCallback(() => {
     setPhase((p) => (p === "closed" ? "opening" : p));
@@ -64,103 +64,87 @@ export default function CurtainHero({
     return () => clearTimeout(t);
   }, [phase, open]);
 
-  const finish = () => {
+  const finish = useCallback(() => {
     setPhase("open");
     markIntroPlayed();
-  };
+  }, []);
+
+  // Safety net: the curtain can never get stuck. Normally the end of the CSS
+  // animation calls finish(); if that event were ever missed, this timer does it.
+  useEffect(() => {
+    if (phase !== "opening") return;
+    const t = setTimeout(finish, OPEN_MS * 1000 + 900);
+    return () => clearTimeout(t);
+  }, [phase, finish]);
 
   const replay = () => {
+    setMode("intro");
     setPhase("pending");
     requestAnimationFrame(() => setPhase("closed"));
   };
 
   const curtainsUp = phase === "closed" || phase === "pending";
-  const revealed = phase === "opening" || phase === "open";
-  const instant = phase === "open";
-
   const scrollToForm = () =>
     document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <section
-      className={
+      className={`fp-root ${
         isGate
           ? "fixed inset-0 z-[100] isolate flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-[#1f0406] px-4 pb-10 pt-8"
           : "relative isolate flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-[#1f0406] px-4 pb-10 pt-8"
-      }
+      }`}
+      data-phase={phase}
+      data-mode={mode}
       aria-label="Invitation"
-      style={{ fontFamily: "var(--font-newsreader), Georgia, serif" }}
+      style={
+        {
+          fontFamily: "var(--font-newsreader), Georgia, serif",
+          "--fp-open": `${OPEN_MS}s`,
+          "--fp-letter-ms": `${LETTER_MS}s`,
+          "--fp-letter-delay": `${LETTER_DELAY}s`,
+          "--fp-sheen-delay": `${SHEEN_DELAY}s`,
+        } as React.CSSProperties
+      }
     >
       <style dangerouslySetInnerHTML={{ __html: FP_STYLES }} />
+      <noscript dangerouslySetInnerHTML={{ __html: FP_NOSCRIPT }} />
 
       {/* Stage light */}
-      <motion.div
+      <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
+        className="fp-light pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
             "radial-gradient(ellipse 70% 60% at 50% 38%, rgba(250,245,220,.2), rgba(250,245,220,0) 70%), radial-gradient(ellipse 120% 90% at 50% 120%, rgba(137,23,26,.55), rgba(0,0,0,0) 60%)",
         }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: revealed ? 1 : 0.25 }}
-        transition={{ duration: instant ? 0.4 : 3, delay: instant ? 0 : 1.2 }}
       />
 
-      <StageDecor show={revealed} instant={instant} />
+      <StageDecor />
 
       {/* The invitation */}
-      <motion.div
-        className={`relative z-10 ${isGate ? "mt-auto" : ""}`}
-        style={{
-          width: "min(92vw, 640px, calc((100svh - 170px) * 0.7727))",
-        }}
-        initial={{ opacity: 0, scale: 0.93, y: 14 }}
-        animate={
-          revealed
-            ? { opacity: 1, scale: 1, y: 0 }
-            : { opacity: 0, scale: 0.93, y: 14 }
-        }
-        transition={
-          instant
-            ? { duration: 0.45, ease: "easeOut" }
-            : { duration: LETTER_MS, delay: LETTER_DELAY, ease: [0.2, 0.7, 0.2, 1] }
-        }
+      <div
+        className={`fp-letter relative z-10 ${isGate ? "mt-auto" : ""}`}
+        style={{ width: "min(92vw, 640px, calc((100svh - 170px) * 0.7727))" }}
       >
-        <motion.div
-          animate={phase === "open" && !reduceMotion ? { y: [0, -6, 0] } : { y: 0 }}
-          transition={
-            phase === "open" && !reduceMotion
-              ? { duration: 7, ease: "easeInOut", repeat: Infinity }
-              : { duration: 0.3 }
-          }
-          className="relative"
-        >
-          <InviteLetter className="block h-auto w-full drop-shadow-[0_24px_50px_rgba(0,0,0,.55)]" />
+        <div className="fp-float relative shadow-[0_28px_60px_-18px_rgba(0,0,0,.7)]">
+          <InviteLetter className="block h-auto w-full" />
           {/* A single sweep of light across the card once it has landed */}
-          {/* Always rendered (so server and browser HTML are identical); hidden for
-              reduced-motion visitors with CSS, see .fp-sheen in StageDecor. */}
           <div aria-hidden className="fp-sheen pointer-events-none absolute inset-0 overflow-hidden">
-            <motion.div
-              className="absolute inset-y-0 w-[55%]"
+            <div
+              className="fp-sheen-bar absolute inset-y-0 w-[55%]"
               style={{
                 background:
                   "linear-gradient(105deg, rgba(255,250,235,0) 0%, rgba(255,250,235,.32) 50%, rgba(255,250,235,0) 100%)",
               }}
-              initial={{ x: "-130%", opacity: 0 }}
-              animate={revealed ? { x: "260%", opacity: [0, 1, 1, 0] } : { x: "-130%", opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeInOut", delay: instant ? 0.4 : SHEEN_DELAY }}
             />
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Call to action appears once the letter has landed */}
-      <motion.div
-        className={`relative z-10 mt-6 flex flex-col items-center gap-3 sm:flex-row sm:gap-5 ${isGate ? "mb-auto" : ""}`}
-        initial={{ opacity: 0, y: 8 }}
-        animate={phase === "open" ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-        transition={{ duration: 0.6, delay: reduceMotion ? 0 : 0.15 }}
-        style={{ pointerEvents: phase === "open" ? "auto" : "none" }}
+      <div
+        className={`fp-cta relative z-10 mt-6 flex flex-col items-center gap-3 sm:flex-row sm:gap-5 ${isGate ? "mb-auto" : ""}`}
         aria-hidden={phase !== "open"}
       >
         <button
@@ -189,13 +173,13 @@ export default function CurtainHero({
             Visit the Podversal website
           </Link>
         )}
-      </motion.div>
+      </div>
 
-      {phase === "open" && !reduceMotion && !isGate && (
+      {phase === "open" && !isGate && (
         <button
           type="button"
           onClick={replay}
-          className="absolute bottom-3 right-3 z-20 rounded-full px-3 py-2 text-xs text-[#faf5dc]/50 hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#faf5dc]"
+          className="fp-replay absolute bottom-3 right-3 z-20 rounded-full px-3 py-2 text-xs text-[#faf5dc]/50 hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#faf5dc]"
         >
           Replay intro
         </button>
@@ -208,41 +192,18 @@ export default function CurtainHero({
           onClick={open}
           aria-hidden={phase === "opening"}
         >
-          {(["left", "right"] as const).map((side) => (
-            <motion.div
-              key={side}
-              className="absolute top-0 h-full w-[51%]"
-              style={{
-                [side]: 0,
-                transformOrigin: side === "left" ? "left center" : "right center",
-                backgroundImage: PLEATS,
-                boxShadow:
-                  side === "left"
-                    ? "inset -28px 0 38px -18px rgba(0,0,0,.65)"
-                    : "inset 28px 0 38px -18px rgba(0,0,0,.65)",
-              }}
-              initial={{ scaleX: 1, skewX: 0 }}
-              animate={
-                phase === "opening"
-                  ? { scaleX: 0.14, skewX: [0, side === "left" ? -1.8 : 1.8, 0] }
-                  : { scaleX: 1, skewX: 0 }
-              }
-              transition={{
-                scaleX: {
-                  duration: OPEN_MS,
-                  ease: [0.7, 0, 0.18, 1],
-                  delay: side === "right" ? 0.12 : 0,
-                },
-                skewX: {
-                  duration: OPEN_MS,
-                  times: [0, 0.4, 1],
-                  ease: "easeInOut",
-                  delay: side === "right" ? 0.12 : 0,
-                },
-              }}
-              onAnimationComplete={side === "right" ? () => phase === "opening" && finish() : undefined}
-            />
-          ))}
+          <div className="fp-panel fp-panel-l">
+            <div className="fp-fabric" />
+          </div>
+          <div
+            className="fp-panel fp-panel-r"
+            onAnimationEnd={(e) => {
+              // the right panel starts last, so its end means the curtain is fully open
+              if (e.target === e.currentTarget && e.animationName === "fp-part") finish();
+            }}
+          >
+            <div className="fp-fabric" />
+          </div>
 
           {/* Pelmet across the top, with a scalloped lower edge */}
           <div aria-hidden className="absolute inset-x-0 top-0 h-[6.5svh] min-h-[40px]">
@@ -265,16 +226,8 @@ export default function CurtainHero({
           </div>
 
           {/* Closed-curtain message */}
-          <motion.div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: phase === "closed" ? 1 : 0 }}
-            transition={{ duration: phase === "closed" ? 0.9 : 0.4, delay: phase === "closed" ? 0.3 : 0 }}
-          >
-            <p
-              className="text-[clamp(1.6rem,6vw,2.6rem)] italic leading-tight text-[#faf5dc] [text-shadow:0_2px_18px_rgba(0,0,0,.55)]"
-              style={{ fontFamily: "var(--font-newsreader), Georgia, serif" }}
-            >
+          <div className="fp-closed absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center">
+            <p className="text-[clamp(1.6rem,6vw,2.6rem)] italic leading-tight text-[#faf5dc] [text-shadow:0_2px_18px_rgba(0,0,0,.55)]">
               Podversal presents
             </p>
             <div className="flex w-[min(62vw,260px)] flex-col items-center gap-3">
@@ -298,7 +251,7 @@ export default function CurtainHero({
                 Tap to open now
               </button>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
     </section>
