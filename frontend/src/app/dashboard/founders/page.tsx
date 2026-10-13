@@ -1,11 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Download, Mail, RefreshCw } from "lucide-react";
 import api from "@/lib/api";
 import { getStoredUser } from "@/lib/auth";
-import { formatDateShort, formatTime12 } from "@/components/founders/founders-api";
+import {
+  FounderTeam,
+  formatDateShort,
+  formatTime12,
+  foundersApi,
+} from "@/components/founders/founders-api";
 
 interface FounderRow {
   id: string;
@@ -17,6 +22,7 @@ interface FounderRow {
   referredBy: string;
   referrerName: string;
   teamName: string;
+  viaPersonalLink: boolean;
   shootDate: string;
   startTime: string;
   endTime: string;
@@ -36,6 +42,7 @@ interface Leaderboard {
   teams: (Counts & {
     id: string;
     name: string;
+    pickedAsTeam: number;
     members: (Counts & { id: string; name: string })[];
   })[];
 }
@@ -56,13 +63,15 @@ export default function FoundersAdminPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [teams, setTeams] = useState<FounderTeam[]>([]);
 
   const [status, setStatus] = useState("");
-  const [member, setMember] = useState("");
+  const [team, setTeam] = useState("");
   const [date, setDate] = useState("");
 
   useEffect(() => {
     setIsSuperAdmin(getStoredUser()?.role === "SUPER_ADMIN");
+    foundersApi.config().then((c) => setTeams(c.teams)).catch(() => undefined);
   }, []);
 
   const load = useCallback(async () => {
@@ -70,7 +79,7 @@ export default function FoundersAdminPage() {
     try {
       const params: Record<string, string> = {};
       if (status) params.status = status;
-      if (member) params.referredBy = member;
+      if (team) params.referredBy = team;
       if (date) params.date = date;
       const list = await api.get<FounderRow[]>("/founders/admin/bookings", { params });
       setRows(list.data);
@@ -79,7 +88,7 @@ export default function FoundersAdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [status, member, date]);
+  }, [status, team, date]);
 
   const loadBoard = useCallback(async () => {
     try {
@@ -128,19 +137,6 @@ export default function FoundersAdminPage() {
       setBusyId(null);
     }
   };
-
-  const members = useMemo(
-    () => board?.teams.flatMap((t) => t.members.map((m) => ({ ...m, team: t.name }))) ?? [],
-    [board],
-  );
-
-  // Filter options when the leaderboard isn't available (Studio Manager)
-  const memberOptions = useMemo(() => {
-    if (members.length) return members.map((m) => ({ id: m.id, label: `${m.name} (${m.team})` }));
-    const seen = new Map<string, string>();
-    rows.forEach((r) => seen.set(r.referredBy, `${r.referrerName} (${r.teamName})`));
-    return Array.from(seen, ([id, label]) => ({ id, label }));
-  }, [members, rows]);
 
   const exportCsv = () => {
     const esc = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
@@ -226,7 +222,7 @@ export default function FoundersAdminPage() {
                 <ul className="divide-y divide-[#f0f0f0] dark:divide-[#1e1e1e]">
                   {team.members.map((m) => (
                     <li key={m.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
-                      <span className="text-gray-900 dark:text-white">{m.name}</span>
+                      <span className="text-gray-900 dark:text-white">{m.name}<span className="text-[#888] dark:text-[#999]"> (own link)</span></span>
                       <span className="text-[#6b6b6b] dark:text-[#b0b0b0]">
                         <strong className="text-gray-900 dark:text-white">{m.total}</strong>
                         {m.completed > 0 && ` · ${m.completed} done`}
@@ -234,6 +230,10 @@ export default function FoundersAdminPage() {
                       </span>
                     </li>
                   ))}
+                  <li className="flex items-center justify-between px-4 py-2.5 text-sm">
+                    <span className="text-gray-900 dark:text-white">Picked the team<span className="text-[#888] dark:text-[#999]"> (on the form)</span></span>
+                    <strong className="text-gray-900 dark:text-white">{team.pickedAsTeam}</strong>
+                  </li>
                 </ul>
               </div>
             ))}
@@ -249,16 +249,16 @@ export default function FoundersAdminPage() {
           <option value="COMPLETED">Completed</option>
           <option value="CANCELLED">Cancelled</option>
         </select>
-        <select value={member} onChange={(e) => setMember(e.target.value)} className="input-field !w-auto" aria-label="Filter by who invited">
-          <option value="">Everyone</option>
-          {memberOptions.map((m) => (
-            <option key={m.id} value={m.id}>{m.label}</option>
+        <select value={team} onChange={(e) => setTeam(e.target.value)} className="input-field !w-auto" aria-label="Filter by team">
+          <option value="">All teams</option>
+          {teams.map((t) => (
+            <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input-field !w-auto" aria-label="Filter by date" />
-        {(status || member || date) && (
+        {(status || team || date) && (
           <button
-            onClick={() => { setStatus(""); setMember(""); setDate(""); }}
+            onClick={() => { setStatus(""); setTeam(""); setDate(""); }}
             className="text-sm font-bold text-[#E5312A] px-2"
           >
             Clear filters
@@ -313,8 +313,10 @@ export default function FoundersAdminPage() {
                     <a href={`mailto:${r.email}`} className="block text-xs text-[#6b6b6b] dark:text-[#b0b0b0] hover:text-[#E5312A] break-all">{r.email}</a>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <p className="text-gray-900 dark:text-white">{r.referrerName}</p>
-                    <p className="text-xs text-[#6b6b6b] dark:text-[#b0b0b0]">{r.teamName}</p>
+                    <p className="text-gray-900 dark:text-white">{r.teamName}</p>
+                    <p className="text-xs text-[#6b6b6b] dark:text-[#b0b0b0]">
+                      {r.viaPersonalLink ? `${r.referrerName} (own link)` : `${r.referrerName} (picked the team)`}
+                    </p>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-block px-2 py-1 text-[10px] font-black tracking-[0.08em] uppercase ${STATUS_CLS[r.status]}`}>

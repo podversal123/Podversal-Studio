@@ -36,7 +36,7 @@ const schema = z.object({
     .string()
     .trim()
     .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
-  referredBy: z.string().min(1, "Choose who invited you"),
+  referredBy: z.string().min(1, "Choose the team that invited you"),
   website: z.string().optional(), // honeypot
 });
 type FormValues = z.infer<typeof schema>;
@@ -120,6 +120,8 @@ export default function BookingSection() {
   const [serverError, setServerError] = useState("");
   const [result, setResult] = useState<FounderBookingResult | null>(null);
   const [refFromLink, setRefFromLink] = useState<string | null>(null);
+  // When the visitor came through a member's personal link we remember exactly whose it was
+  const [linkMember, setLinkMember] = useState<{ id: string; teamId: string } | null>(null);
 
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -155,10 +157,12 @@ export default function BookingSection() {
       } catch {
         /* ignore */
       }
-      const known = cfg.teams.flatMap((t) => t.members).find((m) => m.id === ref);
-      if (known) {
-        setValue("referredBy", known.id);
-        setRefFromLink(known.name);
+      const team = cfg.teams.find((t) => t.members.some((m) => m.id === ref));
+      const known = team?.members.find((m) => m.id === ref);
+      if (team && known) {
+        setValue("referredBy", team.id); // the visitor picks a team...
+        setLinkMember({ id: known.id, teamId: team.id }); // ...we keep whose link it was
+        setRefFromLink(team.name);
       }
     } catch (err) {
       setLoadError(
@@ -260,7 +264,9 @@ export default function BookingSection() {
         name: v.name.trim(),
         email: v.email.trim(),
         phone: v.phone.trim(),
-        referredBy: v.referredBy,
+        // Same team as the link they arrived on -> record the exact member; otherwise the team
+        referredBy:
+          linkMember && v.referredBy === linkMember.teamId ? linkMember.id : v.referredBy,
         shootDate: date,
         startTime: time,
         website: v.website ?? "",
@@ -590,40 +596,59 @@ export default function BookingSection() {
                   )}
                 </div>
 
-                {/* Reference */}
+                {/* Reference: the team is the unit, both members light up together */}
                 <fieldset className="space-y-4">
                   <legend className="w-full">
                     <GroupTitle>Who invited you?</GroupTitle>
                   </legend>
-                  {refFromLink && (
-                    <p className="text-center text-[17px] italic text-[#89171a]/85">
-                      We selected {refFromLink} from your invitation link. Change it if that’s not right.
-                    </p>
-                  )}
+                  <p className="text-center text-[17px] italic text-[#89171a]/85">
+                    {refFromLink
+                      ? `We selected ${refFromLink} from your invitation link. Change it if that’s not right.`
+                      : "Choose the team that invited you."}
+                  </p>
                   <div>
-                    {config.teams.map((team) => (
-                      <div
-                        key={team.id}
-                        className="flex flex-col gap-2.5 border-t border-[#89171a]/15 py-4 sm:flex-row sm:items-center sm:gap-6"
-                      >
-                        <span className="text-[19px] italic text-[#89171a] sm:w-52">{team.name}</span>
-                        <div className="flex flex-wrap gap-2.5">
-                          {team.members.map((m) => (
-                            <label key={m.id} className="cursor-pointer">
-                              <input
-                                type="radio"
-                                value={m.id}
-                                className="peer sr-only"
-                                {...register("referredBy")}
-                              />
-                              <span className="inline-flex min-h-[46px] items-center border border-[#89171a]/35 px-6 text-[19px] text-[#2e0a0c] transition-colors hover:border-[#89171a] peer-checked:border-[#89171a] peer-checked:bg-[#89171a] peer-checked:text-[#faf5dc] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#89171a]">
+                    {config.teams.map((team) => {
+                      const selected = referredBy === team.id;
+                      return (
+                        <label
+                          key={team.id}
+                          className={`-mx-3 flex cursor-pointer flex-col gap-2.5 border-t border-[#89171a]/15 px-3 py-4 transition-colors focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[#89171a] sm:flex-row sm:items-center sm:gap-6 ${
+                            selected ? "bg-[#89171a]/[0.07]" : "hover:bg-[#89171a]/[0.035]"
+                          }`}
+                        >
+                          {/* Controlled on purpose: what is highlighted, what is checked and
+                              what gets submitted all come from the same value, so they can
+                              never disagree. */}
+                          <input
+                            type="radio"
+                            name="referredBy"
+                            value={team.id}
+                            checked={selected}
+                            onChange={() =>
+                              setValue("referredBy", team.id, { shouldValidate: true })
+                            }
+                            className="sr-only"
+                          />
+                          <span className="text-[19px] italic text-[#89171a] sm:w-52">
+                            {team.name}
+                          </span>
+                          <span className="flex flex-wrap gap-2.5">
+                            {team.members.map((m) => (
+                              <span
+                                key={m.id}
+                                className={`inline-flex min-h-[46px] items-center border px-6 text-[19px] transition-colors ${
+                                  selected
+                                    ? "border-[#89171a] bg-[#89171a] text-[#faf5dc]"
+                                    : "border-[#89171a]/35 text-[#2e0a0c]"
+                                }`}
+                              >
                                 {m.name}
                               </span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                            ))}
+                          </span>
+                        </label>
+                      );
+                    })}
                     <div className="border-t border-[#89171a]/15" />
                   </div>
                   {errors.referredBy && !referredBy && (

@@ -50,13 +50,37 @@ export const FOUNDER_TEAMS: FounderTeam[] = [
 export const FOUNDER_MEMBER_IDS = FOUNDER_TEAMS.flatMap((t) =>
   t.members.map((m) => m.id),
 );
+export const FOUNDER_TEAM_IDS = FOUNDER_TEAMS.map((t) => t.id);
 
-export const memberById = (id: string) => {
+// `referredBy` holds ONE of two things:
+//   • a team id ("team-2")  – the visitor picked the team on the form; both
+//                             members count together (the team is the unit)
+//   • a member id ("ritu")  – the visitor arrived through that member's personal
+//                             link, so we also know exactly who it was
+// Either way the booking counts for the member's team.
+export const FOUNDER_REFERRER_IDS = [...FOUNDER_TEAM_IDS, ...FOUNDER_MEMBER_IDS];
+
+export interface ReferrerInfo {
+  team: FounderTeam;
+  member: FounderMember | null; // null = chosen at team level
+  label: string; // "Ritu" or "Ritu / Suraj"
+}
+
+export const referrerInfo = (id: string): ReferrerInfo | null => {
   for (const team of FOUNDER_TEAMS) {
+    if (team.id === id) {
+      return { team, member: null, label: team.members.map((m) => m.name).join(" / ") };
+    }
     const member = team.members.find((m) => m.id === id);
-    if (member) return { member, team };
+    if (member) return { team, member, label: member.name };
   }
   return null;
+};
+
+/** Every referredBy value that counts for this team (its id + its members' ids). */
+export const idsForTeam = (teamId: string): string[] => {
+  const team = FOUNDER_TEAMS.find((t) => t.id === teamId);
+  return team ? [team.id, ...team.members.map((m) => m.id)] : [];
 };
 
 // 1-hour slots, 10 AM – 6 PM (last slot 5–6 PM), every day.

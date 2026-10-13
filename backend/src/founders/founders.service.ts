@@ -27,7 +27,8 @@ import {
   hhmm,
   isValidDateStr,
   istNow,
-  memberById,
+  idsForTeam,
+  referrerInfo,
 } from "./founders.constants";
 
 type Interval = { start: string; end: string };
@@ -360,7 +361,11 @@ export class FoundersService {
     ) {
       where.status = filters.status as FounderBookingStatus;
     }
-    if (filters.referredBy) where.referredBy = filters.referredBy;
+    if (filters.referredBy) {
+      // A team id matches the team's own picks AND every personal link of its members
+      const teamIds = idsForTeam(filters.referredBy);
+      where.referredBy = teamIds.length ? { in: teamIds } : filters.referredBy;
+    }
     if (filters.date && isValidDateStr(filters.date)) {
       where.shootDate = filters.date;
     }
@@ -369,58 +374,55 @@ export class FoundersService {
       orderBy: [{ shootDate: "asc" }, { startTime: "asc" }],
     });
     return rows.map((b) => {
-      const ref = memberById(b.referredBy);
+      const ref = referrerInfo(b.referredBy);
       return {
         ...b,
-        referrerName: ref?.member.name ?? b.referredBy,
+        referrerName: ref?.label ?? b.referredBy,
         teamName: ref?.team.name ?? "—",
+        viaPersonalLink: !!ref?.member,
       };
     });
   }
 
+  // Incentive counts. The TEAM is the unit: a booking counts for the team whether
+  // the visitor picked the team on the form or arrived via a member's own link.
+  // Members show only the bookings that came through their personal link.
+  // Cancelled bookings never count towards `total`.
   async leaderboard() {
     const grouped = await this.prisma.founderBooking.groupBy({
       by: ["referredBy", "status"],
       _count: { _all: true },
     });
-    const count = (id: string, status: FounderBookingStatus) =>
-      grouped.find((g) => g.referredBy === id && g.status === status)?._count
-        ._all ?? 0;
+    const count = (ids: string[], status: FounderBookingStatus) =>
+      grouped
+        .filter((g) => ids.includes(g.referredBy) && g.status === status)
+        .reduce((sum, g) => sum + g._count._all, 0);
+    const counts = (ids: string[]) => {
+      const confirmed = count(ids, FounderBookingStatus.CONFIRMED);
+      const completed = count(ids, FounderBookingStatus.COMPLETED);
+      const cancelled = count(ids, FounderBookingStatus.CANCELLED);
+      return { confirmed, completed, cancelled, total: confirmed + completed };
+    };
 
-    const teams = FOUNDER_TEAMS.map((team) => {
-      const members = team.members.map((m) => {
-        const confirmed = count(m.id, FounderBookingStatus.CONFIRMED);
-        const completed = count(m.id, FounderBookingStatus.COMPLETED);
-        const cancelled = count(m.id, FounderBookingStatus.CANCELLED);
-        return {
-          id: m.id,
-          name: m.name,
-          confirmed,
-          completed,
-          cancelled,
-          total: confirmed + completed, // cancelled bookings never count
-        };
-      });
-      const sum = (k: "confirmed" | "completed" | "cancelled" | "total") =>
-        members.reduce((s, m) => s + m[k], 0);
-      return {
-        id: team.id,
-        name: team.name,
-        confirmed: sum("confirmed"),
-        completed: sum("completed"),
-        cancelled: sum("cancelled"),
-        total: sum("total"),
-        members: members.sort((a, b) => b.total - a.total),
-      };
-    }).sort((a, b) => b.total - a.total);
+    const teams = FOUNDER_TEAMS.map((team) => ({
+      id: team.id,
+      name: team.name,
+      ...counts(idsForTeam(team.id)),
+      pickedAsTeam: counts([team.id]).total, // chose the team on the form
+      members: team.members
+        .map((m) => ({ id: m.id, name: m.name, ...counts([m.id]) }))
+        .sort((a, b) => b.total - a.total),
+    })).sort((a, b) => b.total - a.total);
 
+    const sum = (k: "confirmed" | "completed" | "cancelled" | "total") =>
+      teams.reduce((s, t) => s + t[k], 0);
     return {
       teams,
       totals: {
-        total: teams.reduce((s, t) => s + t.total, 0),
-        confirmed: teams.reduce((s, t) => s + t.confirmed, 0),
-        completed: teams.reduce((s, t) => s + t.completed, 0),
-        cancelled: teams.reduce((s, t) => s + t.cancelled, 0),
+        total: sum("total"),
+        confirmed: sum("confirmed"),
+        completed: sum("completed"),
+        cancelled: sum("cancelled"),
       },
     };
   }

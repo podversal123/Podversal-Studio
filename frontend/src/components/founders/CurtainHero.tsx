@@ -4,12 +4,21 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import InviteLetter from "./InviteLetter";
+import { introPlayed, markIntroPlayed } from "./intro-state";
+import StageDecor, { FP_STYLES } from "./StageDecor";
 
 type Phase = "pending" | "closed" | "opening" | "open";
 
-const SEEN_KEY = "pv_founders_intro_seen";
-const AUTO_OPEN_MS = 2600;
-const OPEN_MS = 2.6;
+// Timeline (all in one place so the pace is easy to change):
+//   closed curtain, "Podversal presents" ........ AUTO_OPEN_MS (a tap skips the wait)
+//   curtain parts ............................... OPEN_MS seconds
+//   letter fades up behind it ................... LETTER_DELAY + LETTER_MS seconds into the opening
+//   one sweep of light across the card .......... SHEEN_DELAY seconds into the opening
+const AUTO_OPEN_MS = 3200;
+const OPEN_MS = 4.4;
+const LETTER_DELAY = 1.4;
+const LETTER_MS = 2.6;
+const SHEEN_DELAY = 3.7;
 
 // Velvet pleats: two repeating gradients with different periods so the folds
 // never look machine-regular. Compressing the panel (scaleX) bunches them up
@@ -37,16 +46,11 @@ export default function CurtainHero({
   const reduceMotion = useReducedMotion();
   const [phase, setPhase] = useState<Phase>("pending");
 
-  // Decide once on the client: first visit this session gets the full curtain,
-  // returning visitors (or reduced-motion users) see the letter straight away.
+  // Decide once on the client: a freshly opened link gets the full curtain; if the
+  // curtain already played during this page load (e.g. the home-page gate), or the
+  // visitor prefers reduced motion, show the letter straight away.
   useEffect(() => {
-    let seen = false;
-    try {
-      seen = sessionStorage.getItem(SEEN_KEY) === "1";
-    } catch {
-      /* storage blocked: just play the intro */
-    }
-    setPhase(reduceMotion || seen ? "open" : "closed");
+    setPhase(reduceMotion || introPlayed() ? "open" : "closed");
   }, [reduceMotion]);
 
   const open = useCallback(() => {
@@ -62,11 +66,7 @@ export default function CurtainHero({
 
   const finish = () => {
     setPhase("open");
-    try {
-      sessionStorage.setItem(SEEN_KEY, "1");
-    } catch {
-      /* ignore */
-    }
+    markIntroPlayed();
   };
 
   const replay = () => {
@@ -91,6 +91,8 @@ export default function CurtainHero({
       aria-label="Invitation"
       style={{ fontFamily: "var(--font-newsreader), Georgia, serif" }}
     >
+      <style dangerouslySetInnerHTML={{ __html: FP_STYLES }} />
+
       {/* Stage light */}
       <motion.div
         aria-hidden
@@ -101,8 +103,10 @@ export default function CurtainHero({
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: revealed ? 1 : 0.25 }}
-        transition={{ duration: instant ? 0.4 : 2, delay: instant ? 0 : 0.8 }}
+        transition={{ duration: instant ? 0.4 : 3, delay: instant ? 0 : 1.2 }}
       />
+
+      <StageDecor show={revealed} instant={instant} />
 
       {/* The invitation */}
       <motion.div
@@ -119,10 +123,35 @@ export default function CurtainHero({
         transition={
           instant
             ? { duration: 0.45, ease: "easeOut" }
-            : { duration: 1.7, delay: 0.7, ease: [0.2, 0.7, 0.2, 1] }
+            : { duration: LETTER_MS, delay: LETTER_DELAY, ease: [0.2, 0.7, 0.2, 1] }
         }
       >
-        <InviteLetter className="block h-auto w-full drop-shadow-[0_24px_50px_rgba(0,0,0,.55)]" />
+        <motion.div
+          animate={phase === "open" && !reduceMotion ? { y: [0, -6, 0] } : { y: 0 }}
+          transition={
+            phase === "open" && !reduceMotion
+              ? { duration: 7, ease: "easeInOut", repeat: Infinity }
+              : { duration: 0.3 }
+          }
+          className="relative"
+        >
+          <InviteLetter className="block h-auto w-full drop-shadow-[0_24px_50px_rgba(0,0,0,.55)]" />
+          {/* A single sweep of light across the card once it has landed */}
+          {/* Always rendered (so server and browser HTML are identical); hidden for
+              reduced-motion visitors with CSS, see .fp-sheen in StageDecor. */}
+          <div aria-hidden className="fp-sheen pointer-events-none absolute inset-0 overflow-hidden">
+            <motion.div
+              className="absolute inset-y-0 w-[55%]"
+              style={{
+                background:
+                  "linear-gradient(105deg, rgba(255,250,235,0) 0%, rgba(255,250,235,.32) 50%, rgba(255,250,235,0) 100%)",
+              }}
+              initial={{ x: "-130%", opacity: 0 }}
+              animate={revealed ? { x: "260%", opacity: [0, 1, 1, 0] } : { x: "-130%", opacity: 0 }}
+              transition={{ duration: 1.5, ease: "easeInOut", delay: instant ? 0.4 : SHEEN_DELAY }}
+            />
+          </div>
+        </motion.div>
       </motion.div>
 
       {/* Call to action appears once the letter has landed */}
@@ -192,10 +221,26 @@ export default function CurtainHero({
                     ? "inset -28px 0 38px -18px rgba(0,0,0,.65)"
                     : "inset 28px 0 38px -18px rgba(0,0,0,.65)",
               }}
-              initial={{ scaleX: 1 }}
-              animate={{ scaleX: phase === "opening" ? 0.14 : 1 }}
-              transition={{ duration: OPEN_MS, ease: [0.7, 0, 0.18, 1] }}
-              onAnimationComplete={side === "left" ? () => phase === "opening" && finish() : undefined}
+              initial={{ scaleX: 1, skewX: 0 }}
+              animate={
+                phase === "opening"
+                  ? { scaleX: 0.14, skewX: [0, side === "left" ? -1.8 : 1.8, 0] }
+                  : { scaleX: 1, skewX: 0 }
+              }
+              transition={{
+                scaleX: {
+                  duration: OPEN_MS,
+                  ease: [0.7, 0, 0.18, 1],
+                  delay: side === "right" ? 0.12 : 0,
+                },
+                skewX: {
+                  duration: OPEN_MS,
+                  times: [0, 0.4, 1],
+                  ease: "easeInOut",
+                  delay: side === "right" ? 0.12 : 0,
+                },
+              }}
+              onAnimationComplete={side === "right" ? () => phase === "opening" && finish() : undefined}
             />
           ))}
 
@@ -232,17 +277,27 @@ export default function CurtainHero({
             >
               Podversal presents
             </p>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                open();
-              }}
-              disabled={phase !== "closed"}
-              className="min-h-[52px] border border-[#faf5dc]/60 px-9 text-[19px] italic text-[#faf5dc] shadow-[inset_0_0_0_3px_rgba(0,0,0,0),inset_0_0_0_4px_rgba(250,245,220,.25)] backdrop-blur-[1px] transition-colors hover:bg-[#faf5dc]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
-            >
-              Open the curtain
-            </button>
+            <div className="flex w-[min(62vw,260px)] flex-col items-center gap-3">
+              <span aria-hidden className="relative block h-px w-full overflow-hidden bg-[#faf5dc]/25">
+                {phase === "closed" && (
+                  <span
+                    className="fp-progress absolute inset-0 bg-[#faf5dc]"
+                    style={{ animationDuration: `${AUTO_OPEN_MS}ms` }}
+                  />
+                )}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  open();
+                }}
+                disabled={phase !== "closed"}
+                className="min-h-[44px] px-3 text-[18px] italic text-[#faf5dc]/90 underline decoration-[#faf5dc]/40 underline-offset-[6px] transition-colors hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
+              >
+                Tap to open now
+              </button>
+            </div>
           </motion.div>
         </div>
       )}

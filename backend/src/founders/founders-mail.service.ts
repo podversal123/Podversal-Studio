@@ -6,7 +6,7 @@ import {
   VENUE,
   formatDateLong,
   formatTime12,
-  memberById,
+  referrerInfo,
   slotInstant,
 } from "./founders.constants";
 
@@ -189,7 +189,7 @@ export class FoundersMailService {
   async sendAdminNewBooking(b: FounderBooking): Promise<void> {
     const admin = process.env.ADMIN_EMAIL;
     if (!admin) return;
-    const ref = memberById(b.referredBy);
+    const ref = referrerInfo(b.referredBy);
     const html = this.layout(
       "New founder booking",
       `${this.detailsTable(b)}
@@ -198,7 +198,7 @@ export class FoundersMailService {
          <tr><td style="padding:4px 0;color:#8a7a6a;">Name</td><td style="padding:4px 0;">${esc(b.name)}</td></tr>
          <tr><td style="padding:4px 0;color:#8a7a6a;">Phone</td><td style="padding:4px 0;">${esc(b.phone)}</td></tr>
          <tr><td style="padding:4px 0;color:#8a7a6a;">Email</td><td style="padding:4px 0;">${esc(b.email)}</td></tr>
-         <tr><td style="padding:4px 0;color:#8a7a6a;">Referred by</td><td style="padding:4px 0;font-weight:700;">${esc(ref?.member.name ?? b.referredBy)}${ref ? ` (${esc(ref.team.name)})` : ""}</td></tr>
+         <tr><td style="padding:4px 0;color:#8a7a6a;">Referred by</td><td style="padding:4px 0;font-weight:700;">${esc(ref?.label ?? b.referredBy)}${ref ? ` (${esc(ref.team.name)}${ref.member ? "" : ", picked the team"})` : ""}</td></tr>
        </table>`,
     );
     await this.send(

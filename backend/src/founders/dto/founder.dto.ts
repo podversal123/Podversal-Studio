@@ -7,7 +7,7 @@ import {
   Length,
   Matches,
 } from "class-validator";
-import { FOUNDER_MEMBER_IDS } from "../founders.constants";
+import { FOUNDER_REFERRER_IDS } from "../founders.constants";
 
 const trim = ({ value }: { value: unknown }) =>
   typeof value === "string" ? value.trim() : value;
@@ -35,7 +35,7 @@ export class CreateFounderBookingDto {
   })
   phone: string;
 
-  @IsIn(FOUNDER_MEMBER_IDS, { message: "Select who referred you" })
+  @IsIn(FOUNDER_REFERRER_IDS, { message: "Select who referred you" })
   referredBy: string;
 
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: "Invalid date" })
