@@ -20,7 +20,20 @@ const PLEATS = [
   "repeating-linear-gradient(90deg, #4a0a0d 0px, #741317 21px, #9c2126 41px, #741317 60px, #470a0c 82px)",
 ].join(",");
 
-export default function CurtainHero() {
+interface CurtainHeroProps {
+  // "page": the section at the top of /founders.
+  // "gate": a full-screen overlay shown before the home page.
+  variant?: "page" | "gate";
+  onBook?: () => void; // gate only: "Book your slot"
+  onEnterSite?: () => void; // gate only: "Enter website"
+}
+
+export default function CurtainHero({
+  variant = "page",
+  onBook,
+  onEnterSite,
+}: CurtainHeroProps) {
+  const isGate = variant === "gate";
   const reduceMotion = useReducedMotion();
   const [phase, setPhase] = useState<Phase>("pending");
 
@@ -70,7 +83,11 @@ export default function CurtainHero() {
 
   return (
     <section
-      className="relative isolate flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-[#1f0406] px-4 pb-10 pt-8"
+      className={
+        isGate
+          ? "fixed inset-0 z-[100] isolate flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-[#1f0406] px-4 pb-10 pt-8"
+          : "relative isolate flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-[#1f0406] px-4 pb-10 pt-8"
+      }
       aria-label="Invitation"
     >
       {/* Stage light */}
@@ -88,7 +105,7 @@ export default function CurtainHero() {
 
       {/* The invitation */}
       <motion.div
-        className="relative z-10"
+        className={`relative z-10 ${isGate ? "mt-auto" : ""}`}
         style={{
           width: "min(92vw, 640px, calc((100svh - 170px) * 0.7727))",
         }}
@@ -109,7 +126,7 @@ export default function CurtainHero() {
 
       {/* Call to action appears once the letter has landed */}
       <motion.div
-        className="relative z-10 mt-6 flex flex-col items-center gap-3 sm:flex-row sm:gap-5"
+        className={`relative z-10 mt-6 flex flex-col items-center gap-3 sm:flex-row sm:gap-5 ${isGate ? "mb-auto" : ""}`}
         initial={{ opacity: 0, y: 8 }}
         animate={phase === "open" ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
         transition={{ duration: 0.6, delay: reduceMotion ? 0 : 0.15 }}
@@ -118,22 +135,33 @@ export default function CurtainHero() {
       >
         <button
           type="button"
-          onClick={scrollToForm}
+          onClick={isGate ? onBook : scrollToForm}
           className="min-h-[48px] rounded-full bg-[#faf5dc] px-8 text-[17px] font-semibold text-[#89171a] shadow-[0_8px_24px_rgba(0,0,0,.35)] transition-transform duration-200 hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc] active:scale-[0.98]"
           tabIndex={phase === "open" ? 0 : -1}
         >
           Book your slot
         </button>
-        <Link
-          href="/"
-          className="min-h-[48px] px-2 py-3 text-[15px] text-[#faf5dc]/80 underline decoration-[#faf5dc]/40 underline-offset-4 hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
-          tabIndex={phase === "open" ? 0 : -1}
-        >
-          Visit the Podversal website
-        </Link>
+        {isGate ? (
+          <button
+            type="button"
+            onClick={onEnterSite}
+            className="min-h-[48px] px-2 py-3 text-[15px] text-[#faf5dc]/80 underline decoration-[#faf5dc]/40 underline-offset-4 hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
+            tabIndex={phase === "open" ? 0 : -1}
+          >
+            Enter the Podversal website
+          </button>
+        ) : (
+          <Link
+            href="/"
+            className="min-h-[48px] px-2 py-3 text-[15px] text-[#faf5dc]/80 underline decoration-[#faf5dc]/40 underline-offset-4 hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
+            tabIndex={phase === "open" ? 0 : -1}
+          >
+            Visit the Podversal website
+          </Link>
+        )}
       </motion.div>
 
-      {phase === "open" && !reduceMotion && (
+      {phase === "open" && !reduceMotion && !isGate && (
         <button
           type="button"
           onClick={replay}
@@ -180,10 +208,10 @@ export default function CurtainHero() {
               }}
             />
             <div
-              className="absolute inset-x-0 top-full h-[14px] drop-shadow-[0_8px_10px_rgba(0,0,0,.55)]"
+              className="absolute inset-x-0 top-full h-[23px] drop-shadow-[0_8px_10px_rgba(0,0,0,.55)]"
               style={{
                 backgroundImage:
-                  "radial-gradient(circle at 23px 0, #6e1317 0, #6e1317 22px, rgba(250,245,220,.45) 22px, rgba(250,245,220,.45) 24px, transparent 24px)",
+                  "radial-gradient(circle at 23px 0, #6e1317 0, #6e1317 20.5px, rgba(250,245,220,.55) 20.5px, rgba(250,245,220,.55) 22.5px, transparent 23px)",
                 backgroundSize: "46px 100%",
                 backgroundRepeat: "repeat-x",
               }}

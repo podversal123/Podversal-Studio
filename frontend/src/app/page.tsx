@@ -22,6 +22,7 @@ import { isAuthenticated } from "@/lib/auth";
 import { useRefetchOnFocus } from "@/lib/use-refetch-on-focus";
 import { useFadeIn, anim } from "@/lib/use-fade-in";
 import { FEATURED_VIDEOS } from "@/lib/featured-videos";
+import CampaignGate from "@/components/founders/CampaignGate";
 
 // ── Static data ───────────────────────────────────────
 const SERVICES = [
@@ -234,6 +235,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#111111]">
+      <CampaignGate />
       <Navbar />
 
       {/* ════════════════════════════════════════════════════

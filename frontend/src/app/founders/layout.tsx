@@ -1,15 +1,5 @@
 import type { Metadata } from "next";
-import { Newsreader } from "next/font/google";
-
-// Same typeface family as the printed invitation.
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-  display: "swap",
-  adjustFontFallback: false,
-  variable: "--font-newsreader",
-});
+import { newsreader } from "@/components/founders/newsreader";
 
 const TITLE = "Book your founder podcast slot";
 const DESCRIPTION =

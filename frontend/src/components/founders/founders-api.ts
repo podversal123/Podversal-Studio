@@ -62,31 +62,67 @@ export class ApiError extends Error {
   }
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// The API runs on a free tier that sleeps when idle: the first request after a
+// quiet spell can be slow or return a transient 502/503. Reads therefore get a
+// timeout plus automatic retries; the booking POST is never retried (a retry
+// after a timeout could create a second booking).
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  let res: Response;
-  try {
-    res = await fetch(`${BASE}${path}`, {
-      ...init,
-      headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
-      cache: "no-store",
-    });
-  } catch {
-    throw new ApiError(
-      "We couldn't reach the booking system. Check your internet connection and try again.",
-      0,
-    );
+  const isRead = !init?.method || init.method === "GET";
+  const attempts = isRead ? 3 : 1;
+  const timeoutMs = isRead ? 20000 : 45000;
+  let lastError = new ApiError("Something went wrong. Please try again.", 0);
+
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    if (attempt > 0) await sleep(900 * attempt);
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    let res: Response;
+    try {
+      res = await fetch(`${BASE}${path}`, {
+        ...init,
+        signal: controller.signal,
+        // No Content-Type on reads: it would turn every GET into a "non-simple"
+        // request and make the browser send an extra preflight round trip first.
+        headers: {
+          ...(init?.body ? { "Content-Type": "application/json" } : {}),
+          ...(init?.headers ?? {}),
+        },
+        cache: "no-store",
+      });
+    } catch {
+      lastError = new ApiError(
+        isRead
+          ? "We couldn't reach the booking system. Check your internet connection and try again."
+          : "We couldn't confirm whether your booking went through. Please check your email for a confirmation before trying again.",
+        0,
+      );
+      continue;
+    } finally {
+      clearTimeout(timer);
+    }
+
+    // Transient server-side failure (e.g. the server is waking up): try again
+    if (isRead && res.status >= 502 && res.status <= 504 && attempt < attempts - 1) {
+      lastError = new ApiError("The booking system is starting up. Please try again.", res.status);
+      continue;
+    }
+
+    const body = await res.json().catch(() => null);
+    if (!res.ok) {
+      const raw = body?.message;
+      const message = Array.isArray(raw)
+        ? raw[0]
+        : typeof raw === "string"
+          ? raw
+          : "Something went wrong. Please try again.";
+      throw new ApiError(message, res.status);
+    }
+    return body as T;
   }
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    const raw = body?.message;
-    const message = Array.isArray(raw)
-      ? raw[0]
-      : typeof raw === "string"
-        ? raw
-        : "Something went wrong. Please try again.";
-    throw new ApiError(message, res.status);
-  }
-  return body as T;
+  throw lastError;
 }
 
 export const foundersApi = {

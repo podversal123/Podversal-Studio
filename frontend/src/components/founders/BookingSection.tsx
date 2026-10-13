@@ -83,6 +83,8 @@ export default function BookingSection() {
   const [date, setDate] = useState<string | null>(null);
   const [slots, setSlots] = useState<FounderSlot[] | null>(null);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState("");
+  const [slotsSlow, setSlotsSlow] = useState(false);
   const [time, setTime] = useState<string | null>(null);
   const [pickError, setPickError] = useState<{ date?: string; time?: string }>({});
 
@@ -147,17 +149,45 @@ export default function BookingSection() {
   }, [loadInitial]);
 
   // ── Slots for the chosen date (kept fresh while the tab is open)
+  // Every call gets a ticket number; only the newest ticket may update the
+  // screen, so a slow answer for an old date can never overwrite a newer one.
+  const slotsTicket = useRef(0);
+
   const fetchSlots = useCallback(async (d: string, quiet = false) => {
-    if (!quiet) setSlotsLoading(true);
+    const ticket = ++slotsTicket.current;
+    if (!quiet) {
+      setSlotsLoading(true);
+      setSlotsError("");
+      setSlotsSlow(false);
+    }
+    const slowTimer = quiet ? null : setTimeout(() => {
+      if (ticket === slotsTicket.current) setSlotsSlow(true);
+    }, 3500);
     try {
       const res = await foundersApi.slots(d);
+      if (ticket !== slotsTicket.current) return;
       setSlots(res.slots);
+      setSlotsError("");
       // Someone may have just taken the slot this visitor selected
       setTime((t) => (t && !res.slots.find((s) => s.start === t)?.available ? null : t));
-    } catch {
-      if (!quiet) setSlots([]);
+    } catch (err) {
+      if (ticket !== slotsTicket.current) return;
+      // A failed refresh in the background keeps what is on screen; a failed
+      // first load must say so instead of pretending there are no times.
+      if (!quiet) {
+        setSlots(null);
+        setSlotsError(
+          err instanceof ApiError
+            ? err.message
+            : "We couldn't load the times. Please try again.",
+        );
+      }
     } finally {
-      if (!quiet) setSlotsLoading(false);
+      if (slowTimer) clearTimeout(slowTimer);
+      if (!quiet && ticket === slotsTicket.current) {
+        setSlotsLoading(false);
+        setSlotsSlow(false);
+      }
     }
   }, []);
 
@@ -167,13 +197,17 @@ export default function BookingSection() {
     const id = setInterval(() => {
       if (document.visibilityState === "visible") fetchSlots(date, true);
     }, 30000);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      slotsTicket.current++; // drop any answer still on its way for this date
+    };
   }, [date, fetchSlots]);
 
   const pickDate = (d: string) => {
     setDate(d);
     setTime(null);
     setSlots(null);
+    setSlotsError("");
     setPickError({});
     setServerError("");
   };
@@ -429,12 +463,31 @@ export default function BookingSection() {
                 {!date && (
                   <p className="text-[16px] text-[#89171a]/70">Choose a date first to see the times.</p>
                 )}
-                {date && (slotsLoading || !slots) && (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden>
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={i} className="h-[66px] animate-pulse bg-[#89171a]/10" />
-                    ))}
+                {date && slotsError && !slotsLoading && (
+                  <div role="alert" className="border border-[#89171a]/40 bg-[#89171a]/5 p-5">
+                    <p className="text-[16px] text-[#3a0b0d]">{slotsError}</p>
+                    <button
+                      type="button"
+                      onClick={() => fetchSlots(date)}
+                      className="mt-3 min-h-[46px] rounded-full bg-[#89171a] px-6 text-[16px] font-semibold text-[#faf5dc] hover:bg-[#6f1215] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#89171a]"
+                    >
+                      Try again
+                    </button>
                   </div>
+                )}
+                {date && !slotsError && (slotsLoading || !slots) && (
+                  <>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden>
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="h-[66px] animate-pulse bg-[#89171a]/10" />
+                      ))}
+                    </div>
+                    <p role="status" className="text-[15px] text-[#89171a]/80">
+                      {slotsSlow
+                        ? "Still loading. The booking system may be waking up, this can take a few seconds."
+                        : "Loading times…"}
+                    </p>
+                  </>
                 )}
                 {date && slots && !slotsLoading && (
                   <>
