@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CalendarPlus, Loader2 } from "lucide-react";
+import { CalendarPlus, Check, Loader2 } from "lucide-react";
 import MonthCalendar from "./MonthCalendar";
 import {
   ApiError,
@@ -20,7 +20,12 @@ import {
   foundersApi,
 } from "./founders-api";
 
-const serif = { fontFamily: "var(--font-newsreader), Georgia, serif" };
+// Everything in this section is set in the same serif as the printed invitation.
+const SERIF = {
+  fontFamily: "var(--font-newsreader), Georgia, serif",
+  fontVariantNumeric: "lining-nums",
+} as const;
+const GRAIN = { backgroundImage: "url(/founders/grain.png)" } as const;
 const REF_KEY = "pv_founders_ref";
 
 const schema = z.object({
@@ -37,7 +42,14 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 const inputCls =
-  "w-full border-0 border-b border-[#89171a]/40 bg-transparent px-0 py-3 text-[17px] text-[#3a0b0d] placeholder:text-[#89171a]/40 transition-colors focus:border-[#89171a] focus:shadow-[0_1px_0_0_#89171a] focus:outline-none";
+  "w-full border-0 border-b border-[#89171a]/35 bg-transparent px-0 pb-2 pt-1 text-[21px] leading-snug text-[#2e0a0c] placeholder:italic placeholder:text-[#89171a]/35 transition-[border-color,box-shadow] focus:border-[#89171a] focus:shadow-[0_1px_0_0_#89171a] focus:outline-none";
+
+// Square-cornered, with a fine inner rule like a stationery frame.
+// (Full class names on purpose: Tailwind can't see classes built at runtime.)
+const primaryBtn =
+  "inline-flex min-h-[58px] items-center justify-center gap-2 bg-[#89171a] px-10 text-[20px] font-semibold text-[#faf5dc] shadow-[inset_0_0_0_4px_#89171a,inset_0_0_0_5px_rgba(250,245,220,.5)] transition-colors hover:bg-[#6f1215] hover:shadow-[inset_0_0_0_4px_#6f1215,inset_0_0_0_5px_rgba(250,245,220,.7)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#89171a] disabled:cursor-not-allowed disabled:opacity-60";
+const ghostBtn =
+  "inline-flex min-h-[58px] items-center justify-center border border-[#89171a]/50 px-10 text-[20px] text-[#89171a] transition-colors hover:bg-[#89171a]/[0.07] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#89171a]";
 
 function Field({
   id,
@@ -52,12 +64,12 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-[15px] text-[#89171a]">
+      <label htmlFor={id} className="block text-[16px] italic text-[#89171a]/90">
         {label}
       </label>
       {children}
       {error && (
-        <p role="alert" className="mt-1 text-[14px] text-[#b3201f]">
+        <p role="alert" className="mt-1.5 text-[15px] text-[#b3201f]">
           {error}
         </p>
       )}
@@ -65,11 +77,27 @@ function Field({
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+// An invitation-style divider: a rule, the title, a rule
+function GroupTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-[1.5rem] italic leading-tight text-[#89171a]" style={serif}>
-      {children}
-    </h3>
+    <div className="flex items-center gap-4">
+      <span aria-hidden className="h-px flex-1 bg-[#89171a]/25" />
+      <h3 className="text-[1.5rem] italic leading-none text-[#89171a]">{children}</h3>
+      <span aria-hidden className="h-px flex-1 bg-[#89171a]/25" />
+    </div>
+  );
+}
+
+// A wax-seal style stamp for the confirmation
+function Seal() {
+  return (
+    <div
+      aria-hidden
+      className="relative mx-auto mb-7 flex h-[84px] w-[84px] -rotate-[8deg] items-center justify-center rounded-full bg-[#89171a] text-[#faf5dc] shadow-[0_10px_24px_-8px_rgba(80,10,12,.55)]"
+    >
+      <span className="absolute inset-[6px] rounded-full border border-dashed border-[#faf5dc]/55" />
+      <Check size={34} strokeWidth={2.4} />
+    </div>
   );
 }
 
@@ -160,9 +188,11 @@ export default function BookingSection() {
       setSlotsError("");
       setSlotsSlow(false);
     }
-    const slowTimer = quiet ? null : setTimeout(() => {
-      if (ticket === slotsTicket.current) setSlotsSlow(true);
-    }, 3500);
+    const slowTimer = quiet
+      ? null
+      : setTimeout(() => {
+          if (ticket === slotsTicket.current) setSlotsSlow(true);
+        }, 3500);
     try {
       const res = await foundersApi.slots(d);
       if (ticket !== slotsTicket.current) return;
@@ -177,9 +207,7 @@ export default function BookingSection() {
       if (!quiet) {
         setSlots(null);
         setSlotsError(
-          err instanceof ApiError
-            ? err.message
-            : "We couldn't load the times. Please try again.",
+          err instanceof ApiError ? err.message : "We couldn't load the times. Please try again.",
         );
       }
     } finally {
@@ -276,24 +304,30 @@ export default function BookingSection() {
     URL.revokeObjectURL(url);
   };
 
+  const sectionCls =
+    "relative z-10 -mt-10 rounded-t-[2.5rem] bg-[#faf5dc] px-5 sm:rounded-t-[50%_6rem] sm:px-8 lg:px-12";
+
   // ── Success
   if (result) {
     return (
       <section
         id="book"
         ref={sectionRef}
-        className="relative z-10 -mt-10 rounded-t-[2.5rem] bg-[#faf5dc] px-5 pb-20 pt-16 sm:rounded-t-[50%_6rem] sm:px-8"
+        style={{ ...SERIF, ...GRAIN }}
+        className={`${sectionCls} pb-24 pt-16 sm:pt-24`}
       >
         <div className="mx-auto max-w-xl text-center">
-          <h2 className="text-[clamp(2.2rem,7vw,3.4rem)] font-bold leading-[1.05] text-[#89171a]" style={serif}>
+          <Seal />
+          <h2 className="text-[clamp(2.8rem,9vw,4.4rem)] font-bold leading-[0.95] tracking-[-0.02em] text-[#89171a]">
             You’re booked.
           </h2>
-          <p className="mt-4 text-[17px] leading-relaxed text-[#3a0b0d]" style={serif}>
+          <p className="mx-auto mt-6 max-w-md text-[20px] leading-[1.6] text-[#2e0a0c]">
             Thank you, {result.name.split(" ")[0]}. We’ve emailed the details to{" "}
-            <strong className="break-all">{result.email}</strong>. If it doesn’t show up in a few minutes, check your spam folder.
+            <strong className="break-all font-semibold">{result.email}</strong>. If it doesn’t
+            show up in a few minutes, look in your spam folder.
           </p>
 
-          <dl className="mt-8 divide-y divide-[#89171a]/15 border-y border-[#89171a]/15 text-left">
+          <dl className="mt-10 divide-y divide-[#89171a]/20 border-y border-[#89171a]/20 text-left">
             {[
               ["Date", formatDateLong(result.shootDate)],
               ["Time", `${formatTime12(result.startTime)} – ${formatTime12(result.endTime)}`],
@@ -301,25 +335,18 @@ export default function BookingSection() {
               ["Company", result.companyName],
               ["Booking ID", result.bookingCode],
             ].map(([k, val]) => (
-              <div key={k} className="flex flex-col gap-0.5 py-3 sm:flex-row sm:gap-6">
-                <dt className="w-28 shrink-0 text-[15px] text-[#89171a]/70">{k}</dt>
-                <dd className="text-[17px] font-medium text-[#3a0b0d]">{val}</dd>
+              <div key={k} className="flex flex-col gap-0.5 py-3.5 sm:flex-row sm:gap-8">
+                <dt className="w-28 shrink-0 text-[16px] italic text-[#89171a]/75">{k}</dt>
+                <dd className="text-[19px] text-[#2e0a0c]">{val}</dd>
               </div>
             ))}
           </dl>
 
-          <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
-            <button
-              type="button"
-              onClick={downloadIcs}
-              className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-full bg-[#89171a] px-7 text-[17px] font-semibold text-[#faf5dc] transition-colors hover:bg-[#6f1215] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#89171a]"
-            >
-              <CalendarPlus size={18} /> Add to calendar
+          <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
+            <button type="button" onClick={downloadIcs} className={primaryBtn}>
+              <CalendarPlus size={19} /> Add to calendar
             </button>
-            <Link
-              href="/"
-              className="inline-flex min-h-[50px] items-center justify-center rounded-full border border-[#89171a]/50 px-7 text-[17px] text-[#89171a] transition-colors hover:bg-[#89171a]/8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#89171a]"
-            >
+            <Link href="/" className={ghostBtn}>
               Visit the Podversal website
             </Link>
           </div>
@@ -333,288 +360,308 @@ export default function BookingSection() {
     <section
       id="book"
       ref={sectionRef}
-      className="relative z-10 -mt-10 rounded-t-[2.5rem] bg-[#faf5dc] px-5 pb-24 pt-14 sm:rounded-t-[50%_6rem] sm:px-8 sm:pt-24 lg:px-12"
+      style={{ ...SERIF, ...GRAIN }}
+      className={`${sectionCls} pb-24 pt-14 sm:pt-24`}
     >
-      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
+      <div className="mx-auto grid max-w-6xl gap-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
         {/* About the session */}
         <div className="lg:sticky lg:top-12 lg:self-start">
-          <h2
-            className="text-[clamp(2rem,6.5vw,3.3rem)] font-bold leading-[1.08] text-[#89171a]"
-            style={serif}
-          >
-            Choose a time for your episode
+          <h2 className="text-[clamp(2.9rem,8.5vw,5.1rem)] font-bold leading-[0.96] tracking-[-0.025em] text-[#89171a]">
+            Your hour at the microphone
           </h2>
-          <p className="mt-4 max-w-md text-[18px] leading-[1.65] text-[#3a0b0d]" style={serif}>
-            A complimentary one-hour podcast session at Podversal Studio. Pick a slot and we’ll
-            confirm it by email, then remind you the day before and again two hours ahead.
+          <p className="mt-6 max-w-md text-[20px] leading-[1.6] text-[#2e0a0c]">
+            A complimentary one-hour podcast session at Podversal Studio. Choose a date and a
+            time and we’ll confirm it by email, then remind you the day before and again two
+            hours ahead.
           </p>
-          <dl className="mt-8 max-w-md divide-y divide-[#89171a]/15 border-y border-[#89171a]/15">
+          <dl className="mt-9 max-w-md divide-y divide-[#89171a]/20 border-y border-[#89171a]/20">
             {[
-              ["Length", "1 hour"],
+              ["Length", "One hour"],
               ["Open", "10 AM to 6 PM, every day"],
               ["Where", config?.venue ?? "Podversal Studio, Greater Noida West"],
             ].map(([k, v]) => (
-              <div key={k} className="flex gap-5 py-3">
-                <dt className="w-16 shrink-0 text-[15px] text-[#89171a]/70">{k}</dt>
-                <dd className="text-[16px] text-[#3a0b0d]">{v}</dd>
+              <div key={k} className="flex gap-6 py-3.5">
+                <dt className="w-16 shrink-0 text-[16px] italic text-[#89171a]/75">{k}</dt>
+                <dd className="text-[18px] leading-snug text-[#2e0a0c]">{v}</dd>
               </div>
             ))}
           </dl>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/founders/studio-set.svg"
+            alt=""
+            aria-hidden
+            className="mt-14 hidden w-full max-w-[400px] lg:block"
+          />
         </div>
 
         {/* The reply card */}
-        <div>
-          {load === "loading" && (
-            <div className="flex flex-col items-center gap-3 py-20 text-center text-[#89171a]" role="status">
-              <Loader2 className="animate-spin" size={26} />
-              <p className="text-[17px]" style={serif}>
-                {slow
-                  ? "Waking up the booking system. This can take up to a minute the first time."
-                  : "Loading available times…"}
-              </p>
-            </div>
-          )}
+        <div
+          style={GRAIN}
+          className="relative bg-[#fffaf0] shadow-[0_1px_0_rgba(137,23,26,.1),0_36px_70px_-36px_rgba(70,10,12,.45)]"
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-2 border border-[#89171a]/25 sm:inset-3"
+          />
 
-          {load === "error" && (
-            <div role="alert" className="border border-[#89171a]/40 bg-[#89171a]/5 p-6 text-center">
-              <p className="text-[17px] text-[#3a0b0d]">{loadError}</p>
-              <button
-                type="button"
-                onClick={loadInitial}
-                className="mt-4 min-h-[48px] rounded-full bg-[#89171a] px-7 text-[16px] font-semibold text-[#faf5dc] hover:bg-[#6f1215] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#89171a]"
-              >
-                Try again
-              </button>
-            </div>
-          )}
-
-          {load === "ready" && config && (
-            <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-12">
-              {/* honeypot: hidden from people, irresistible to bots */}
-              <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-                <label>
-                  Website
-                  <input type="text" tabIndex={-1} autoComplete="off" {...register("website")} />
-                </label>
+          <div className="relative px-6 py-10 sm:px-12 sm:py-14">
+            {load === "loading" && (
+              <div className="flex flex-col items-center gap-3 py-16 text-center text-[#89171a]" role="status">
+                <Loader2 className="animate-spin" size={26} />
+                <p className="text-[19px] italic">
+                  {slow
+                    ? "Waking up the booking system. This can take up to a minute the first time."
+                    : "Loading available times…"}
+                </p>
               </div>
+            )}
 
-              {/* Details */}
-              <div className="space-y-6">
-                <SectionTitle>Your details</SectionTitle>
-                <Field id="companyName" label="Company name" error={errors.companyName?.message}>
-                  <input
-                    id="companyName"
-                    autoComplete="organization"
-                    className={inputCls}
-                    placeholder="Acme Pvt. Ltd."
-                    {...register("companyName")}
-                  />
-                </Field>
-                <Field id="name" label="Your name" error={errors.name?.message}>
-                  <input
-                    id="name"
-                    autoComplete="name"
-                    className={inputCls}
-                    placeholder="Full name"
-                    {...register("name")}
-                  />
-                </Field>
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <Field id="email" label="Email" error={errors.email?.message}>
-                    <input
-                      id="email"
-                      type="email"
-                      inputMode="email"
-                      autoComplete="email"
-                      className={inputCls}
-                      placeholder="you@company.com"
-                      {...register("email")}
-                    />
-                  </Field>
-                  <Field id="phone" label="Mobile number" error={errors.phone?.message}>
-                    <input
-                      id="phone"
-                      type="tel"
-                      inputMode="numeric"
-                      autoComplete="tel-national"
-                      maxLength={10}
-                      className={inputCls}
-                      placeholder="10-digit number"
-                      {...register("phone")}
-                    />
-                  </Field>
-                </div>
-              </div>
-
-              {/* Date */}
-              <div id="pick-date" className="scroll-mt-24 space-y-4">
-                <SectionTitle>Pick a date</SectionTitle>
-                <MonthCalendar days={days} value={date} onChange={pickDate} />
-                {pickError.date && (
-                  <p role="alert" className="text-[14px] text-[#b3201f]">
-                    {pickError.date}
-                  </p>
-                )}
-              </div>
-
-              {/* Time */}
-              <div id="pick-time" className="scroll-mt-24 space-y-4">
-                <SectionTitle>Pick a time</SectionTitle>
-                {!date && (
-                  <p className="text-[16px] text-[#89171a]/70">Choose a date first to see the times.</p>
-                )}
-                {date && slotsError && !slotsLoading && (
-                  <div role="alert" className="border border-[#89171a]/40 bg-[#89171a]/5 p-5">
-                    <p className="text-[16px] text-[#3a0b0d]">{slotsError}</p>
-                    <button
-                      type="button"
-                      onClick={() => fetchSlots(date)}
-                      className="mt-3 min-h-[46px] rounded-full bg-[#89171a] px-6 text-[16px] font-semibold text-[#faf5dc] hover:bg-[#6f1215] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#89171a]"
-                    >
-                      Try again
-                    </button>
-                  </div>
-                )}
-                {date && !slotsError && (slotsLoading || !slots) && (
-                  <>
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden>
-                      {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="h-[66px] animate-pulse bg-[#89171a]/10" />
-                      ))}
-                    </div>
-                    <p role="status" className="text-[15px] text-[#89171a]/80">
-                      {slotsSlow
-                        ? "Still loading. The booking system may be waking up, this can take a few seconds."
-                        : "Loading times…"}
-                    </p>
-                  </>
-                )}
-                {date && slots && !slotsLoading && (
-                  <>
-                    <p className="text-[16px] text-[#89171a]/80">{formatDateLong(date)}</p>
-                    {slots.every((s) => !s.available) ? (
-                      <p className="text-[16px] text-[#3a0b0d]">
-                        No times are left on this day. Please pick another date.
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" role="radiogroup" aria-label="Time slot">
-                        {slots.map((s) => {
-                          const selected = time === s.start;
-                          return (
-                            <button
-                              key={s.start}
-                              type="button"
-                              role="radio"
-                              aria-checked={selected}
-                              disabled={!s.available}
-                              onClick={() => {
-                                setTime(s.start);
-                                setPickError((p) => ({ ...p, time: undefined }));
-                              }}
-                              className={[
-                                "flex min-h-[66px] flex-col items-center justify-center border px-2 py-2 text-center transition-colors",
-                                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#89171a]",
-                                selected
-                                  ? "border-[#89171a] bg-[#89171a] text-[#faf5dc]"
-                                  : s.available
-                                    ? "border-[#89171a]/40 text-[#3a0b0d] hover:border-[#89171a] hover:bg-[#89171a]/8"
-                                    : "cursor-not-allowed border-[#89171a]/15 text-[#89171a]/35",
-                              ].join(" ")}
-                            >
-                              <span className={`text-[17px] font-semibold ${!s.available ? "line-through" : ""}`}>
-                                {formatTime12(s.start)}
-                              </span>
-                              <span className="text-[13px] opacity-80">
-                                {s.available ? `to ${formatTime12(s.end)}` : "Not available"}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
-                )}
-                {pickError.time && (
-                  <p role="alert" className="text-[14px] text-[#b3201f]">
-                    {pickError.time}
-                  </p>
-                )}
-              </div>
-
-              {/* Reference */}
-              <fieldset className="space-y-2">
-                <legend className="mb-2">
-                  <SectionTitle>Who invited you?</SectionTitle>
-                </legend>
-                {refFromLink && (
-                  <p className="text-[15px] text-[#89171a]/80">
-                    We selected {refFromLink} from your invitation link. Change it if that’s not right.
-                  </p>
-                )}
-                <div>
-                  {config.teams.map((team) => (
-                    <div
-                      key={team.id}
-                      className="flex flex-col gap-2 border-t border-[#89171a]/15 py-3 sm:flex-row sm:items-center sm:gap-5"
-                    >
-                      <span className="text-[1.1rem] italic text-[#89171a] sm:w-48" style={serif}>
-                        {team.name}
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {team.members.map((m) => (
-                          <label key={m.id} className="cursor-pointer">
-                            <input
-                              type="radio"
-                              value={m.id}
-                              className="peer sr-only"
-                              {...register("referredBy")}
-                            />
-                            <span className="inline-flex min-h-[44px] items-center rounded-full border border-[#89171a]/40 px-5 text-[16px] text-[#3a0b0d] transition-colors hover:border-[#89171a] peer-checked:border-[#89171a] peer-checked:bg-[#89171a] peer-checked:text-[#faf5dc] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#89171a]">
-                              {m.name}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                  <div className="border-t border-[#89171a]/15" />
-                </div>
-                {errors.referredBy && !referredBy && (
-                  <p role="alert" className="text-[14px] text-[#b3201f]">
-                    {errors.referredBy.message}
-                  </p>
-                )}
-              </fieldset>
-
-              {/* Submit */}
-              <div className="space-y-4">
-                {date && time && (
-                  <p className="text-[17px] text-[#3a0b0d]" style={serif}>
-                    {formatDateShort(date)}, {formatTime12(time)} to{" "}
-                    {formatTime12(`${String(Number(time.slice(0, 2)) + 1).padStart(2, "0")}:00`)}
-                  </p>
-                )}
-                {serverError && (
-                  <div role="alert" className="border border-[#89171a]/40 bg-[#89171a]/6 px-4 py-3 text-[16px] text-[#3a0b0d]">
-                    {serverError}
-                  </div>
-                )}
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-full bg-[#89171a] px-8 text-[18px] font-semibold text-[#faf5dc] transition-colors hover:bg-[#6f1215] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#89171a] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[260px]"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="animate-spin" size={18} /> Booking…
-                    </>
-                  ) : (
-                    "Confirm my slot"
-                  )}
+            {load === "error" && (
+              <div role="alert" className="border border-[#89171a]/40 bg-[#89171a]/5 p-6 text-center">
+                <p className="text-[19px] text-[#2e0a0c]">{loadError}</p>
+                <button type="button" onClick={loadInitial} className={`${primaryBtn} mt-5`}>
+                  Try again
                 </button>
               </div>
-            </form>
-          )}
+            )}
+
+            {load === "ready" && config && (
+              <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-14">
+                {/* honeypot: hidden from people, irresistible to bots */}
+                <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+                  <label>
+                    Website
+                    <input type="text" tabIndex={-1} autoComplete="off" {...register("website")} />
+                  </label>
+                </div>
+
+                {/* Details */}
+                <div className="space-y-7">
+                  <GroupTitle>Your details</GroupTitle>
+                  <Field id="companyName" label="Company name" error={errors.companyName?.message}>
+                    <input
+                      id="companyName"
+                      autoComplete="organization"
+                      className={inputCls}
+                      placeholder="Acme Pvt. Ltd."
+                      {...register("companyName")}
+                    />
+                  </Field>
+                  <Field id="name" label="Your name" error={errors.name?.message}>
+                    <input
+                      id="name"
+                      autoComplete="name"
+                      className={inputCls}
+                      placeholder="Full name"
+                      {...register("name")}
+                    />
+                  </Field>
+                  <div className="grid gap-7 sm:grid-cols-2">
+                    <Field id="email" label="Email" error={errors.email?.message}>
+                      <input
+                        id="email"
+                        type="email"
+                        inputMode="email"
+                        autoComplete="email"
+                        className={inputCls}
+                        placeholder="you@company.com"
+                        {...register("email")}
+                      />
+                    </Field>
+                    <Field id="phone" label="Mobile number" error={errors.phone?.message}>
+                      <input
+                        id="phone"
+                        type="tel"
+                        inputMode="numeric"
+                        autoComplete="tel-national"
+                        maxLength={10}
+                        className={inputCls}
+                        placeholder="10-digit number"
+                        {...register("phone")}
+                      />
+                    </Field>
+                  </div>
+                </div>
+
+                {/* Date */}
+                <div id="pick-date" className="scroll-mt-24 space-y-5">
+                  <GroupTitle>Pick a date</GroupTitle>
+                  <MonthCalendar days={days} value={date} onChange={pickDate} />
+                  {pickError.date && (
+                    <p role="alert" className="text-[15px] text-[#b3201f]">
+                      {pickError.date}
+                    </p>
+                  )}
+                </div>
+
+                {/* Time */}
+                <div id="pick-time" className="scroll-mt-24 space-y-5">
+                  <GroupTitle>Pick a time</GroupTitle>
+                  {!date && (
+                    <p className="text-center text-[18px] italic text-[#89171a]/70">
+                      Choose a date first to see the times.
+                    </p>
+                  )}
+                  {date && slotsError && !slotsLoading && (
+                    <div role="alert" className="border border-[#89171a]/40 bg-[#89171a]/5 p-5">
+                      <p className="text-[18px] text-[#2e0a0c]">{slotsError}</p>
+                      <button
+                        type="button"
+                        onClick={() => fetchSlots(date)}
+                        className={`${primaryBtn} mt-4 !min-h-[50px] !px-7 !text-[18px]`}
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  )}
+                  {date && !slotsError && (slotsLoading || !slots) && (
+                    <>
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden>
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="h-[76px] animate-pulse bg-[#89171a]/10" />
+                        ))}
+                      </div>
+                      <p role="status" className="text-center text-[17px] italic text-[#89171a]/80">
+                        {slotsSlow
+                          ? "Still loading. The booking system may be waking up, this can take a few seconds."
+                          : "Loading times…"}
+                      </p>
+                    </>
+                  )}
+                  {date && slots && !slotsLoading && (
+                    <>
+                      <p className="text-center text-[18px] italic text-[#89171a]/85">
+                        {formatDateLong(date)}
+                      </p>
+                      {slots.every((s) => !s.available) ? (
+                        <p className="text-center text-[18px] text-[#2e0a0c]">
+                          No times are left on this day. Please pick another date.
+                        </p>
+                      ) : (
+                        <div
+                          className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+                          role="radiogroup"
+                          aria-label="Time slot"
+                        >
+                          {slots.map((s) => {
+                            const selected = time === s.start;
+                            const [clock, suffix] = formatTime12(s.start).split(" ");
+                            return (
+                              <button
+                                key={s.start}
+                                type="button"
+                                role="radio"
+                                aria-checked={selected}
+                                aria-label={`${formatTime12(s.start)} to ${formatTime12(s.end)}${s.available ? "" : ", not available"}`}
+                                disabled={!s.available}
+                                onClick={() => {
+                                  setTime(s.start);
+                                  setPickError((p) => ({ ...p, time: undefined }));
+                                }}
+                                className={[
+                                  "flex min-h-[76px] flex-col items-center justify-center border px-2 py-2 text-center transition-colors",
+                                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#89171a]",
+                                  selected
+                                    ? "border-[#89171a] bg-[#89171a] text-[#faf5dc]"
+                                    : s.available
+                                      ? "border-[#89171a]/35 text-[#2e0a0c] hover:border-[#89171a] hover:bg-[#89171a]/[0.06]"
+                                      : "cursor-not-allowed border-[#89171a]/12 text-[#89171a]/35",
+                                ].join(" ")}
+                              >
+                                <span className="text-[26px] font-bold leading-none">
+                                  {clock}
+                                  <span className="ml-1 text-[15px] font-normal italic">{suffix}</span>
+                                </span>
+                                <span className="mt-1.5 text-[14px] italic opacity-80">
+                                  {s.available ? `to ${formatTime12(s.end)}` : "Taken"}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {pickError.time && (
+                    <p role="alert" className="text-[15px] text-[#b3201f]">
+                      {pickError.time}
+                    </p>
+                  )}
+                </div>
+
+                {/* Reference */}
+                <fieldset className="space-y-4">
+                  <legend className="w-full">
+                    <GroupTitle>Who invited you?</GroupTitle>
+                  </legend>
+                  {refFromLink && (
+                    <p className="text-center text-[17px] italic text-[#89171a]/85">
+                      We selected {refFromLink} from your invitation link. Change it if that’s not right.
+                    </p>
+                  )}
+                  <div>
+                    {config.teams.map((team) => (
+                      <div
+                        key={team.id}
+                        className="flex flex-col gap-2.5 border-t border-[#89171a]/15 py-4 sm:flex-row sm:items-center sm:gap-6"
+                      >
+                        <span className="text-[19px] italic text-[#89171a] sm:w-52">{team.name}</span>
+                        <div className="flex flex-wrap gap-2.5">
+                          {team.members.map((m) => (
+                            <label key={m.id} className="cursor-pointer">
+                              <input
+                                type="radio"
+                                value={m.id}
+                                className="peer sr-only"
+                                {...register("referredBy")}
+                              />
+                              <span className="inline-flex min-h-[46px] items-center border border-[#89171a]/35 px-6 text-[19px] text-[#2e0a0c] transition-colors hover:border-[#89171a] peer-checked:border-[#89171a] peer-checked:bg-[#89171a] peer-checked:text-[#faf5dc] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#89171a]">
+                                {m.name}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="border-t border-[#89171a]/15" />
+                  </div>
+                  {errors.referredBy && !referredBy && (
+                    <p role="alert" className="text-[15px] text-[#b3201f]">
+                      {errors.referredBy.message}
+                    </p>
+                  )}
+                </fieldset>
+
+                {/* Submit */}
+                <div className="space-y-5 text-center">
+                  {date && time && (
+                    <p className="text-[21px] italic text-[#2e0a0c]">
+                      {formatDateShort(date)}, {formatTime12(time)} to{" "}
+                      {formatTime12(`${String(Number(time.slice(0, 2)) + 1).padStart(2, "0")}:00`)}
+                    </p>
+                  )}
+                  {serverError && (
+                    <div
+                      role="alert"
+                      className="border border-[#89171a]/40 bg-[#89171a]/[0.06] px-4 py-3 text-left text-[18px] text-[#2e0a0c]"
+                    >
+                      {serverError}
+                    </div>
+                  )}
+                  <button type="submit" disabled={submitting} className={`${primaryBtn} w-full sm:w-auto sm:min-w-[300px]`}>
+                    {submitting ? (
+                      <>
+                        <Loader2 className="animate-spin" size={19} /> Booking…
+                      </>
+                    ) : (
+                      "Confirm my slot"
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </section>

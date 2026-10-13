@@ -52,8 +52,7 @@ export default function MonthCalendar({ days, value, onChange }: Props) {
     <div className="w-full select-none">
       <div className="mb-3 flex items-center justify-between">
         <h4
-          className="text-[1.35rem] italic text-[#89171a]"
-          style={{ fontFamily: "var(--font-newsreader), Georgia, serif" }}
+          className="text-[1.75rem] font-bold leading-none tracking-[-0.01em] text-[#89171a]"
           aria-live="polite"
         >
           {MONTHS[view.month]} {view.year}
@@ -82,7 +81,7 @@ export default function MonthCalendar({ days, value, onChange }: Props) {
 
       <div className="grid grid-cols-7 gap-y-1 text-center">
         {WEEKDAYS.map((w) => (
-          <div key={w} className="pb-2 text-xs text-[#89171a]/60">
+          <div key={w} className="pb-3 text-[15px] italic text-[#89171a]/65">
             {w}
           </div>
         ))}
@@ -118,19 +117,24 @@ export default function MonthCalendar({ days, value, onChange }: Props) {
                       : `${label}, ${info.available} ${info.available === 1 ? "time" : "times"} free`
                 }
                 className={[
-                  "relative flex aspect-square w-full max-w-[46px] items-center justify-center rounded-full text-[16px] transition-colors",
+                  "relative flex aspect-square w-full max-w-[48px] items-center justify-center rounded-full text-[20px] transition-colors",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#89171a]",
                   selected
-                    ? "bg-[#89171a] font-semibold text-[#faf5dc]"
+                    ? "bg-[#89171a] font-bold text-[#faf5dc]"
                     : bookable
-                      ? "text-[#3a0b0d] hover:bg-[#89171a]/10"
+                      ? "text-[#2e0a0c] hover:bg-[#89171a]/10"
                       : full
                         ? "cursor-not-allowed text-[#89171a]/35 line-through decoration-[#89171a]/40"
                         : "cursor-not-allowed text-[#89171a]/20",
-                  isToday && !selected ? "ring-1 ring-inset ring-[#89171a]/50" : "",
                 ].join(" ")}
               >
                 {day}
+                {isToday && (
+                  <span
+                    aria-hidden
+                    className={`absolute bottom-[5px] h-[3px] w-[3px] rounded-full ${selected ? "bg-[#faf5dc]" : "bg-[#89171a]"}`}
+                  />
+                )}
               </button>
             </div>
           );

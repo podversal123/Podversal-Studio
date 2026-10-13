@@ -89,6 +89,7 @@ export default function CurtainHero({
           : "relative isolate flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-[#1f0406] px-4 pb-10 pt-8"
       }
       aria-label="Invitation"
+      style={{ fontFamily: "var(--font-newsreader), Georgia, serif" }}
     >
       {/* Stage light */}
       <motion.div
@@ -136,7 +137,7 @@ export default function CurtainHero({
         <button
           type="button"
           onClick={isGate ? onBook : scrollToForm}
-          className="min-h-[48px] rounded-full bg-[#faf5dc] px-8 text-[17px] font-semibold text-[#89171a] shadow-[0_8px_24px_rgba(0,0,0,.35)] transition-transform duration-200 hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc] active:scale-[0.98]"
+          className="min-h-[56px] bg-[#faf5dc] px-10 text-[20px] font-semibold text-[#89171a] shadow-[inset_0_0_0_4px_#faf5dc,inset_0_0_0_5px_rgba(137,23,26,.55),0_14px_30px_-10px_rgba(0,0,0,.6)] transition-colors duration-200 hover:bg-white hover:shadow-[inset_0_0_0_4px_#ffffff,inset_0_0_0_5px_rgba(137,23,26,.75),0_14px_30px_-10px_rgba(0,0,0,.6)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
           tabIndex={phase === "open" ? 0 : -1}
         >
           Book your slot
@@ -145,7 +146,7 @@ export default function CurtainHero({
           <button
             type="button"
             onClick={onEnterSite}
-            className="min-h-[48px] px-2 py-3 text-[15px] text-[#faf5dc]/80 underline decoration-[#faf5dc]/40 underline-offset-4 hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
+            className="min-h-[48px] px-2 py-3 text-[18px] italic text-[#faf5dc]/85 underline decoration-[#faf5dc]/40 underline-offset-[6px] hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
             tabIndex={phase === "open" ? 0 : -1}
           >
             Enter the Podversal website
@@ -153,7 +154,7 @@ export default function CurtainHero({
         ) : (
           <Link
             href="/"
-            className="min-h-[48px] px-2 py-3 text-[15px] text-[#faf5dc]/80 underline decoration-[#faf5dc]/40 underline-offset-4 hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
+            className="min-h-[48px] px-2 py-3 text-[18px] italic text-[#faf5dc]/85 underline decoration-[#faf5dc]/40 underline-offset-[6px] hover:text-[#faf5dc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
             tabIndex={phase === "open" ? 0 : -1}
           >
             Visit the Podversal website
@@ -238,7 +239,7 @@ export default function CurtainHero({
                 open();
               }}
               disabled={phase !== "closed"}
-              className="min-h-[48px] rounded-full border border-[#faf5dc]/60 px-7 text-[15px] text-[#faf5dc] backdrop-blur-[1px] transition-colors hover:bg-[#faf5dc]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
+              className="min-h-[52px] border border-[#faf5dc]/60 px-9 text-[19px] italic text-[#faf5dc] shadow-[inset_0_0_0_3px_rgba(0,0,0,0),inset_0_0_0_4px_rgba(250,245,220,.25)] backdrop-blur-[1px] transition-colors hover:bg-[#faf5dc]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#faf5dc]"
             >
               Open the curtain
             </button>
