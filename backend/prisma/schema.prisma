@@ -425,3 +425,42 @@ model GalleryImage {
 
   @@map("gallery_images")
 }
+
+// ─────────────────────────────────────────
+// FOUNDER BOOKING  free "Inside the Founder's Mind" podcast slots
+// Separate from Booking on purpose: no user account, no price/payment/invoice.
+// shootDate is a plain IST calendar date (YYYY-MM-DD) to avoid timezone drift.
+// NOTE: the migration also adds a partial unique index on (shootDate, startTime)
+// WHERE status <> 'CANCELLED' (Prisma can't express it) — a hard DB guarantee
+// against double-booking. If `prisma migrate dev` ever proposes dropping it, keep it.
+// ─────────────────────────────────────────
+
+enum FounderBookingStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model FounderBooking {
+  id                 String               @id @default(cuid())
+  bookingCode        String               @unique // FP-YYYYMMDD-XXXXX
+  companyName        String
+  name               String
+  email              String
+  phone              String
+  referredBy         String               // member id, e.g. "ritu" (see founders.constants.ts)
+  shootDate          String               // "2026-10-14" (IST)
+  startTime          String               // "10:00"
+  endTime            String               // "11:00"
+  status             FounderBookingStatus @default(CONFIRMED)
+  confirmationSentAt DateTime?
+  reminderDaySentAt  DateTime?
+  reminderHourSentAt DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@index([shootDate])
+  @@index([status])
+  @@index([referredBy])
+  @@map("founder_bookings")
+}

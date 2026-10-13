@@ -24,6 +24,7 @@ import { RedisModule } from './redis/redis.module';
 import { SseModule } from './sse/sse.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { BackupModule } from './backup/backup.module';
+import { FoundersModule } from './founders/founders.module';
 
 @Module({
   controllers: [HealthController],
@@ -59,6 +60,7 @@ import { BackupModule } from './backup/backup.module';
     StudioVideosModule,
     GalleryModule,
     BackupModule,
+    FoundersModule,
   ],
 })
 export class AppModule {}

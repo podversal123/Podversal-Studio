@@ -433,6 +433,18 @@ export class BookingsService {
         AND: [{ startTime: { lt: endTime } }, { endTime: { gt: startTime } }],
       },
     });
-    return !!existing;
+    if (existing) return true;
+
+    // Free founder-podcast sessions also occupy the single studio, so a paid
+    // booking must not be created on top of one (and vice versa, see FoundersService).
+    const founder = await this.prisma.founderBooking.findFirst({
+      where: {
+        shootDate: date.slice(0, 10),
+        status: { not: "CANCELLED" },
+        AND: [{ startTime: { lt: endTime } }, { endTime: { gt: startTime } }],
+      },
+      select: { id: true },
+    });
+    return !!founder;
   }
 }

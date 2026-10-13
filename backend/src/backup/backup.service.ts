@@ -37,7 +37,7 @@ export class BackupService {
     const [
       users, customers, agents, employees, services,
       bookings, payments, invoices, commissions,
-      blogs, studioVideos, galleryImages,
+      blogs, studioVideos, galleryImages, founderBookings,
     ] = await Promise.all([
       this.prisma.user.findMany(),
       this.prisma.customer.findMany(),
@@ -51,13 +51,14 @@ export class BackupService {
       this.prisma.blog.findMany(),
       this.prisma.studioVideo.findMany(),
       this.prisma.galleryImage.findMany(),
+      this.prisma.founderBooking.findMany(),
     ]);
 
     const backup = {
       generatedAt: new Date().toISOString(),
       users, customers, agents, employees, services,
       bookings, payments, invoices, commissions,
-      blogs, studioVideos, galleryImages,
+      blogs, studioVideos, galleryImages, founderBookings,
     };
 
     const json = JSON.stringify(backup, null, 2);
