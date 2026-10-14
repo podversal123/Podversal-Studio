@@ -629,22 +629,12 @@ export default function BookingSection() {
                             }
                             className="sr-only"
                           />
-                          <span className="text-[19px] italic text-[#89171a] sm:w-52">
+                          <span
+                            className={`text-[19px] italic text-[#89171a] ${
+                              selected ? "font-semibold" : ""
+                            }`}
+                          >
                             {team.name}
-                          </span>
-                          <span className="flex flex-wrap gap-2.5">
-                            {team.members.map((m) => (
-                              <span
-                                key={m.id}
-                                className={`inline-flex min-h-[46px] items-center border px-6 text-[19px] transition-colors ${
-                                  selected
-                                    ? "border-[#89171a] bg-[#89171a] text-[#faf5dc]"
-                                    : "border-[#89171a]/35 text-[#2e0a0c]"
-                                }`}
-                              >
-                                {m.name}
-                              </span>
-                            ))}
                           </span>
                         </label>
                       );
