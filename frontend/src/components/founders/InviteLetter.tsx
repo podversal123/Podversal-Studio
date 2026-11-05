@@ -26,7 +26,7 @@ export default function InviteLetter({ className }: { className?: string }) {
       viewBox={`0 0 ${LETTER_W} ${LETTER_H}`}
       className={className}
       role="img"
-      aria-label="Invitation: Inside the Founder's Mind podcast by Podversal. We invite you. The show gets live this Diwali."
+      aria-label="Invitation: Inside the Founder's Mind podcast by Podversal. We invite you. The show gets live this New Year."
     >
       <defs>
         <path
@@ -106,7 +106,7 @@ export default function InviteLetter({ className }: { className?: string }) {
         fill={LETTER_MAROON}
         style={serif}
       >
-        The Show Gets Live on this Diwali
+        The Show Gets Live this New Year
       </text>
 
       <text

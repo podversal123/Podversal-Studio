@@ -21,6 +21,13 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    // The founders booking page was removed; old links and QR codes land on the site.
+    return [
+      { source: '/founders', destination: '/', permanent: false },
+      { source: '/founder', destination: '/', permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

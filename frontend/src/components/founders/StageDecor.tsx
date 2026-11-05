@@ -8,9 +8,8 @@
 // in exactly those moments.
 //
 // HOW IT IS DRIVEN
-// CurtainHero only sets two attributes on its root element:
+// CurtainHero only sets one attribute on its root element:
 //   data-phase = pending | closed | opening | open
-//   data-mode  = intro   (full curtain)  |  instant (letter shown straight away)
 // and the rules below do the rest. Durations arrive as CSS variables (--fp-*).
 
 // left %, size px, seconds to rise, start delay s, sideways drift px
@@ -82,7 +81,6 @@ export const FP_STYLES = `
 
 /* Sizes. Each has an older-browser fallback first: a declaration the browser does not
    understand (e.g. svh on iOS before 15.4) is skipped and the line above it is used. */
-.fp-hero-h { min-height: 100vh; min-height: 100svh; }
 .fp-letter-w {
   width: min(92vw, 640px);
   /* as tall as fits the screen, but never smaller than 300px (phones held sideways) */
@@ -92,30 +90,22 @@ export const FP_STYLES = `
 
 /* ───────── the invitation ───────── */
 .fp-letter { opacity: 0; transform: translateY(14px) scale(.93); will-change: transform, opacity; }
-.fp-root[data-mode="intro"][data-phase="opening"] .fp-letter,
-.fp-root[data-mode="intro"][data-phase="open"] .fp-letter {
+.fp-root[data-phase="opening"] .fp-letter,
+.fp-root[data-phase="open"] .fp-letter {
   animation: fp-letter-in var(--fp-letter-ms) cubic-bezier(.2,.7,.2,1) var(--fp-letter-delay) both;
 }
-.fp-root[data-mode="instant"][data-phase="open"] .fp-letter { opacity: 1; transform: none; }
 
 .fp-root[data-phase="open"] .fp-float { will-change: transform; animation: fp-float 7s ease-in-out infinite; }
 
 .fp-sheen-bar { transform: translateX(-130%); opacity: 0; }
-.fp-root[data-mode="intro"][data-phase="opening"] .fp-sheen-bar,
-.fp-root[data-mode="intro"][data-phase="open"] .fp-sheen-bar { animation: fp-sheen 1.5s ease-in-out var(--fp-sheen-delay) both; }
-.fp-root[data-mode="instant"][data-phase="open"] .fp-sheen-bar { animation: fp-sheen 1.5s ease-in-out .4s both; }
-
-/* buttons arrive once the letter has landed */
-.fp-cta { opacity: 0; transform: translateY(8px); pointer-events: none; }
-.fp-root[data-phase="open"] .fp-cta { opacity: 1; transform: none; pointer-events: auto; transition: opacity .6s ease .15s, transform .6s ease .15s; }
+.fp-root[data-phase="opening"] .fp-sheen-bar,
+.fp-root[data-phase="open"] .fp-sheen-bar { animation: fp-sheen 1.5s ease-in-out var(--fp-sheen-delay) both; }
 
 /* ───────── the stage around it ───────── */
 .fp-light { opacity: .25; }
 .fp-root[data-phase="opening"] .fp-light, .fp-root[data-phase="open"] .fp-light { opacity: 1; transition: opacity 3s ease 1.2s; }
 .fp-decor { opacity: 0; }
 .fp-root[data-phase="opening"] .fp-decor, .fp-root[data-phase="open"] .fp-decor { opacity: 1; transition: opacity 3.2s ease 2s; }
-.fp-root[data-mode="instant"][data-phase="open"] .fp-light,
-.fp-root[data-mode="instant"][data-phase="open"] .fp-decor { transition: none; }
 
 /* soft spotlight beams: a small pre-rendered alpha texture, rotated */
 .fp-beam {
@@ -154,8 +144,8 @@ export const FP_STYLES = `
 }
 `;
 
-// If scripts fail to run at all, show the letter instead of leaving a closed curtain
-export const FP_NOSCRIPT = `<style>.fp-panel,.fp-closed{display:none!important}.fp-letter,.fp-cta,.fp-light,.fp-decor{opacity:1!important;transform:none!important;pointer-events:auto!important}</style>`;
+// Without scripts nothing could ever close the intro, so do not show it at all
+export const FP_NOSCRIPT = `<style>.fp-root{display:none!important}</style>`;
 
 export default function StageDecor() {
   return (
