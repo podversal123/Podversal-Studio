@@ -73,3 +73,6 @@ CONTENT_REQUIREMENTS.md
 .temp/
 .tmp/
 *.tmp
+
+.vercel
+.env*
